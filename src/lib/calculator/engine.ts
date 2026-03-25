@@ -114,7 +114,7 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
   if (data.co2CostDirect && data.co2CostDirect > 0) {
     totalCO2Cost = data.co2CostDirect;
   } else {
-    totalCO2Cost = (totalEmissionsKg / 1000) * co2PricePerTon;
+    totalCO2Cost = (totalEmissionsKg / 1000) * co2PricePerTon * CO2_COST_VAT_RATE;
   }
 
   const isWohn = data.buildingType !== 'nichtwohngebaeude';
