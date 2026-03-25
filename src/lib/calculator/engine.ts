@@ -1,14 +1,20 @@
 import type { WizardData, CalculationResult, StufenmodellEntry, FuelType } from './types';
 
-// Emission factors in kg CO2 per kWh
+// Emission factors in kg CO2 per kWh (based on Heizwert)
 const EMISSION_FACTORS: Record<string, number> = {
-  erdgas: 0.201,
+  erdgas: 0.20088,
   heizoel: 0.266,
   // fernwaerme: user-provided
 };
 
+// Erdgas: Brennwert-to-Heizwert conversion factor (3.2508 / 3.6)
+const ERDGAS_BRENNWERT_TO_HEIZWERT = 3.2508 / 3.6; // ≈ 0.903
+
 // Heizöl: 1 liter ≈ 10 kWh
 const HEIZOEL_KWH_PER_LITER = 10;
+
+// VAT rate applied to CO2 costs (7% reduced rate)
+const CO2_COST_VAT_RATE = 1.07;
 
 // CO2 price per ton in EUR by year
 const CO2_PRICE_BY_YEAR: Record<number, number> = {
