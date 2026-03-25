@@ -16,10 +16,14 @@ export type FuelType =
   | 'fluessiggas_kwk'
   | 'heizoel_kwk';
 
+export type CostInputType = 'brutto' | 'netto';
+
 export interface FuelEntry {
   fuelType: FuelType;
   amount: number;
   emissionFactorCustom?: number;
+  co2CostDirect?: number;
+  co2CostDirectType?: CostInputType;
 }
 
 export interface WizardData {
@@ -34,12 +38,15 @@ export interface WizardData {
   apartmentArea?: number;
   fuelAmount?: number;
   co2CostDirect?: number;
+  co2CostDirectType?: CostInputType;
   emissionFactorCustom?: number;
   fuelEntries?: FuelEntry[];
   tenantName?: string;
   tenantAddress?: string;
   landlordName?: string;
   landlordAddress?: string;
+  /** Tenant path: extra gas device without separate meter (5% reduction) */
+  hasExtraGasDevice?: boolean;
 }
 
 export interface FuelCalculationResult {
@@ -51,6 +58,7 @@ export interface FuelCalculationResult {
   co2Kg: number;
   co2CostNet: number;
   co2CostGross: number;
+  usedDirectCost: boolean;
 }
 
 export interface CalculationResult {
@@ -76,6 +84,12 @@ export interface CalculationResult {
   restrictionNote?: string;
   isResidential: boolean;
   usedDirectCost: boolean;
+  /** 5% reduction for tenant apartment heating with extra gas device */
+  reimbursementReductionApplied: boolean;
+  reimbursementReductionPercent: number;
+  /** Pre-reduction landlord amount (for display) */
+  landlordShareBeforeReduction?: number;
+  notes: string[];
 }
 
 export interface StufenmodellEntry {
