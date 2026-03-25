@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
-import { FileText, RotateCcw, ArrowRight, Info } from 'lucide-react';
+import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 
 export default function ResultsPage() {
@@ -13,34 +13,22 @@ export default function ResultsPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">Keine Berechnung vorhanden.</p>
-          <Button onClick={() => navigate('/rechner')}>
-            Zur Berechnung
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          <Button onClick={() => navigate('/rechner')}>Zur Berechnung<ArrowRight className="h-4 w-4" /></Button>
         </div>
       </div>
     );
   }
 
-  const handleNewCalculation = () => {
-    reset();
-    navigate('/rechner');
-  };
-
-  const handleGeneratePDF = () => {
-    generatePDF(wizardData, result);
-  };
+  const handleNewCalculation = () => { reset(); navigate('/rechner'); };
+  const handleGeneratePDF = () => { generatePDF(wizardData, result); };
 
   const formatCurrency = (n: number) =>
     new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
-
   const formatNumber = (n: number, decimals = 2) =>
     new Intl.NumberFormat('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(n);
 
   const allocationExplanation = result.isResidential
-    ? result.stufenmodellStep > 0
-      ? `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells nach §5 CO2KostAufG`
-      : ''
+    ? result.stufenmodellStep > 0 ? `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells nach §5 CO2KostAufG` : ''
     : 'Hälftige Aufteilung (50/50) nach §8 CO2KostAufG für Nichtwohngebäude';
 
   return (
@@ -53,24 +41,20 @@ export default function ResultsPage() {
 
       <main className="section-padding">
         <div className="container-narrow px-4 space-y-8 animate-fade-in">
-          {/* Summary sentence */}
+          {/* Summary */}
           <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-6">
             <p className="text-lg font-medium text-foreground leading-relaxed">
-              Nach Ihren Angaben entfallen <strong className="text-primary">{result.landlordPercent}\u00A0% der CO2-Kosten auf den Vermieter</strong> und <strong className="text-accent">{result.tenantPercent}\u00A0% auf den Mieter</strong>.
+              Nach Ihren Angaben entfallen <strong className="text-primary">{result.landlordPercent}&nbsp;% der CO2-Kosten auf den Vermieter</strong> und <strong className="text-accent">{result.tenantPercent}&nbsp;% auf den Mieter</strong>.
             </p>
-            {allocationExplanation && (
-              <p className="text-sm text-muted-foreground mt-2">{allocationExplanation}</p>
-            )}
+            {allocationExplanation && <p className="text-sm text-muted-foreground mt-2">{allocationExplanation}</p>}
           </div>
 
-          {/* Summary Cards */}
+          {/* Cards */}
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-xl border border-border bg-card p-6 text-center shadow-sm">
               <div className="text-sm text-muted-foreground mb-1">Gesamte CO2-Kosten</div>
               <div className="text-3xl font-bold text-foreground">{formatCurrency(result.totalCO2Cost)}</div>
-              {result.usedDirectCost && (
-                <div className="text-xs text-muted-foreground mt-1">(direkt eingegeben)</div>
-              )}
+              {result.usedDirectCost && <div className="text-xs text-muted-foreground mt-1">(direkt eingegeben)</div>}
             </div>
             <div className="rounded-xl border-2 border-primary bg-primary/5 p-6 text-center shadow-sm">
               <div className="text-sm text-muted-foreground mb-1">Anteil Vermieter</div>
@@ -84,6 +68,20 @@ export default function ResultsPage() {
             </div>
           </div>
 
+          {/* 5% reduction note */}
+          {result.reimbursementReductionApplied && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700 p-5 flex gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+                <p className="font-medium">5 % Kürzung angewendet</p>
+                <p>Der Erstattungsanspruch gegenüber dem Vermieter wurde pauschal um {result.reimbursementReductionPercent} % gekürzt (zusätzliches Gasgerät ohne eigenen Zähler).</p>
+                {result.landlordShareBeforeReduction != null && (
+                  <p className="mt-1">Vor Kürzung: {formatCurrency(result.landlordShareBeforeReduction)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Restriction note */}
           {result.restrictionNote && (
             <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700 p-5 flex gap-3">
@@ -92,19 +90,29 @@ export default function ResultsPage() {
             </div>
           )}
 
+          {/* Notes */}
+          {result.notes.length > 0 && (
+            <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
+              {result.notes.map((note, i) => (
+                <p key={i} className="text-sm text-muted-foreground flex gap-2">
+                  <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                  {note}
+                </p>
+              ))}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Button variant="cta" size="lg" className="flex-1" onClick={handleGeneratePDF}>
-              <FileText className="h-5 w-5" />
-              PDF-Schreiben erstellen
+              <FileText className="h-5 w-5" />PDF-Schreiben erstellen
             </Button>
             <Button variant="outline" size="lg" className="flex-1" onClick={handleNewCalculation}>
-              <RotateCcw className="h-5 w-5" />
-              Neue Berechnung
+              <RotateCcw className="h-5 w-5" />Neue Berechnung
             </Button>
           </div>
 
-          {/* Technical details (collapsible feel) */}
+          {/* Technical details */}
           <details className="rounded-xl border border-border bg-card shadow-sm">
             <summary className="px-6 py-4 cursor-pointer text-sm font-semibold text-card-foreground hover:bg-muted/50 rounded-xl transition-colors">
               Technische Details anzeigen
@@ -123,6 +131,12 @@ export default function ResultsPage() {
                 )}
                 <span>Brennstoff:</span>
                 <span className="text-foreground font-medium text-right">{result.fuelLabel}</span>
+                {result.fuelResults.length > 1 && (
+                  <>
+                    <span>Gewichteter Emissionsfaktor:</span>
+                    <span className="text-foreground font-medium text-right">{formatNumber(result.weightedEmissionFactor, 5)} kg CO2/kWh</span>
+                  </>
+                )}
                 <span>Emissionsfaktor:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.emissionFactor, 4)} kg CO2/kWh</span>
                 <span>CO2-Preis:</span>
@@ -131,6 +145,8 @@ export default function ResultsPage() {
                 <span className="text-foreground font-medium text-right">{result.billingYear}</span>
                 <span>Bezugsfläche:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.relevantArea, 0)} m²</span>
+                <span>Gesamtenergie (Heizwert):</span>
+                <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 0)} kWh</span>
                 {result.restrictionApplied !== 'fall3' && result.isResidential && (
                   <>
                     <span>Basis-Aufteilung (vor Einschränkung):</span>
@@ -138,6 +154,23 @@ export default function ResultsPage() {
                   </>
                 )}
               </div>
+
+              {/* Multi-fuel details */}
+              {result.fuelResults.length > 1 && (
+                <div className="mt-4 border-t border-border pt-3 space-y-2">
+                  <p className="font-semibold text-foreground text-xs">Einzelne Brennstoffe:</p>
+                  {result.fuelResults.map((fr, i) => (
+                    <div key={i} className="grid grid-cols-2 gap-1 text-xs pl-2 border-l-2 border-accent/30 ml-1">
+                      <span className="font-medium text-foreground">{fr.fuelLabel}</span>
+                      <span className="text-right">{formatNumber(fr.co2Kg, 1)} kg CO2</span>
+                      <span>Energie (Heizwert):</span>
+                      <span className="text-right">{formatNumber(fr.energyHeatingValueKwh, 0)} kWh</span>
+                      <span>CO2-Kosten brutto:</span>
+                      <span className="text-right">{formatCurrency(fr.co2CostGross)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </details>
 

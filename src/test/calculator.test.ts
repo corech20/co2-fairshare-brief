@@ -4,17 +4,13 @@ import type { WizardData } from '../lib/calculator/types';
 
 function round2(n: number) { return Math.round(n * 100) / 100; }
 
+// ===== EXISTING REFERENCE CASES (must not regress) =====
+
 describe('Reference Case 1: Natural Gas', () => {
   const data: WizardData = {
-    userRole: 'vermieter',
-    buildingType: 'wohngebaeude',
-    heatSupplyType: 'zentral',
-    restrictionCase: 'fall3',
-    billingPeriodStart: '2023-01-01',
-    billingPeriodEnd: '2023-12-31',
-    fuelType: 'erdgas',
-    fuelAmount: 45000,
-    buildingArea: 290,
+    userRole: 'vermieter', buildingType: 'wohngebaeude', heatSupplyType: 'zentral',
+    restrictionCase: 'fall3', billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+    fuelType: 'erdgas', fuelAmount: 45000, buildingArea: 290,
   };
 
   it('matches all expected values', () => {
@@ -29,21 +25,15 @@ describe('Reference Case 1: Natural Gas', () => {
     expect(r.stufenmodellStep).toBe(5);
     expect(r.isResidential).toBe(true);
     expect(r.restrictionNote).toBeUndefined();
+    expect(r.reimbursementReductionApplied).toBe(false);
   });
 });
 
 describe('Reference Case 2: District Heating', () => {
   const data: WizardData = {
-    userRole: 'vermieter',
-    buildingType: 'wohngebaeude',
-    heatSupplyType: 'fernwaerme',
-    restrictionCase: 'fall3',
-    billingPeriodStart: '2023-01-01',
-    billingPeriodEnd: '2023-12-31',
-    fuelType: 'fernwaerme',
-    fuelAmount: 45000,
-    emissionFactorCustom: 0.1234,
-    buildingArea: 290,
+    userRole: 'vermieter', buildingType: 'wohngebaeude', heatSupplyType: 'fernwaerme',
+    restrictionCase: 'fall3', billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+    fuelType: 'fernwaerme', fuelAmount: 45000, emissionFactorCustom: 0.1234, buildingArea: 290,
   };
 
   it('matches all expected values', () => {
@@ -60,16 +50,9 @@ describe('Reference Case 2: District Heating', () => {
 
 describe('Reference Case 3: District Heating with Restriction', () => {
   const data: WizardData = {
-    userRole: 'vermieter',
-    buildingType: 'wohngebaeude',
-    heatSupplyType: 'fernwaerme',
-    restrictionCase: 'fall2',
-    billingPeriodStart: '2023-01-01',
-    billingPeriodEnd: '2023-12-31',
-    fuelType: 'fernwaerme',
-    fuelAmount: 45000,
-    emissionFactorCustom: 0.1234,
-    buildingArea: 290,
+    userRole: 'vermieter', buildingType: 'wohngebaeude', heatSupplyType: 'fernwaerme',
+    restrictionCase: 'fall2', billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+    fuelType: 'fernwaerme', fuelAmount: 45000, emissionFactorCustom: 0.1234, buildingArea: 290,
   };
 
   it('matches all expected values with restriction modifier', () => {
@@ -114,12 +97,8 @@ describe('Restriction modifiers', () => {
 describe('Non-residential building logic', () => {
   it('standard case is 50/50, no stage model', () => {
     const r = calculateCO2Allocation({
-      buildingType: 'nichtwohngebaeude',
-      restrictionCase: 'fall3',
-      billingPeriodEnd: '2023-12-31',
-      fuelType: 'erdgas',
-      fuelAmount: 45000,
-      buildingArea: 290,
+      buildingType: 'nichtwohngebaeude', restrictionCase: 'fall3',
+      billingPeriodEnd: '2023-12-31', fuelType: 'erdgas', fuelAmount: 45000, buildingArea: 290,
     });
     expect(r.landlordPercent).toBe(50);
     expect(r.tenantPercent).toBe(50);
@@ -129,12 +108,8 @@ describe('Non-residential building logic', () => {
 
   it('fall1und2 gives 100% tenant', () => {
     const r = calculateCO2Allocation({
-      buildingType: 'nichtwohngebaeude',
-      restrictionCase: 'fall1und2',
-      billingPeriodEnd: '2023-12-31',
-      fuelType: 'erdgas',
-      fuelAmount: 45000,
-      buildingArea: 290,
+      buildingType: 'nichtwohngebaeude', restrictionCase: 'fall1und2',
+      billingPeriodEnd: '2023-12-31', fuelType: 'erdgas', fuelAmount: 45000, buildingArea: 290,
     });
     expect(r.landlordPercent).toBe(0);
     expect(r.tenantPercent).toBe(100);
@@ -142,12 +117,8 @@ describe('Non-residential building logic', () => {
 
   it('single restriction stays 50/50 with note', () => {
     const r = calculateCO2Allocation({
-      buildingType: 'nichtwohngebaeude',
-      restrictionCase: 'fall2',
-      billingPeriodEnd: '2023-12-31',
-      fuelType: 'erdgas',
-      fuelAmount: 45000,
-      buildingArea: 290,
+      buildingType: 'nichtwohngebaeude', restrictionCase: 'fall2',
+      billingPeriodEnd: '2023-12-31', fuelType: 'erdgas', fuelAmount: 45000, buildingArea: 290,
     });
     expect(r.landlordPercent).toBe(50);
     expect(r.tenantPercent).toBe(50);
@@ -172,6 +143,110 @@ describe('Biomass and Altholz fuel handling', () => {
     const r = calculateSingleFuel('abfallholz', 1000, 30);
     expect(r.co2Kg).toBeGreaterThan(0);
     expect(r.co2CostGross).toBeGreaterThan(0);
-    expect(r.co2CostNet).toBeGreaterThan(0);
+  });
+});
+
+// ===== NEW ADVANCED TEST CASES =====
+
+describe('Case A: Tenant + apartment heating + extra gas device (5% reduction)', () => {
+  const data: WizardData = {
+    userRole: 'mieter', buildingType: 'wohngebaeude', heatSupplyType: 'etage',
+    restrictionCase: 'fall3', billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+    fuelType: 'erdgas', fuelAmount: 12000, apartmentArea: 75, hasExtraGasDevice: true,
+  };
+
+  it('applies 5% reduction to landlord reimbursement', () => {
+    const r = calculateCO2Allocation(data);
+    expect(r.reimbursementReductionApplied).toBe(true);
+    expect(r.reimbursementReductionPercent).toBe(5);
+    expect(r.landlordShareBeforeReduction).toBeDefined();
+    expect(r.landlordShare).toBeLessThan(r.landlordShareBeforeReduction!);
+    // Landlord share should be 95% of original
+    expect(round2(r.landlordShare)).toBe(round2(r.landlordShareBeforeReduction! * 0.95));
+    expect(r.notes.some(n => n.includes('5 %'))).toBe(true);
+  });
+
+  it('does NOT apply reduction without extra gas device', () => {
+    const r = calculateCO2Allocation({ ...data, hasExtraGasDevice: false });
+    expect(r.reimbursementReductionApplied).toBe(false);
+    expect(r.landlordShareBeforeReduction).toBeUndefined();
+  });
+});
+
+describe('Case B: Multiple fuels (heating oil + pellets)', () => {
+  const data: WizardData = {
+    userRole: 'vermieter', buildingType: 'wohngebaeude', heatSupplyType: 'zentral',
+    restrictionCase: 'fall3', billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+    buildingArea: 400,
+    fuelEntries: [
+      { fuelType: 'heizoel', amount: 3000 },
+      { fuelType: 'pellets', amount: 2000 },
+    ],
+  };
+
+  it('aggregates totals from multiple fuels', () => {
+    const r = calculateCO2Allocation(data);
+    expect(r.fuelResults).toHaveLength(2);
+    // Heating oil contributes emissions and costs
+    expect(r.fuelResults[0].co2Kg).toBeGreaterThan(0);
+    expect(r.fuelResults[0].co2CostGross).toBeGreaterThan(0);
+    // Pellets contribute emissions but zero cost
+    expect(r.fuelResults[1].co2Kg).toBeGreaterThan(0);
+    expect(r.fuelResults[1].co2CostGross).toBe(0);
+    // Total = sum
+    expect(round2(r.totalEmissionsKg)).toBe(round2(r.fuelResults[0].co2Kg + r.fuelResults[1].co2Kg));
+    expect(round2(r.totalCO2Cost)).toBe(round2(r.fuelResults[0].co2CostGross + r.fuelResults[1].co2CostGross));
+    // Weighted emission factor
+    expect(r.weightedEmissionFactor).toBeGreaterThan(0);
+    expect(r.weightedEmissionFactor).toBe(r.totalEmissionsKg / r.totalEnergyHeatingValueKwh);
+    expect(r.notes.some(n => n.includes('2 Brennstoffen'))).toBe(true);
+  });
+});
+
+describe('Case C: District heating apartment path (tenant)', () => {
+  const data: WizardData = {
+    userRole: 'mieter', buildingType: 'wohngebaeude', heatSupplyType: 'fernwaerme',
+    restrictionCase: 'fall3', billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+    fuelType: 'fernwaerme', fuelAmount: 8000, emissionFactorCustom: 0.15, apartmentArea: 65,
+  };
+
+  it('calculates apartment-level district heating result', () => {
+    const r = calculateCO2Allocation(data);
+    expect(r.relevantArea).toBe(65);
+    expect(round2(r.totalEmissionsKg)).toBe(1200);
+    expect(round2(r.emissionsPerSqmYear)).toBe(round2(1200 / 65));
+    expect(r.totalCO2Cost).toBeGreaterThan(0);
+    expect(r.notes.some(n => n.includes('Wohnungsfläche'))).toBe(true);
+  });
+});
+
+describe('Direct CO2 cost input (net/gross)', () => {
+  it('uses gross cost directly when type is brutto', () => {
+    const r = calculateSingleFuel('erdgas', 10000, 30, undefined, 100, 'brutto');
+    expect(r.usedDirectCost).toBe(true);
+    expect(round2(r.co2CostGross)).toBe(100);
+  });
+
+  it('converts net to gross with VAT when type is netto', () => {
+    const r = calculateSingleFuel('erdgas', 10000, 30, undefined, 100, 'netto');
+    expect(r.usedDirectCost).toBe(true);
+    expect(round2(r.co2CostGross)).toBe(107);
+    expect(round2(r.co2CostNet)).toBe(100);
+  });
+});
+
+describe('CHP variants', () => {
+  it('natural gas CHP applies heat share factor', () => {
+    const r = calculateSingleFuel('erdgas_kwk', 45000, 30);
+    // 45000 * 0.903 * 0.4375 = 17772.19
+    expect(round2(r.energyHeatingValueKwh)).toBe(round2(45000 * (3.2508 / 3.6) * 0.4375));
+    expect(r.co2Kg).toBeGreaterThan(0);
+    expect(r.co2CostGross).toBeGreaterThan(0);
+  });
+
+  it('heating oil CHP applies heat share factor', () => {
+    const r = calculateSingleFuel('heizoel_kwk', 3000, 30);
+    expect(round2(r.energyHeatingValueKwh)).toBe(round2(3000 * 10.0625 * 0.3984));
+    expect(r.co2Kg).toBeGreaterThan(0);
   });
 });
