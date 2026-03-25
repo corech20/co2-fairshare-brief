@@ -35,21 +35,15 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const goNext = useCallback(() => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
-    }
+    if (currentStep < totalSteps - 1) setCurrentStep(prev => prev + 1);
   }, [currentStep, totalSteps]);
 
   const goBack = useCallback(() => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
+    if (currentStep > 0) setCurrentStep(prev => prev - 1);
   }, [currentStep]);
 
   const goToStep = useCallback((step: number) => {
-    if (step >= 0 && step < totalSteps) {
-      setCurrentStep(step);
-    }
+    if (step >= 0 && step < totalSteps) setCurrentStep(step);
   }, [totalSteps]);
 
   const canGoNext = (() => {
@@ -59,8 +53,21 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'heatSupply': return !!wizardData.heatSupplyType;
       case 'restriction': return !!wizardData.restrictionCase;
       case 'billingPeriod': return !!wizardData.billingPeriodStart && !!wizardData.billingPeriodEnd;
-      case 'fuelSource': return !!wizardData.fuelType;
-      case 'inputValues': return !!(wizardData.buildingArea && wizardData.fuelAmount);
+      case 'fuelSource': {
+        // Multi-fuel: check entries or single fuel
+        if (wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
+          return wizardData.fuelEntries.every(e => !!e.fuelType && e.amount > 0);
+        }
+        return !!wizardData.fuelType;
+      }
+      case 'inputValues': {
+        const needsApartment = wizardData.heatSupplyType === 'etage' ||
+          (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
+        if (needsApartment) {
+          return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && wizardData.fuelAmount && wizardData.fuelAmount > 0);
+        }
+        return !!(wizardData.buildingArea && wizardData.buildingArea > 0 && wizardData.fuelAmount && wizardData.fuelAmount > 0);
+      }
       default: return false;
     }
   })();
