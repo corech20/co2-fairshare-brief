@@ -18,8 +18,8 @@ export type FuelType =
 
 export interface FuelEntry {
   fuelType: FuelType;
-  amount: number; // raw input amount in native unit
-  emissionFactorCustom?: number; // for fernwaerme
+  amount: number;
+  emissionFactorCustom?: number;
 }
 
 export interface WizardData {
@@ -35,9 +35,7 @@ export interface WizardData {
   fuelAmount?: number;
   co2CostDirect?: number;
   emissionFactorCustom?: number;
-  // Multi-fuel support (future)
   fuelEntries?: FuelEntry[];
-  // Letter fields
   tenantName?: string;
   tenantAddress?: string;
   landlordName?: string;
@@ -75,6 +73,9 @@ export interface CalculationResult {
   billingYear: number;
   relevantArea: number;
   restrictionApplied: RestrictionCase;
+  restrictionNote?: string;
+  isResidential: boolean;
+  usedDirectCost: boolean;
 }
 
 export interface StufenmodellEntry {

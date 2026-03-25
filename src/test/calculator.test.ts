@@ -26,7 +26,9 @@ describe('Reference Case 1: Natural Gas', () => {
     expect(r.landlordPercent).toBe(40);
     expect(round2(r.tenantShare)).toBe(157.21);
     expect(round2(r.landlordShare)).toBe(104.81);
-    expect(r.stufenmodellStep).toBe(5); // 27 to < 32
+    expect(r.stufenmodellStep).toBe(5);
+    expect(r.isResidential).toBe(true);
+    expect(r.restrictionNote).toBeUndefined();
   });
 });
 
@@ -89,17 +91,87 @@ describe('Restriction modifiers', () => {
     expect(r.tenantPercent).toBe(100);
   });
 
-  it('fall1 halves landlord share', () => {
+  it('fall1 halves landlord share (residential)', () => {
     const r = applyRestrictionModifier(40, 60, 'fall1', true);
     expect(r.landlordPercent).toBe(20);
     expect(r.tenantPercent).toBe(80);
   });
+
+  it('non-residential fall1und2 sets landlord to 0%', () => {
+    const r = applyRestrictionModifier(50, 50, 'fall1und2', false);
+    expect(r.landlordPercent).toBe(0);
+    expect(r.tenantPercent).toBe(100);
+  });
+
+  it('non-residential fall1 stays 50/50 with note', () => {
+    const r = applyRestrictionModifier(50, 50, 'fall1', false);
+    expect(r.landlordPercent).toBe(50);
+    expect(r.tenantPercent).toBe(50);
+    expect(r.restrictionNote).toBeDefined();
+  });
 });
 
-describe('Zero-cost biomass fuels', () => {
-  it('pellets have zero CO2 cost', () => {
+describe('Non-residential building logic', () => {
+  it('standard case is 50/50, no stage model', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'nichtwohngebaeude',
+      restrictionCase: 'fall3',
+      billingPeriodEnd: '2023-12-31',
+      fuelType: 'erdgas',
+      fuelAmount: 45000,
+      buildingArea: 290,
+    });
+    expect(r.landlordPercent).toBe(50);
+    expect(r.tenantPercent).toBe(50);
+    expect(r.stufenmodellStep).toBe(0);
+    expect(r.isResidential).toBe(false);
+  });
+
+  it('fall1und2 gives 100% tenant', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'nichtwohngebaeude',
+      restrictionCase: 'fall1und2',
+      billingPeriodEnd: '2023-12-31',
+      fuelType: 'erdgas',
+      fuelAmount: 45000,
+      buildingArea: 290,
+    });
+    expect(r.landlordPercent).toBe(0);
+    expect(r.tenantPercent).toBe(100);
+  });
+
+  it('single restriction stays 50/50 with note', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'nichtwohngebaeude',
+      restrictionCase: 'fall2',
+      billingPeriodEnd: '2023-12-31',
+      fuelType: 'erdgas',
+      fuelAmount: 45000,
+      buildingArea: 290,
+    });
+    expect(r.landlordPercent).toBe(50);
+    expect(r.tenantPercent).toBe(50);
+    expect(r.restrictionNote).toBeDefined();
+  });
+});
+
+describe('Biomass and Altholz fuel handling', () => {
+  it('pellets have zero CO2 cost but positive emissions', () => {
     const r = calculateSingleFuel('pellets', 1000, 30);
     expect(r.co2Kg).toBeGreaterThan(0);
     expect(r.co2CostGross).toBe(0);
+  });
+
+  it('hackschnitzel have zero CO2 cost', () => {
+    const r = calculateSingleFuel('hackschnitzel', 1000, 30);
+    expect(r.co2Kg).toBeGreaterThan(0);
+    expect(r.co2CostGross).toBe(0);
+  });
+
+  it('abfallholz (Altholz AI/AII) has non-zero CO2 cost', () => {
+    const r = calculateSingleFuel('abfallholz', 1000, 30);
+    expect(r.co2Kg).toBeGreaterThan(0);
+    expect(r.co2CostGross).toBeGreaterThan(0);
+    expect(r.co2CostNet).toBeGreaterThan(0);
   });
 });

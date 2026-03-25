@@ -81,8 +81,8 @@ export default function StepInputValues() {
         )}
 
         <InputField
-          label="CO2-Kosten direkt (optional)"
-          hint="Falls die CO2-Kosten bereits bekannt sind, hier direkt eingeben"
+          label="CO2-Kosten direkt eingeben (optional)"
+          hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
           value={wizardData.co2CostDirect}
           onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
           placeholder="z.B. 250"

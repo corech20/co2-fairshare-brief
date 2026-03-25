@@ -8,7 +8,7 @@ export default function StepBillingPeriod() {
       <div>
         <h2 className="text-2xl font-bold text-foreground">Abrechnungszeitraum</h2>
         <p className="text-muted-foreground mt-2">
-          Geben Sie den Abrechnungszeitraum Ihrer Heizkostenabrechnung an.
+          Bitte tragen Sie den Zeitraum genau so ein, wie er in Ihrer Heizkosten- oder Brennstoffabrechnung angegeben ist.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -32,7 +32,7 @@ export default function StepBillingPeriod() {
         </div>
       </div>
       <p className="text-sm text-muted-foreground">
-        Der Abrechnungszeitraum umfasst in der Regel 12 Monate (z.B. 01.01.2024 – 31.12.2024).
+        In vielen Fällen umfasst der Abrechnungszeitraum 12 Monate. Wenn Ihre Abrechnung davon abweicht, übernehmen Sie bitte trotzdem den tatsächlichen Zeitraum aus der Abrechnung.
       </p>
     </div>
   );
