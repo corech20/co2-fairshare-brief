@@ -64,7 +64,11 @@ function getFuelAmountInKWh(fuelType: FuelType, amount: number): number {
   if (fuelType === 'heizoel') {
     return amount * HEIZOEL_KWH_PER_LITER;
   }
-  return amount; // already in kWh for erdgas and fernwaerme
+  if (fuelType === 'erdgas') {
+    // Gas bills report Brennwert kWh; convert to Heizwert for emission calc
+    return amount * ERDGAS_BRENNWERT_TO_HEIZWERT;
+  }
+  return amount; // already in kWh for fernwaerme
 }
 
 function lookupStufenmodell(emissionsPerSqm: number, isWohn: boolean): { tenantPercent: number; landlordPercent: number; step: number } {
