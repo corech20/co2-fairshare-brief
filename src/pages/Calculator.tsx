@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { CalculatorProvider, useCalculator } from '@/context/CalculatorContext';
+import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Calculator } from 'lucide-react';
 import StepUserRole from '@/components/wizard/StepUserRole';
