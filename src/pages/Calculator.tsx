@@ -121,9 +121,5 @@ function WizardContent() {
 }
 
 export default function CalculatorPage() {
-  return (
-    <CalculatorProvider>
-      <WizardContent />
-    </CalculatorProvider>
-  );
+  return <WizardContent />;
 }
