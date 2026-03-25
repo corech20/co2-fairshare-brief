@@ -3,9 +3,9 @@ import type { FuelType } from '@/lib/calculator/types';
 import { Flame, Droplets, Thermometer } from 'lucide-react';
 
 const OPTIONS: { value: FuelType; label: string; desc: string; icon: typeof Flame }[] = [
-  { value: 'erdgas', label: 'Erdgas', desc: 'Emissionsfaktor: 0,201 kg CO2/kWh', icon: Flame },
-  { value: 'heizoel', label: 'Heizöl', desc: 'Emissionsfaktor: 0,266 kg CO2/kWh', icon: Droplets },
-  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Individueller Emissionsfaktor des Versorgers', icon: Thermometer },
+  { value: 'erdgas', label: 'Erdgas', desc: 'z.\u00A0B. Gasheizung oder Gasetagenheizung', icon: Flame },
+  { value: 'heizoel', label: 'Heizöl', desc: 'z.\u00A0B. Ölheizung', icon: Droplets },
+  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Der Emissionsfaktor wird aus Ihrer Fernwärmeabrechnung übernommen.', icon: Thermometer },
 ];
 
 export default function StepFuelSource() {

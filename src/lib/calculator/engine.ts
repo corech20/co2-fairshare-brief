@@ -19,9 +19,8 @@ const EMISSION_FACTORS: Record<string, number> = {
   fluessiggas: 0.2358,
   pellets: 0.036,
   hackschnitzel: 0.027,
-  abfallholz: 0.31212,
+  abfallholz: 0.3132,
   braunkohle: 0.35712,
-  // CHP variants share base fuel factor
   erdgas_kwk: 0.20088,
   fluessiggas_kwk: 0.2358,
   heizoel_kwk: 0.2664,
@@ -50,13 +49,12 @@ const CHP_HEAT_SHARE: Record<string, number> = {
 };
 
 /**
- * Fuels where CO2 cost is legally zero (biomass).
- * Emissions are still calculated for reporting.
+ * Fuels where CO2 cost is legally zero (renewable biomass).
+ * Altholz AI/AII is NOT in this set – it is BEHG-relevant.
  */
 const ZERO_COST_FUELS = new Set<string>([
   'pellets',
   'hackschnitzel',
-  'abfallholz',
 ]);
 
 /** CO2 price per ton in EUR by year */
@@ -77,9 +75,9 @@ const FUEL_LABELS: Record<FuelType, string> = {
   erdgas: 'Erdgas',
   heizoel: 'Heizöl',
   fluessiggas: 'Flüssiggas (LPG)',
-  pellets: 'Pellets',
-  hackschnitzel: 'Hackschnitzel',
-  abfallholz: 'Abfallholz AI/AII',
+  pellets: 'Holzpellets',
+  hackschnitzel: 'Holzhackschnitzel',
+  abfallholz: 'Altholz AI/AII',
   braunkohle: 'Braunkohlebriketts',
   fernwaerme: 'Fernwärme',
   erdgas_kwk: 'Erdgas (KWK)',
@@ -182,24 +180,34 @@ export function applyRestrictionModifier(
   baseTenantPercent: number,
   restriction: RestrictionCase,
   isResidential: boolean,
-): { landlordPercent: number; tenantPercent: number } {
+): { landlordPercent: number; tenantPercent: number; restrictionNote?: string } {
+  // fall3 = no restrictions
   if (restriction === 'fall3') {
     if (!isResidential) {
-      // Non-residential, no restriction: 50/50
       return { landlordPercent: 50, tenantPercent: 50 };
     }
     return { landlordPercent: baseLandlordPercent, tenantPercent: baseTenantPercent };
   }
 
+  // fall1und2 = both restrictions: landlord 0%, tenant 100% (both residential and non-residential)
   if (restriction === 'fall1und2') {
-    // Both restrictions: landlord 0%, tenant 100%
     return { landlordPercent: 0, tenantPercent: 100 };
   }
 
-  // fall1 or fall2: landlord share halved
-  const modifiedLandlord = Math.round(baseLandlordPercent / 2);
-  const modifiedTenant = 100 - modifiedLandlord;
-  return { landlordPercent: modifiedLandlord, tenantPercent: modifiedTenant };
+  // fall1 or fall2 with single restriction
+  if (isResidential) {
+    // Residential: landlord share halved
+    const modifiedLandlord = Math.round(baseLandlordPercent / 2);
+    const modifiedTenant = 100 - modifiedLandlord;
+    return { landlordPercent: modifiedLandlord, tenantPercent: modifiedTenant };
+  }
+
+  // Non-residential with single restriction: conservative 50/50, with note
+  return {
+    landlordPercent: 50,
+    tenantPercent: 50,
+    restrictionNote: 'Bei Nichtwohngebäuden mit einzelnen öffentlich-rechtlichen Einschränkungen erfolgt hier eine konservative Standardbehandlung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.',
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -207,13 +215,11 @@ export function applyRestrictionModifier(
 // ---------------------------------------------------------------------------
 
 export function calculateCO2Allocation(data: WizardData): CalculationResult {
-  // Determine billing year
   const billingYear = data.billingPeriodEnd
     ? new Date(data.billingPeriodEnd).getFullYear()
     : new Date().getFullYear();
   const co2PricePerTon = getCO2PriceForYear(billingYear);
 
-  // Build fuel entries – support single fuel (current UI) or multi-fuel array
   const fuelEntries: FuelEntry[] = data.fuelEntries && data.fuelEntries.length > 0
     ? data.fuelEntries
     : [{
@@ -222,52 +228,64 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
         emissionFactorCustom: data.emissionFactorCustom,
       }];
 
-  // Calculate each fuel
   const fuelResults: FuelCalculationResult[] = fuelEntries.map(entry =>
     calculateSingleFuel(entry.fuelType, entry.amount, co2PricePerTon, entry.emissionFactorCustom),
   );
 
-  // Aggregate
   const totalEnergyHeatingValueKwh = fuelResults.reduce((s, r) => s + r.energyHeatingValueKwh, 0);
   const totalEmissionsKg = fuelResults.reduce((s, r) => s + r.co2Kg, 0);
   const totalCO2CostGrossCalc = fuelResults.reduce((s, r) => s + r.co2CostGross, 0);
 
-  // Use direct CO2 cost if provided; otherwise use calculated
   const useDirect = data.co2CostDirect != null && data.co2CostDirect > 0;
   const totalCO2Cost = useDirect ? data.co2CostDirect! : totalCO2CostGrossCalc;
 
-  // Weighted emission factor
   const weightedEmissionFactor = totalEnergyHeatingValueKwh > 0
     ? totalEmissionsKg / totalEnergyHeatingValueKwh
     : 0;
 
-  // Relevant area
   const isResidential = data.buildingType !== 'nichtwohngebaeude';
   const relevantArea = data.buildingArea ?? data.apartmentArea ?? 1;
   const emissionsPerSqmYear = totalEmissionsKg / relevantArea;
 
-  // Stage model lookup (always based on residential model for base values)
+  // Stage model lookup (used for residential; also computed for reference)
   const { tenantPercent: baseTenantPercent, landlordPercent: baseLandlordPercent, step } =
     lookupStufenmodell(emissionsPerSqmYear);
 
-  // Apply restriction modifier
   const restriction = data.restrictionCase ?? 'fall3';
 
-  // For non-residential with fall1 or fall2, use residential stage model as base
-  const baseForModifier = !isResidential && restriction === 'fall3'
-    ? { landlordPercent: 50, tenantPercent: 50 }
-    : { landlordPercent: baseLandlordPercent, tenantPercent: baseTenantPercent };
+  // Determine allocation
+  let landlordPercent: number;
+  let tenantPercent: number;
+  let restrictionNote: string | undefined;
 
-  const { landlordPercent, tenantPercent } = restriction === 'fall3'
-    ? (isResidential
-        ? { landlordPercent: baseLandlordPercent, tenantPercent: baseTenantPercent }
-        : { landlordPercent: 50, tenantPercent: 50 })
-    : applyRestrictionModifier(baseLandlordPercent, baseTenantPercent, restriction, isResidential);
+  if (isResidential) {
+    if (restriction === 'fall3') {
+      landlordPercent = baseLandlordPercent;
+      tenantPercent = baseTenantPercent;
+    } else {
+      const mod = applyRestrictionModifier(baseLandlordPercent, baseTenantPercent, restriction, true);
+      landlordPercent = mod.landlordPercent;
+      tenantPercent = mod.tenantPercent;
+    }
+  } else {
+    // Non-residential
+    if (restriction === 'fall3') {
+      landlordPercent = 50;
+      tenantPercent = 50;
+    } else if (restriction === 'fall1und2') {
+      landlordPercent = 0;
+      tenantPercent = 100;
+    } else {
+      // Single restriction: conservative 50/50 with note
+      landlordPercent = 50;
+      tenantPercent = 50;
+      restrictionNote = 'Bei Nichtwohngebäuden mit einzelnen öffentlich-rechtlichen Einschränkungen erfolgt hier eine konservative Standardbehandlung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.';
+    }
+  }
 
   const landlordShare = Math.round((totalCO2Cost * landlordPercent) / 100 * 100) / 100;
   const tenantShare = Math.round((totalCO2Cost * tenantPercent) / 100 * 100) / 100;
 
-  // Primary fuel info for single-fuel display
   const primaryFuel = fuelResults[0];
 
   return {
@@ -281,7 +299,7 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
     tenantPercent,
     baseLandlordPercent,
     baseTenantPercent,
-    stufenmodellStep: step,
+    stufenmodellStep: isResidential ? step : 0,
     fuelLabel: primaryFuel?.fuelLabel ?? '',
     emissionFactor: primaryFuel?.emissionFactor ?? 0,
     totalEnergyHeatingValueKwh,
@@ -290,5 +308,8 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
     billingYear,
     relevantArea,
     restrictionApplied: restriction,
+    restrictionNote,
+    isResidential,
+    usedDirectCost: useDirect,
   };
 }

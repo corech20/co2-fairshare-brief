@@ -2,10 +2,26 @@ import { useCalculator } from '@/context/CalculatorContext';
 import type { RestrictionCase } from '@/lib/calculator/types';
 
 const OPTIONS: { value: RestrictionCase; label: string; desc: string }[] = [
-  { value: 'fall1', label: 'Fall 1', desc: 'Öffentlich-rechtliche Vorgaben verhindern eine energetische Verbesserung (z.B. Denkmalschutz).' },
-  { value: 'fall2', label: 'Fall 2', desc: 'Maßnahmen zur energetischen Verbesserung genehmigungsrechtlich nicht umsetzbar.' },
-  { value: 'fall1und2', label: 'Fall 1 und Fall 2', desc: 'Beide Einschränkungen liegen vor.' },
-  { value: 'fall3', label: 'Fall 3', desc: 'Keine Einschränkungen – Standardberechnung.' },
+  {
+    value: 'fall1',
+    label: 'Energetische Verbesserung des Gebäudes nicht möglich',
+    desc: 'Zum Beispiel wegen Denkmalschutz oder anderer öffentlich-rechtlicher Vorgaben.',
+  },
+  {
+    value: 'fall2',
+    label: 'Energetische Verbesserung der Heizungs- oder Wärmeversorgung nicht möglich',
+    desc: 'Zum Beispiel wegen Anschlusszwang an ein Wärmenetz oder ähnlicher Vorgaben.',
+  },
+  {
+    value: 'fall1und2',
+    label: 'Beide Einschränkungen treffen zu',
+    desc: 'Sowohl die energetische Gebäudesanierung als auch die Verbesserung der Wärmeversorgung sind nicht möglich.',
+  },
+  {
+    value: 'fall3',
+    label: 'Keine rechtlichen Einschränkungen bekannt',
+    desc: 'Es liegen keine öffentlich-rechtlichen Einschränkungen vor – Standardberechnung.',
+  },
 ];
 
 export default function StepRestriction() {
@@ -35,6 +51,9 @@ export default function StepRestriction() {
           </button>
         ))}
       </div>
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        Wenn Ihnen keine solchen Einschränkungen bekannt sind, wählen Sie bitte „Keine rechtlichen Einschränkungen bekannt".
+      </p>
     </div>
   );
 }
