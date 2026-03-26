@@ -253,12 +253,10 @@ describe('Heizöl: liters → kWh conversion', () => {
     const r = calculateSingleFuel('heizoel', 3000, 30);
     // 3000 × 10.0625 = 30187.5 kWh
     expect(round2(r.energyHeatingValueKwh)).toBe(30187.5);
-    // 30187.5 × 0.2664 = 8037.93
-    expect(round2(r.co2Kg)).toBe(8037.93);
-    // net: 8037.93 × 30/1000 = 241.14
-    expect(round2(r.co2CostNet)).toBe(241.14);
-    // gross: 241.14 × 1.07 = 258.02
-    expect(round2(r.co2CostGross)).toBe(258.02);
+    // 30187.5 × 0.2664 = 8041.95 (full precision)
+    expect(round2(r.co2Kg)).toBe(8041.95);
+    expect(round2(r.co2CostNet)).toBe(round2(r.co2Kg * 30 / 1000));
+    expect(round2(r.co2CostGross)).toBe(round2(r.co2CostNet * 1.07));
   });
 });
 
