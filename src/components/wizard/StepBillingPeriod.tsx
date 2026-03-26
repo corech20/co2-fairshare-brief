@@ -17,7 +17,6 @@ export default function StepBillingPeriod() {
   useEffect(() => {
     if (crossYear && yearBoundaries.length > 0) {
       const existing = wizardData.yearlySegments;
-      // Only initialize if not already set or segment count changed
       if (!existing || existing.length !== yearBoundaries.length) {
         const segments: YearlySegment[] = yearBoundaries.map(b => ({
           year: b.year,
@@ -54,6 +53,7 @@ export default function StepBillingPeriod() {
             type="date"
             value={start ?? ''}
             onChange={e => setWizardField('billingPeriodStart', e.target.value)}
+            placeholder="TT.MM.JJJJ"
             className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
           />
         </div>
@@ -63,6 +63,7 @@ export default function StepBillingPeriod() {
             type="date"
             value={end ?? ''}
             onChange={e => setWizardField('billingPeriodEnd', e.target.value)}
+            placeholder="TT.MM.JJJJ"
             className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
           />
         </div>
@@ -84,7 +85,7 @@ export default function StepBillingPeriod() {
             <div className="text-sm text-amber-800 dark:text-amber-300">
               <p className="font-medium">Jahresübergreifender Abrechnungszeitraum</p>
               <p className="mt-1">
-                Da sich der Zeitraum über mehrere Kalenderjahre erstreckt und unterschiedliche CO2-Preise gelten, müssen die Verbrauchsmengen getrennt nach Jahren eingegeben werden.
+                Da sich der Zeitraum über mehrere Kalenderjahre erstreckt und unterschiedliche CO2-Preise gelten, werden die Verbrauchsmengen im nächsten Schritt getrennt nach Jahren erfasst.
               </p>
             </div>
           </div>
@@ -97,7 +98,7 @@ export default function StepBillingPeriod() {
                 <div key={seg.year} className="rounded-xl border-2 border-border bg-card p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-foreground">
-                      Segment {seg.year}
+                      Abschnitt {seg.year}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       CO2-Preis: {co2Price} €/Tonne
@@ -124,9 +125,14 @@ export default function StepBillingPeriod() {
       )}
 
       {!crossYear && !validationError && (
-        <p className="text-sm text-muted-foreground">
-          In vielen Fällen umfasst der Abrechnungszeitraum 12 Monate. Wenn Ihre Abrechnung davon abweicht, übernehmen Sie bitte trotzdem den tatsächlichen Zeitraum aus der Abrechnung.
-        </p>
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            In vielen Fällen umfasst der Abrechnungszeitraum 12 Monate. Wenn Ihre Abrechnung davon abweicht, übernehmen Sie bitte den tatsächlichen Zeitraum aus der Abrechnung.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Erstreckt sich der Zeitraum über mehr als ein Kalenderjahr, werden die Verbrauchsmengen im nächsten Schritt getrennt nach Jahren erfasst.
+          </p>
+        </div>
       )}
     </div>
   );

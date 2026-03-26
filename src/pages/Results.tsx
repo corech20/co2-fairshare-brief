@@ -3,7 +3,15 @@ import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
 import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle, Building2, Flame, CalendarDays } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
-import { getDocumentCase, getHeatSupplyLabel, getBuildingTypeLabel, fmt } from '@/lib/calculator/pdf-helpers';
+import { getDocumentCase, getHeatSupplyLabel, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
+
+function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
+  if (wizardData.buildingType === 'nichtwohngebaeude') return 'Bezugsfläche';
+  const isApartment = wizardData.heatSupplyType === 'etage' ||
+    (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
+  if (isApartment) return 'Wohnungswohnfläche';
+  return 'Gebäudewohnfläche';
+}
 
 export default function ResultsPage() {
   const navigate = useNavigate();
@@ -29,11 +37,18 @@ export default function ResultsPage() {
   const docCase = getDocumentCase(wizardData);
   const isTenantClaim = docCase === 'C' || docCase === 'D';
 
-  const allocationExplanation = result.isResidential
-    ? result.stufenmodellStep > 0 ? `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells nach §5 CO2KostAufG` : ''
-    : result.restrictionApplied === 'fall1und2'
-      ? 'Bei Vorliegen beider öffentlich-rechtlicher Einschränkungen trägt der Mieter die CO2-Kosten vollständig (100 % / 0 %).'
-      : 'Hälftige Aufteilung (50/50) nach §8 CO2KostAufG für Nichtwohngebäude';
+  const allocationExplanation = (() => {
+    if (result.isResidential && result.stufenmodellStep > 0) {
+      const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
+      return `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells – liegt im Bereich von ${rangeText}`;
+    }
+    if (!result.isResidential) {
+      return result.restrictionApplied === 'fall1und2'
+        ? 'Bei Vorliegen beider öffentlich-rechtlicher Einschränkungen trägt der Mieter die CO2-Kosten vollständig (100 % / 0 %).'
+        : 'Hälftige Aufteilung (50/50) nach § 8 CO2KostAufG für Nichtwohngebäude';
+    }
+    return '';
+  })();
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,7 +124,7 @@ export default function ResultsPage() {
             <div className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
               <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
-                Für Nichtwohngebäude gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten zwischen Mieter und Vermieter gemäß §8 CO2KostAufG.
+                Für Nichtwohngebäude gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten zwischen Mieter und Vermieter gemäß § 8 CO2KostAufG.
               </p>
             </div>
           )}
@@ -209,7 +224,9 @@ export default function ResultsPage() {
                 {result.isResidential && result.stufenmodellStep > 0 && (
                   <>
                     <span>Stufe (10-Stufen-Modell):</span>
-                    <span className="text-foreground font-medium text-right">Stufe {result.stufenmodellStep}</span>
+                    <span className="text-foreground font-medium text-right">
+                      Stufe {result.stufenmodellStep} ({getStufenmodellRangeText(result.stufenmodellStep)})
+                    </span>
                   </>
                 )}
                 <span>Brennstoff:</span>
@@ -230,7 +247,7 @@ export default function ResultsPage() {
                 )}
                 <span>Abrechnungsjahr:</span>
                 <span className="text-foreground font-medium text-right">{result.billingYear}</span>
-                <span>Bezugsfläche:</span>
+                <span>{getAreaLabel(wizardData)}:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.relevantArea, 0)} m²</span>
                 <span>Gesamtenergie (Heizwert):</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 0)} kWh</span>

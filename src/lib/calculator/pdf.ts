@@ -19,6 +19,7 @@ import {
   getPeriodString,
   getFuelCalculationSteps,
   getStufenmodellRangeText,
+  getAreaLabelForPDF,
 } from './pdf-helpers';
 
 export function generatePDF(data: WizardData, result: CalculationResult) {
@@ -35,6 +36,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   const docCase = getDocumentCase(data);
   const period = getPeriodString(data);
   const isApartmentLevel = data.heatSupplyType === 'etage' || (data.userRole === 'mieter' && data.heatSupplyType === 'fernwaerme');
+  const isNonResidential = data.buildingType === 'nichtwohngebaeude';
 
   // ── Helpers ──────────────────────────────────────────────────────────
   const ensureSpace = (needed: number) => {
@@ -177,7 +179,6 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   // PART II — TECHNICAL CALCULATION
   // ═══════════════════════════════════════════════════════════════════════
 
-  // ═══ SECTION 1: Energy / Emissions / CO2 Costs ═══
   sectionHeading('1. Energiegehalt der eingesetzten Brennstoffe, CO2-Emissionen und CO2-Kosten');
 
   // Cross-year segment display
@@ -270,9 +271,8 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   // PART III — ALLOCATION
   // ═══════════════════════════════════════════════════════════════════════
 
-  // ═══ SECTION 2: Allocation ═══
   if (result.isResidential) {
-    sectionHeading('2. CO2-Aufteilung nach dem Stufenmodell für Wohngebäude / Wohnungen');
+    sectionHeading('2. CO2-Aufteilung nach dem Stufenmodell für Wohngebäude');
   } else {
     sectionHeading('2. CO2-Aufteilung zwischen Vermieter und Mieter');
   }
@@ -280,15 +280,16 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   detailRow('Gebäudetyp:', getBuildingTypeLabel(data), 2);
   detailRow('Wärmeversorgung:', getHeatSupplyLabel(data), 2);
 
-  // Area display — differentiated
+  // Area display — dynamic labels
+  const areaLabel = getAreaLabelForPDF(data);
   if (isApartmentLevel) {
     if (data.buildingArea) {
       detailRow('Gebäudewohnfläche:', `${fmt.number(data.buildingArea, 0)} m²`, 2);
     }
-    detailRow('Wohnungswohnfläche:', `${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`, 2);
-    detailRow('Bezugsfläche für Berechnung:', `${fmt.number(result.relevantArea, 0)} m² (Wohnungswohnfläche)`, 2);
+    detailRow(`${areaLabel}:`, `${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`, 2);
+    detailRow('Bezugsfläche für Berechnung:', `${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`, 2);
   } else {
-    detailRow('Gebäudewohnfläche:', `${fmt.number(result.relevantArea, 0)} m²`, 2);
+    detailRow(`${areaLabel}:`, `${fmt.number(result.relevantArea, 0)} m²`, 2);
   }
 
   detailRow('Spezifischer CO2-Ausstoß:', `${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m² / a`, 2);
@@ -297,9 +298,6 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   if (result.isResidential && result.stufenmodellStep > 0) {
     y += 2;
     const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(50, 50, 50);
     bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
     y += 1;
     detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2, true);
@@ -324,8 +322,11 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   // PART IV — SPECIAL CIRCUMSTANCES
   // ═══════════════════════════════════════════════════════════════════════
 
-  // ═══ SECTION 3: Special circumstances ═══
-  sectionHeading('3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell');
+  // Use case-sensitive heading
+  const section3Title = isNonResidential
+    ? '3. Besonderheiten zur Aufteilung der CO2-Kosten'
+    : '3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell';
+  sectionHeading(section3Title);
 
   const specialText = getSpecialCircumstancesText(data, result);
   const specialParagraphs = specialText.split('\n\n');
@@ -342,11 +343,16 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   // PART V — FINAL RESULT
   // ═══════════════════════════════════════════════════════════════════════
 
-  // ═══ SECTION 4: Final allocation result ═══
   sectionHeading('4. Aufteilung der CO2-Kosten unter Berücksichtigung der vorgenannten Besonderheiten');
 
-  ensureSpace(50);
-  const boxStartY = y - 2;
+  // Ensure generous space for entire result box
+  const estimatedBoxH = (docCase === 'C' || docCase === 'D') ? 60 : 40;
+  ensureSpace(estimatedBoxH + 10);
+
+  const boxStartY = y;
+
+  // Add padding inside the box
+  y += 4;
 
   detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 6, true);
 
@@ -386,8 +392,11 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     y += 16;
   }
 
+  // Add bottom padding
+  y += 4;
+
   // Draw result box border
-  const boxH = y - boxStartY + 4;
+  const boxH = y - boxStartY;
   doc.setDrawColor(30, 55, 90);
   doc.setLineWidth(0.4);
   doc.roundedRect(mL, boxStartY, cw, boxH, 2, 2, 'S');
@@ -439,8 +448,8 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   doc.text(today, metaValX, y);
   y += 4;
 
-  doc.text('Nutzer-ID für den CO2-Kostenrechner:', metaLabelX, y);
-  doc.text(calcId, metaValX + 30, y);
+  doc.text('Berechnungs-Nr.:', metaLabelX, y);
+  doc.text(calcId, metaValX, y);
   y += 4;
 
   const buildingRef = getBuildingReference(data);
@@ -459,8 +468,8 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   // FINAL SUMMARY BOX
   // ═══════════════════════════════════════════════════════════════════════
 
-  const summaryH = (docCase === 'C' || docCase === 'D') ? 34 : 28;
-  ensureSpace(summaryH + 6);
+  const summaryH = (docCase === 'C' || docCase === 'D') ? 36 : 30;
+  ensureSpace(summaryH + 8);
 
   const summaryY = y;
 
@@ -471,27 +480,27 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   doc.setLineWidth(0.5);
   doc.roundedRect(mL, summaryY, cw, summaryH, 2.5, 2.5, 'S');
 
-  // Heading
+  // Heading with enough top padding
   const yearLabel = result.isCrossYear && result.segmentResults?.length
     ? `${result.segmentResults[0].year}/${result.billingYear}`
     : String(result.billingYear);
 
-  let sy = summaryY + 6;
+  let sy = summaryY + 7;
   doc.setFontSize(9.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 55, 90);
   doc.text(`Zusammenfassung – CO2-Kosten ${yearLabel} inkl. Mehrwertsteuer`, mL + 5, sy);
 
-  sy += 6;
+  sy += 5;
   doc.setDrawColor(30, 55, 90);
   doc.setLineWidth(0.2);
-  doc.line(mL + 5, sy - 1, mL + cw - 5, sy - 1);
+  doc.line(mL + 5, sy, mL + cw - 5, sy);
 
   // Values
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(40, 40, 40);
-  sy += 3;
+  sy += 5;
   doc.text('CO2-Kosten gesamt (brutto):', mL + 5, sy);
   doc.setFont('helvetica', 'bold');
   doc.text(fmt.currency(result.totalCO2Cost), mL + cw - 5, sy, { align: 'right' });
