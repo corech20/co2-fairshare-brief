@@ -7,6 +7,8 @@ import type {
   FuelEntry,
   RestrictionCase,
   CostInputType,
+  SegmentResult,
+  YearlySegment,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -49,7 +51,7 @@ const CHP_HEAT_SHARE: Record<string, number> = {
   heizoel_kwk: 0.3984,
 };
 
-/** Fuels where CO2 cost is legally zero (renewable biomass). Altholz is NOT here. */
+/** Fuels where CO2 cost is legally zero (renewable biomass). */
 const ZERO_COST_FUELS = new Set<string>(['pellets', 'hackschnitzel']);
 
 /** CO2 price per ton in EUR by year */
@@ -110,6 +112,49 @@ export function getFuelLabel(fuelType: FuelType): string {
 }
 
 // ---------------------------------------------------------------------------
+// BILLING PERIOD HELPERS
+// ---------------------------------------------------------------------------
+
+export function getBillingPeriodDays(start: string, end: string): number {
+  const s = new Date(start);
+  const e = new Date(end);
+  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export function isCrossYearPeriod(start: string, end: string): boolean {
+  return new Date(start).getFullYear() !== new Date(end).getFullYear();
+}
+
+export function getYearBoundaries(start: string, end: string): { year: number; periodStart: string; periodEnd: string }[] {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+
+  if (startYear === endYear) {
+    return [{ year: startYear, periodStart: start, periodEnd: end }];
+  }
+
+  const segments: { year: number; periodStart: string; periodEnd: string }[] = [];
+  for (let yr = startYear; yr <= endYear; yr++) {
+    const segStart = yr === startYear ? start : `${yr}-01-01`;
+    const segEnd = yr === endYear ? end : `${yr}-12-31`;
+    segments.push({ year: yr, periodStart: segStart, periodEnd: segEnd });
+  }
+  return segments;
+}
+
+export function validateBillingPeriod(start?: string, end?: string): string | null {
+  if (!start || !end) return null;
+  const s = new Date(start);
+  const e = new Date(end);
+  if (e <= s) return 'Das Enddatum muss nach dem Startdatum liegen.';
+  const days = getBillingPeriodDays(start, end);
+  if (days > 365) return 'Der angegebene Zeitraum darf nicht länger als 365 Tage sein.';
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // SINGLE FUEL CALCULATION
 // ---------------------------------------------------------------------------
 
@@ -148,6 +193,29 @@ export function calculateSingleFuel(
     energyHeatingValueKwh, emissionFactor, co2Kg,
     co2CostNet, co2CostGross, usedDirectCost: false,
   };
+}
+
+// ---------------------------------------------------------------------------
+// SINGLE FUEL SEGMENT CALCULATION (for cross-year)
+// ---------------------------------------------------------------------------
+
+function calculateFuelSegment(
+  fuelType: FuelType,
+  amount: number,
+  co2PricePerTon: number,
+  customEmissionFactor?: number,
+): { energyHeatingValueKwh: number; co2Kg: number; co2CostNet: number; co2CostGross: number } {
+  const heatingValueFactor = HEATING_VALUE_FACTORS[fuelType] ?? 1;
+  const chpFactor = CHP_HEAT_SHARE[fuelType] ?? 1;
+  const emissionFactor = getEmissionFactor(fuelType, customEmissionFactor);
+
+  const energyHeatingValueKwh = amount * heatingValueFactor * chpFactor;
+  const co2Kg = energyHeatingValueKwh * emissionFactor;
+  const isZeroCost = ZERO_COST_FUELS.has(fuelType);
+  const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
+  const co2CostGross = isZeroCost ? 0 : co2CostNet * VAT_RATE;
+
+  return { energyHeatingValueKwh, co2Kg, co2CostNet, co2CostGross };
 }
 
 // ---------------------------------------------------------------------------
@@ -233,16 +301,32 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
   const billingYear = data.billingPeriodEnd
     ? new Date(data.billingPeriodEnd).getFullYear()
     : new Date().getFullYear();
-  const co2PricePerTon = getCO2PriceForYear(billingYear);
   const notes: string[] = [];
+
+  // Detect cross-year
+  const crossYear = data.billingPeriodStart && data.billingPeriodEnd
+    ? isCrossYearPeriod(data.billingPeriodStart, data.billingPeriodEnd)
+    : false;
+
+  // Determine primary fuel type and emission factor
+  const primaryFuelType = data.fuelType ?? 'erdgas';
+  const primaryEmissionFactor = data.emissionFactorCustom;
+
+  // --- Cross-year segmented calculation ---
+  if (crossYear && data.yearlySegments && data.yearlySegments.length > 0) {
+    return calculateCrossYear(data, notes);
+  }
+
+  // --- Standard same-year calculation ---
+  const co2PricePerTon = getCO2PriceForYear(billingYear);
 
   // Build fuel entries
   const fuelEntries: FuelEntry[] = data.fuelEntries && data.fuelEntries.length > 0
     ? data.fuelEntries
     : [{
-        fuelType: data.fuelType ?? 'erdgas',
+        fuelType: primaryFuelType,
         amount: data.fuelAmount ?? 0,
-        emissionFactorCustom: data.emissionFactorCustom,
+        emissionFactorCustom: primaryEmissionFactor,
         co2CostDirect: data.co2CostDirect,
         co2CostDirectType: data.co2CostDirectType,
       }];
@@ -255,13 +339,91 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
     ),
   );
 
+  return buildResult(data, fuelResults, co2PricePerTon, billingYear, notes, false, undefined);
+}
+
+// ---------------------------------------------------------------------------
+// CROSS-YEAR CALCULATION
+// ---------------------------------------------------------------------------
+
+function calculateCrossYear(data: WizardData, notes: string[]): CalculationResult {
+  const segments = data.yearlySegments!;
+  const primaryFuelType = data.fuelType ?? 'erdgas';
+  const primaryEmissionFactor = data.emissionFactorCustom;
+
+  const segmentResults: SegmentResult[] = [];
+  let totalEnergyKwh = 0;
+  let totalCo2Kg = 0;
+  let totalCostNet = 0;
+  let totalCostGross = 0;
+  let totalAmount = 0;
+
+  for (const seg of segments) {
+    const co2Price = getCO2PriceForYear(seg.year);
+    const result = calculateFuelSegment(primaryFuelType, seg.amount, co2Price, primaryEmissionFactor);
+    segmentResults.push({
+      year: seg.year,
+      periodStart: seg.periodStart,
+      periodEnd: seg.periodEnd,
+      amount: seg.amount,
+      co2PricePerTon: co2Price,
+      co2Kg: result.co2Kg,
+      co2CostNet: result.co2CostNet,
+      co2CostGross: result.co2CostGross,
+      energyHeatingValueKwh: result.energyHeatingValueKwh,
+    });
+    totalEnergyKwh += result.energyHeatingValueKwh;
+    totalCo2Kg += result.co2Kg;
+    totalCostNet += result.co2CostNet;
+    totalCostGross += result.co2CostGross;
+    totalAmount += seg.amount;
+  }
+
+  const emissionFactor = getEmissionFactor(primaryFuelType, primaryEmissionFactor);
+
+  // Build a synthetic FuelCalculationResult for the combined total
+  const fuelResults: FuelCalculationResult[] = [{
+    fuelType: primaryFuelType,
+    fuelLabel: getFuelLabel(primaryFuelType),
+    inputAmount: totalAmount,
+    energyHeatingValueKwh: totalEnergyKwh,
+    emissionFactor,
+    co2Kg: totalCo2Kg,
+    co2CostNet: totalCostNet,
+    co2CostGross: totalCostGross,
+    usedDirectCost: false,
+  }];
+
+  const yearsUsed = segments.map(s => `${s.year}: ${s.co2PricePerTon} €/t`).join(', ');
+  notes.push(`Jahresübergreifende Berechnung mit getrennten CO2-Preisen (${yearsUsed}).`);
+
+  // Use last segment year as billing year for display
+  const billingYear = segments[segments.length - 1].year;
+  // co2PricePerTon is not uniform – use -1 as sentinel or the first year's price for display
+  const displayCo2Price = segments[0].co2PricePerTon;
+
+  return buildResult(data, fuelResults, displayCo2Price, billingYear, notes, true, segmentResults);
+}
+
+// ---------------------------------------------------------------------------
+// BUILD RESULT (shared between same-year and cross-year)
+// ---------------------------------------------------------------------------
+
+function buildResult(
+  data: WizardData,
+  fuelResults: FuelCalculationResult[],
+  co2PricePerTon: number,
+  billingYear: number,
+  notes: string[],
+  isCrossYear: boolean,
+  segmentResults?: SegmentResult[],
+): CalculationResult {
   // Aggregates
   const totalEnergyHeatingValueKwh = fuelResults.reduce((s, r) => s + r.energyHeatingValueKwh, 0);
   const totalEmissionsKg = fuelResults.reduce((s, r) => s + r.co2Kg, 0);
   const totalCO2CostGrossCalc = fuelResults.reduce((s, r) => s + r.co2CostGross, 0);
   const anyDirectCost = fuelResults.some(r => r.usedDirectCost);
 
-  // Use aggregated direct+calculated costs
   const totalCO2Cost = totalCO2CostGrossCalc;
   const usedDirectCost = anyDirectCost;
 
@@ -368,5 +530,7 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
     reimbursementReductionPercent,
     landlordShareBeforeReduction,
     notes,
+    isCrossYear,
+    segmentResults,
   };
 }
