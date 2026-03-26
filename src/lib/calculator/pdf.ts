@@ -23,8 +23,8 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pw = doc.internal.pageSize.getWidth();
   const ph = doc.internal.pageSize.getHeight();
-  const mL = 25;   // left margin
-  const mR = 20;    // right margin
+  const mL = 25;
+  const mR = 20;
   const cw = pw - mL - mR;
   let y = 20;
 
@@ -87,9 +87,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     y += 4.5;
   };
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 1. SENDER BLOCK
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ 1. SENDER BLOCK ═══
   const senderName = getSenderName(data);
   const senderLines = getSenderAddressLines(data);
 
@@ -107,9 +105,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     y += 8;
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 2. RECIPIENT BLOCK
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ 2. RECIPIENT BLOCK ═══
   const recipientName = getRecipientName(data);
   const recipientLines = getRecipientAddressLines(data);
 
@@ -117,22 +113,14 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     doc.setFontSize(10.5);
     doc.setTextColor(30, 30, 30);
     doc.setFont('helvetica', 'bold');
-    if (recipientName) {
-      doc.text(recipientName, mL, y);
-      y += 5;
-    }
+    if (recipientName) { doc.text(recipientName, mL, y); y += 5; }
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9.5);
-    for (const line of recipientLines) {
-      doc.text(line, mL, y);
-      y += 4.5;
-    }
+    for (const line of recipientLines) { doc.text(line, mL, y); y += 4.5; }
     y += 4;
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 3. DATE + CALC-ID (right-aligned) + BILLING PERIOD
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ 3. DATE + CALC-ID + BILLING PERIOD ═══
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(80, 80, 80);
@@ -141,15 +129,18 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   doc.text(`Berechnungs-Nr.: ${calcId}`, pw - mR, y, { align: 'right' });
   y += 8;
 
-  // Billing period block
   doc.setFontSize(9);
   doc.setTextColor(60, 60, 60);
   doc.text(`Abrechnungszeitraum: ${period}`, mL, y);
+  if (result.isCrossYear) {
+    y += 4;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text('(jahresübergreifend, Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
+  }
   y += 8;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 4. SUBJECT LINE
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ 4. SUBJECT LINE ═══
   const subjectText = getSubjectLine(data, result);
   doc.setFontSize(11.5);
   doc.setFont('helvetica', 'bold');
@@ -162,9 +153,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   doc.line(mL, y, pw - mR, y);
   y += 8;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 5. SALUTATION + INTRODUCTORY PARAGRAPH
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ 5. SALUTATION + INTRO ═══
   const salutation = getSalutation(data);
   doc.setFontSize(9.5);
   doc.setFont('helvetica', 'normal');
@@ -176,62 +165,79 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   bodyText(introText);
   y += 4;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // SECTION 1: Energy / Emissions / CO2 Costs
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ SECTION 1: Energy / Emissions / CO2 Costs ═══
   sectionHeading('1. Energiegehalt, CO2-Emissionen und CO2-Kosten');
 
-  // Per-fuel details
-  for (let i = 0; i < result.fuelResults.length; i++) {
-    const fr = result.fuelResults[i];
-    const steps = getFuelCalculationSteps(fr);
-
-    if (result.fuelResults.length > 1) {
-      ensureSpace(8);
+  // Cross-year segment display
+  if (result.isCrossYear && result.segmentResults && result.segmentResults.length > 0) {
+    for (const seg of result.segmentResults) {
+      ensureSpace(20);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(50, 50, 50);
-      doc.text(`Brennstoff ${i + 1}: ${fr.fuelLabel}`, mL + 2, y);
+      doc.text(`Abschnitt ${seg.year} (${fmt.date(seg.periodStart)} – ${fmt.date(seg.periodEnd)})`, mL + 2, y);
       y += 5;
       doc.setFont('helvetica', 'normal');
-
-      for (const step of steps.slice(1)) { // skip label, already shown
-        bodyText(step, 4);
-      }
-    } else {
-      for (const step of steps) {
-        bodyText(step, 2);
-      }
+      detailRow('Menge:', fmt.number(seg.amount, 0), 4);
+      detailRow('CO2-Preis:', `${seg.co2PricePerTon} EUR/Tonne`, 4);
+      detailRow('Energie (Heizwert):', `${fmt.number(seg.energyHeatingValueKwh, 0)} kWh`, 4);
+      detailRow('CO2-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
+      detailRow('CO2-Kosten (brutto):', fmt.currency(seg.co2CostGross), 4);
+      y += 2;
     }
-    y += 2;
-  }
-
-  // Totals for multi-fuel
-  if (result.fuelResults.length > 1) {
-    ensureSpace(20);
+    // Totals
+    ensureSpace(12);
     doc.setDrawColor(200, 200, 200);
     doc.line(mL + 2, y, pw - mR, y);
     y += 4;
-    detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 0)} kWh`, 2, true);
     detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
-    detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`, 2);
     detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
   } else {
-    // Single fuel summary
-    ensureSpace(8);
-    detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+    // Standard per-fuel details
+    for (let i = 0; i < result.fuelResults.length; i++) {
+      const fr = result.fuelResults[i];
+      const steps = getFuelCalculationSteps(fr);
+
+      if (result.fuelResults.length > 1) {
+        ensureSpace(8);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(50, 50, 50);
+        doc.text(`Brennstoff ${i + 1}: ${fr.fuelLabel}`, mL + 2, y);
+        y += 5;
+        doc.setFont('helvetica', 'normal');
+        for (const step of steps.slice(1)) { bodyText(step, 4); }
+      } else {
+        for (const step of steps) { bodyText(step, 2); }
+      }
+      y += 2;
+    }
+
+    // Totals for multi-fuel
+    if (result.fuelResults.length > 1) {
+      ensureSpace(20);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(mL + 2, y, pw - mR, y);
+      y += 4;
+      detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 0)} kWh`, 2, true);
+      detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
+      detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`, 2);
+      detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+    } else {
+      ensureSpace(8);
+      detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+    }
+
+    // CO2 price note
+    y += 2;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`CO2-Preis: ${fmt.currency(result.co2PricePerTon)} pro Tonne (${result.billingYear})`, mL + 2, y);
   }
 
-  // CO2 price note
-  y += 2;
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.text(`CO2-Preis: ${fmt.currency(result.co2PricePerTon)} pro Tonne (${result.billingYear})`, mL + 2, y);
   y += 8;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // SECTION 2: Allocation between landlord and tenant
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ SECTION 2: Allocation ═══
   if (result.isResidential) {
     sectionHeading('2. CO2-Aufteilung nach dem Stufenmodell für Wohngebäude');
   } else {
@@ -250,28 +256,34 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
 
   if (!result.isResidential) {
     if (result.restrictionApplied === 'fall1und2') {
-      detailRow('Aufteilung:', 'Mieter 100 % / Vermieter 0 % (Fall 1 und 2)', 2, true);
+      detailRow('Aufteilung:', 'Mieter 100 % / Vermieter 0 % (beide Einschränkungen)', 2, true);
+      y += 2;
+      bodyText('Da beide öffentlich-rechtlichen Einschränkungen vorliegen, trägt der Mieter die CO2-Kosten vollständig.', 2);
     } else {
       detailRow('Aufteilung:', 'Hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG', 2, true);
+      y += 2;
+      bodyText('Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Mieter und Vermieter.', 2);
     }
   }
   y += 4;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // SECTION 3: Special circumstances / deviations
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ SECTION 3: Special circumstances ═══
   sectionHeading('3. Besonderheiten / Abweichungen vom Stufenmodell');
 
   const specialText = getSpecialCircumstancesText(data, result);
   bodyText(specialText);
+
+  // Pellets note
+  if (result.fuelResults.some(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel')) {
+    y += 2;
+    bodyText('Hinweis: Holzpellets und Holzhackschnitzel haben einen Emissionsfaktor, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen daher 0,00 EUR.', 2);
+  }
+
   y += 4;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // SECTION 4: Final allocation result
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ SECTION 4: Final allocation result ═══
   sectionHeading('4. Aufteilung der CO2-Kosten');
 
-  // Result box
   ensureSpace(40);
   const boxStartY = y - 2;
 
@@ -307,7 +319,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     y += 14;
   }
 
-  // Draw background box around result section
+  // Draw box
   const boxH = y - boxStartY + 2;
   doc.setDrawColor(30, 55, 90);
   doc.setLineWidth(0.3);
@@ -315,9 +327,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
 
   y += 6;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // CLOSING
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ CLOSING ═══
   ensureSpace(30);
   const closingText = getClosingText(data);
   bodyText(closingText);
@@ -332,9 +342,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     y += 8;
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // FOOTER / META BLOCK
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ FOOTER / META BLOCK ═══
   ensureSpace(30);
   doc.setDrawColor(180, 180, 180);
   doc.line(mL, y, pw - mR, y);
@@ -348,11 +356,8 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     ['Erstellt am:', today],
     ['Berechnungs-Nr.:', calcId],
   ];
-
   const buildingRef = getBuildingReference(data);
-  if (buildingRef) {
-    metaRows.push(['Berechnung erstellt für:', buildingRef]);
-  }
+  if (buildingRef) metaRows.push(['Berechnung erstellt für:', buildingRef]);
 
   for (const [label, val] of metaRows) {
     ensureSpace(5);
@@ -360,12 +365,9 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
     doc.text(val, mL + 40, y);
     y += 4;
   }
-
   y += 4;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // COMPACT SUMMARY BOX
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══ COMPACT SUMMARY BOX ═══
   ensureSpace(28);
   doc.setFillColor(240, 243, 248);
   doc.roundedRect(mL, y - 2, cw, 22, 2, 2, 'F');
@@ -376,7 +378,7 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 55, 90);
-  doc.text(`Zusammenfassung – CO2-Kosten ${result.billingYear}`, mL + 4, y + 2);
+  doc.text(`Zusammenfassung – CO2-Kosten ${result.isCrossYear ? `${result.segmentResults?.[0]?.year}/${result.billingYear}` : result.billingYear}`, mL + 4, y + 2);
 
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
@@ -392,8 +394,6 @@ export function generatePDF(data: WizardData, result: CalculationResult) {
   }
 
   y += 12;
-
-  // Page footer
   addFooter();
 
   doc.save(`CO2-Kostenaufteilung_${calcId}.pdf`);

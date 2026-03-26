@@ -9,7 +9,7 @@ export type FuelType =
   | 'fluessiggas'
   | 'pellets'
   | 'hackschnitzel'
-  | 'abfallholz'
+  | 'abfallholz' // kept internally for backward compat, not shown in UI
   | 'braunkohle'
   | 'fernwaerme'
   | 'erdgas_kwk'
@@ -35,6 +35,29 @@ export interface AddressData {
   postalCode?: string;
   city?: string;
   apartmentDesignation?: string;
+}
+
+/** A yearly segment for cross-year billing periods */
+export interface YearlySegment {
+  year: number;
+  periodStart: string;
+  periodEnd: string;
+  /** Fuel amounts per segment – one per fuel entry or single fuel */
+  amount: number;
+  co2PricePerTon: number;
+}
+
+/** Per-segment calculation result */
+export interface SegmentResult {
+  year: number;
+  periodStart: string;
+  periodEnd: string;
+  amount: number;
+  co2PricePerTon: number;
+  co2Kg: number;
+  co2CostNet: number;
+  co2CostGross: number;
+  energyHeatingValueKwh: number;
 }
 
 export interface WizardData {
@@ -67,6 +90,8 @@ export interface WizardData {
   landlordAddressFlat?: string;
   /** Tenant path: extra gas device without separate meter (5% reduction) */
   hasExtraGasDevice?: boolean;
+  /** Cross-year billing: yearly segment data */
+  yearlySegments?: YearlySegment[];
 }
 
 export interface FuelCalculationResult {
@@ -110,6 +135,10 @@ export interface CalculationResult {
   /** Pre-reduction landlord amount (for display) */
   landlordShareBeforeReduction?: number;
   notes: string[];
+  /** Cross-year: was the calculation split by year segments? */
+  isCrossYear: boolean;
+  /** Per-segment results for cross-year calculations */
+  segmentResults?: SegmentResult[];
 }
 
 export interface StufenmodellEntry {

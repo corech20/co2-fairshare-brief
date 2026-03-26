@@ -8,9 +8,8 @@ const ALL_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Fl
   { value: 'heizoel', label: 'Heizöl', desc: 'z.\u00A0B. Ölheizung', icon: Droplets, group: 'standard' },
   { value: 'fernwaerme', label: 'Fernwärme', desc: 'Der Emissionsfaktor wird aus Ihrer Fernwärmeabrechnung übernommen.', icon: Thermometer, group: 'standard' },
   { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'z.\u00A0B. Flüssiggasheizung', icon: Zap, group: 'standard' },
-  { value: 'pellets', label: 'Holzpellets', desc: 'CO2-Kosten = 0 (nicht BEHG-pflichtig)', icon: Leaf, group: 'biomass' },
-  { value: 'hackschnitzel', label: 'Holzhackschnitzel', desc: 'CO2-Kosten = 0 (nicht BEHG-pflichtig)', icon: Trees, group: 'biomass' },
-  { value: 'abfallholz', label: 'Altholz AI/AII', desc: 'BEHG-pflichtig – CO2-Kosten werden berechnet', icon: Factory, group: 'standard' },
+  { value: 'pellets', label: 'Holzpellets', desc: 'CO2-Kosten = 0 EUR (nicht BEHG-pflichtig, Emissionsfaktor wird berechnet)', icon: Leaf, group: 'biomass' },
+  { value: 'hackschnitzel', label: 'Holzhackschnitzel', desc: 'CO2-Kosten = 0 EUR (nicht BEHG-pflichtig)', icon: Trees, group: 'biomass' },
   { value: 'braunkohle', label: 'Braunkohlebriketts', desc: 'z.\u00A0B. Braunkohleheizung', icon: Factory, group: 'standard' },
   { value: 'erdgas_kwk', label: 'Erdgas (KWK)', desc: 'Kraft-Wärme-Kopplung mit Erdgas', icon: Flame, group: 'kwk' },
   { value: 'fluessiggas_kwk', label: 'Flüssiggas (KWK)', desc: 'Kraft-Wärme-Kopplung mit Flüssiggas', icon: Zap, group: 'kwk' },
@@ -25,12 +24,10 @@ export default function StepFuelSource() {
 
   const selectSingleFuel = (fuelType: FuelType) => {
     setWizardField('fuelType', fuelType);
-    // Clear multi-fuel when using single
     if (fuelEntries.length > 0) setWizardField('fuelEntries', undefined);
   };
 
   const addFuelEntry = () => {
-    // Switch to multi-fuel mode
     const existing: FuelEntry[] = fuelEntries.length > 0
       ? [...fuelEntries]
       : wizardData.fuelType
@@ -50,7 +47,6 @@ export default function StepFuelSource() {
   const removeFuelEntry = (index: number) => {
     const updated = fuelEntries.filter((_, i) => i !== index);
     if (updated.length <= 1 && updated.length > 0) {
-      // Revert to single fuel
       setWizardField('fuelType', updated[0].fuelType);
       setWizardField('fuelAmount', updated[0].amount);
       setWizardField('fuelEntries', undefined);

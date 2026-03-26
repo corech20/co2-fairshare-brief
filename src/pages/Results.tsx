@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
-import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle, Building2, Flame } from 'lucide-react';
+import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle, Building2, Flame, CalendarDays } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getHeatSupplyLabel, getBuildingTypeLabel, fmt } from '@/lib/calculator/pdf-helpers';
 
@@ -31,7 +31,9 @@ export default function ResultsPage() {
 
   const allocationExplanation = result.isResidential
     ? result.stufenmodellStep > 0 ? `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells nach §5 CO2KostAufG` : ''
-    : 'Hälftige Aufteilung (50/50) nach §8 CO2KostAufG für Nichtwohngebäude';
+    : result.restrictionApplied === 'fall1und2'
+      ? 'Bei Vorliegen beider öffentlich-rechtlicher Einschränkungen trägt der Mieter die CO2-Kosten vollständig (100 % / 0 %).'
+      : 'Hälftige Aufteilung (50/50) nach §8 CO2KostAufG für Nichtwohngebäude';
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,6 +64,11 @@ export default function ResultsPage() {
             <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-muted-foreground">
               {fmt.date(wizardData.billingPeriodStart)} – {fmt.date(wizardData.billingPeriodEnd)}
             </span>
+            {result.isCrossYear && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-amber-700 dark:text-amber-400">
+                <CalendarDays className="h-3 w-3" />Jahresübergreifend
+              </span>
+            )}
           </div>
 
           {/* Cards */}
@@ -97,13 +104,46 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* Non-residential explicit note */}
+          {/* Non-residential explicit notes */}
           {!result.isResidential && result.restrictionApplied === 'fall3' && (
             <div className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
               <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
                 Für Nichtwohngebäude gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten zwischen Mieter und Vermieter gemäß §8 CO2KostAufG.
               </p>
+            </div>
+          )}
+          {!result.isResidential && result.restrictionApplied === 'fall1und2' && (
+            <div className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
+              <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground">
+                Da beide öffentlich-rechtlichen Einschränkungen vorliegen, trägt der Mieter die CO2-Kosten vollständig.
+              </p>
+            </div>
+          )}
+
+          {/* Cross-year segment details */}
+          {result.isCrossYear && result.segmentResults && result.segmentResults.length > 0 && (
+            <div className="rounded-xl border border-border bg-card p-5 space-y-3 shadow-sm">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />Jahresabschnitte
+              </h3>
+              <div className="space-y-2">
+                {result.segmentResults.map((seg, i) => (
+                  <div key={i} className="grid grid-cols-2 gap-1 text-sm border-l-2 border-accent/30 pl-3 py-1">
+                    <span className="text-muted-foreground">{seg.year}</span>
+                    <span className="text-right text-foreground font-medium">{formatCurrency(seg.co2CostGross)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {fmt.date(seg.periodStart)} – {fmt.date(seg.periodEnd)}
+                    </span>
+                    <span className="text-xs text-muted-foreground text-right">
+                      CO2-Preis: {seg.co2PricePerTon} €/t
+                    </span>
+                    <span className="text-xs text-muted-foreground">Menge: {formatNumber(seg.amount, 0)}</span>
+                    <span className="text-xs text-muted-foreground text-right">{formatNumber(seg.co2Kg, 1)} kg CO2</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -182,8 +222,12 @@ export default function ResultsPage() {
                 )}
                 <span>Emissionsfaktor:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.emissionFactor, 4)} kg CO2/kWh</span>
-                <span>CO2-Preis:</span>
-                <span className="text-foreground font-medium text-right">{formatCurrency(result.co2PricePerTon)}/Tonne</span>
+                {!result.isCrossYear && (
+                  <>
+                    <span>CO2-Preis:</span>
+                    <span className="text-foreground font-medium text-right">{formatCurrency(result.co2PricePerTon)}/Tonne</span>
+                  </>
+                )}
                 <span>Abrechnungsjahr:</span>
                 <span className="text-foreground font-medium text-right">{result.billingYear}</span>
                 <span>Bezugsfläche:</span>
@@ -216,6 +260,13 @@ export default function ResultsPage() {
               )}
             </div>
           </details>
+
+          {/* Pellets note */}
+          {result.fuelResults.some(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel') && (
+            <div className="rounded-xl bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
+              <strong className="text-foreground">Hinweis Biomasse:</strong> Holzpellets und Holzhackschnitzel haben einen Emissionsfaktor, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen daher 0,00 EUR.
+            </div>
+          )}
 
           {/* Legal note */}
           <div className="rounded-xl bg-muted/50 border border-border p-6 text-sm text-muted-foreground">

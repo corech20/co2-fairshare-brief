@@ -1,5 +1,6 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData } from '@/lib/calculator/types';
+import { isCrossYearPeriod } from '@/lib/calculator/engine';
 
 function InputField({ label, hint, value, onChange, type = 'number', placeholder, unit }: {
   label: string; hint?: string; value: string | number | undefined;
@@ -25,14 +26,10 @@ function InputField({ label, hint, value, onChange, type = 'number', placeholder
   );
 }
 
-function AddressFields({ title, address, flatName, flatAddr, onChangeAddress, onChangeFlatName, onChangeFlatAddr, showApartment }: {
+function AddressFields({ title, address, onChangeAddress, showApartment }: {
   title: string;
   address?: AddressData;
-  flatName?: string;
-  flatAddr?: string;
   onChangeAddress: (a: AddressData) => void;
-  onChangeFlatName: (v: string) => void;
-  onChangeFlatAddr: (v: string) => void;
   showApartment?: boolean;
 }) {
   const addr = address || {};
@@ -88,11 +85,16 @@ export default function StepInputValues() {
   const isTenantApartmentHeating = wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'etage';
   const isTenant = wizardData.userRole === 'mieter';
 
+  // Cross-year: fuel amount is entered per segment on billing period step
+  const crossYear = wizardData.billingPeriodStart && wizardData.billingPeriodEnd
+    ? isCrossYearPeriod(wizardData.billingPeriodStart, wizardData.billingPeriodEnd)
+    : false;
+
   const fuelUnit = (() => {
     switch (wizardData.fuelType) {
       case 'heizoel': case 'heizoel_kwk': return 'Liter';
       case 'fluessiggas': case 'fluessiggas_kwk': return 'kg';
-      case 'pellets': case 'hackschnitzel': case 'abfallholz': case 'braunkohle': return 'kg';
+      case 'pellets': case 'hackschnitzel': case 'braunkohle': return 'kg';
       default: return 'kWh';
     }
   })();
@@ -104,7 +106,6 @@ export default function StepInputValues() {
       case 'fluessiggas': case 'fluessiggas_kwk': return 'Flüssiggasverbrauch';
       case 'pellets': return 'Pelletverbrauch';
       case 'hackschnitzel': return 'Hackschnitzelverbrauch';
-      case 'abfallholz': return 'Altholzverbrauch';
       case 'braunkohle': return 'Braunkohleverbrauch';
       default: return 'Gasverbrauch';
     }
@@ -154,8 +155,8 @@ export default function StepInputValues() {
           />
         )}
 
-        {/* Fuel amount */}
-        {!isMultiFuel && (
+        {/* Fuel amount – only for same-year, single fuel */}
+        {!isMultiFuel && !crossYear && (
           <InputField
             label={fuelLabel}
             hint={`Verbrauch im Abrechnungszeitraum in ${fuelUnit}`}
@@ -164,6 +165,13 @@ export default function StepInputValues() {
             placeholder={`z. B. ${wizardData.fuelType === 'heizoel' ? '3000' : '50000'}`}
             unit={fuelUnit}
           />
+        )}
+
+        {/* Cross-year notice */}
+        {crossYear && !isMultiFuel && (
+          <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+            Die Verbrauchsmengen pro Jahresabschnitt wurden bereits im Schritt „Abrechnungszeitraum" eingegeben.
+          </div>
         )}
 
         {/* District heating emission factor */}
@@ -183,17 +191,19 @@ export default function StepInputValues() {
         )}
 
         {/* Direct CO2 cost */}
-        <InputField
-          label="CO2-Kosten direkt eingeben (optional)"
-          hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
-          value={wizardData.co2CostDirect}
-          onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
-          placeholder="z. B. 250"
-          unit="EUR"
-        />
+        {!crossYear && (
+          <InputField
+            label="CO2-Kosten direkt eingeben (optional)"
+            hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
+            value={wizardData.co2CostDirect}
+            onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
+            placeholder="z. B. 250"
+            unit="EUR"
+          />
+        )}
 
         {/* Gross / Net selector */}
-        {hasDirectCost && (
+        {hasDirectCost && !crossYear && (
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
             <div className="flex gap-3">
@@ -265,11 +275,7 @@ export default function StepInputValues() {
           <AddressFields
             title={isTenant ? 'Ihre Daten (Mieter/in)' : 'Ihre Daten (Vermieter/in)'}
             address={isTenant ? wizardData.tenantAddress : wizardData.landlordAddress}
-            flatName={isTenant ? wizardData.tenantName : wizardData.landlordName}
-            flatAddr={isTenant ? wizardData.tenantAddressFlat : wizardData.landlordAddressFlat}
             onChangeAddress={a => setWizardField(isTenant ? 'tenantAddress' : 'landlordAddress', a)}
-            onChangeFlatName={v => setWizardField(isTenant ? 'tenantName' : 'landlordName', v)}
-            onChangeFlatAddr={v => setWizardField(isTenant ? 'tenantAddressFlat' : 'landlordAddressFlat', v)}
             showApartment={isTenant}
           />
 
@@ -277,11 +283,7 @@ export default function StepInputValues() {
           <AddressFields
             title={isTenant ? 'Vermieter/in (Empfänger)' : 'Mieter/in (Empfänger)'}
             address={isTenant ? wizardData.landlordAddress : wizardData.tenantAddress}
-            flatName={isTenant ? wizardData.landlordName : wizardData.tenantName}
-            flatAddr={isTenant ? wizardData.landlordAddressFlat : wizardData.tenantAddressFlat}
             onChangeAddress={a => setWizardField(isTenant ? 'landlordAddress' : 'tenantAddress', a)}
-            onChangeFlatName={v => setWizardField(isTenant ? 'landlordName' : 'tenantName', v)}
-            onChangeFlatAddr={v => setWizardField(isTenant ? 'landlordAddressFlat' : 'tenantAddressFlat', v)}
             showApartment={!isTenant}
           />
         </div>

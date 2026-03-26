@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { WizardData, CalculationResult, WizardStep } from '@/lib/calculator/types';
 import { WIZARD_STEPS } from '@/lib/calculator/types';
-import { calculateCO2Allocation } from '@/lib/calculator/engine';
+import { calculateCO2Allocation, validateBillingPeriod, isCrossYearPeriod } from '@/lib/calculator/engine';
 
 interface CalculatorContextType {
   wizardData: WizardData;
@@ -52,9 +52,19 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'buildingType': return !!wizardData.buildingType;
       case 'heatSupply': return !!wizardData.heatSupplyType;
       case 'restriction': return !!wizardData.restrictionCase;
-      case 'billingPeriod': return !!wizardData.billingPeriodStart && !!wizardData.billingPeriodEnd;
+      case 'billingPeriod': {
+        if (!wizardData.billingPeriodStart || !wizardData.billingPeriodEnd) return false;
+        const err = validateBillingPeriod(wizardData.billingPeriodStart, wizardData.billingPeriodEnd);
+        if (err) return false;
+        // Cross-year: require segment amounts
+        if (isCrossYearPeriod(wizardData.billingPeriodStart, wizardData.billingPeriodEnd)) {
+          const segs = wizardData.yearlySegments;
+          if (!segs || segs.length === 0) return false;
+          return segs.every(s => s.amount > 0);
+        }
+        return true;
+      }
       case 'fuelSource': {
-        // Multi-fuel: check entries or single fuel
         if (wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
           return wizardData.fuelEntries.every(e => !!e.fuelType && e.amount > 0);
         }
@@ -63,10 +73,17 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'inputValues': {
         const needsApartment = wizardData.heatSupplyType === 'etage' ||
           (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
+        // For cross-year, fuel amount was entered in billing period step
+        const crossYear = wizardData.billingPeriodStart && wizardData.billingPeriodEnd
+          ? isCrossYearPeriod(wizardData.billingPeriodStart, wizardData.billingPeriodEnd)
+          : false;
+        const hasFuelAmount = crossYear
+          ? (wizardData.yearlySegments?.every(s => s.amount > 0) ?? false)
+          : !!(wizardData.fuelAmount && wizardData.fuelAmount > 0);
         if (needsApartment) {
-          return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && wizardData.fuelAmount && wizardData.fuelAmount > 0);
+          return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasFuelAmount);
         }
-        return !!(wizardData.buildingArea && wizardData.buildingArea > 0 && wizardData.fuelAmount && wizardData.fuelAmount > 0);
+        return !!(wizardData.buildingArea && wizardData.buildingArea > 0 && hasFuelAmount);
       }
       default: return false;
     }

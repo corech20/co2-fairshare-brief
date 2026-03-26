@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateCO2Allocation, calculateSingleFuel, lookupStufenmodell, applyRestrictionModifier } from '../lib/calculator/engine';
+import { calculateCO2Allocation, calculateSingleFuel, lookupStufenmodell, applyRestrictionModifier, validateBillingPeriod, isCrossYearPeriod, getYearBoundaries } from '../lib/calculator/engine';
 import type { WizardData } from '../lib/calculator/types';
 
 function round2(n: number) { return Math.round(n * 100) / 100; }
@@ -26,6 +26,7 @@ describe('Reference Case 1: Natural Gas', () => {
     expect(r.isResidential).toBe(true);
     expect(r.restrictionNote).toBeUndefined();
     expect(r.reimbursementReductionApplied).toBe(false);
+    expect(r.isCrossYear).toBe(false);
   });
 });
 
@@ -126,7 +127,7 @@ describe('Non-residential building logic', () => {
   });
 });
 
-describe('Biomass and Altholz fuel handling', () => {
+describe('Biomass fuel handling', () => {
   it('pellets have zero CO2 cost but positive emissions', () => {
     const r = calculateSingleFuel('pellets', 1000, 30);
     expect(r.co2Kg).toBeGreaterThan(0);
@@ -138,15 +139,9 @@ describe('Biomass and Altholz fuel handling', () => {
     expect(r.co2Kg).toBeGreaterThan(0);
     expect(r.co2CostGross).toBe(0);
   });
-
-  it('abfallholz (Altholz AI/AII) has non-zero CO2 cost', () => {
-    const r = calculateSingleFuel('abfallholz', 1000, 30);
-    expect(r.co2Kg).toBeGreaterThan(0);
-    expect(r.co2CostGross).toBeGreaterThan(0);
-  });
 });
 
-// ===== NEW ADVANCED TEST CASES =====
+// ===== ADVANCED TEST CASES =====
 
 describe('Case A: Tenant + apartment heating + extra gas device (5% reduction)', () => {
   const data: WizardData = {
@@ -161,7 +156,6 @@ describe('Case A: Tenant + apartment heating + extra gas device (5% reduction)',
     expect(r.reimbursementReductionPercent).toBe(5);
     expect(r.landlordShareBeforeReduction).toBeDefined();
     expect(r.landlordShare).toBeLessThan(r.landlordShareBeforeReduction!);
-    // Landlord share should be 95% of original
     expect(round2(r.landlordShare)).toBe(round2(r.landlordShareBeforeReduction! * 0.95));
     expect(r.notes.some(n => n.includes('5 %'))).toBe(true);
   });
@@ -187,19 +181,16 @@ describe('Case B: Multiple fuels (heating oil + pellets)', () => {
   it('aggregates totals from multiple fuels', () => {
     const r = calculateCO2Allocation(data);
     expect(r.fuelResults).toHaveLength(2);
-    // Heating oil contributes emissions and costs
     expect(r.fuelResults[0].co2Kg).toBeGreaterThan(0);
     expect(r.fuelResults[0].co2CostGross).toBeGreaterThan(0);
-    // Pellets contribute emissions but zero cost
     expect(r.fuelResults[1].co2Kg).toBeGreaterThan(0);
     expect(r.fuelResults[1].co2CostGross).toBe(0);
-    // Total = sum
     expect(round2(r.totalEmissionsKg)).toBe(round2(r.fuelResults[0].co2Kg + r.fuelResults[1].co2Kg));
     expect(round2(r.totalCO2Cost)).toBe(round2(r.fuelResults[0].co2CostGross + r.fuelResults[1].co2CostGross));
-    // Weighted emission factor
     expect(r.weightedEmissionFactor).toBeGreaterThan(0);
     expect(r.weightedEmissionFactor).toBe(r.totalEmissionsKg / r.totalEnergyHeatingValueKwh);
     expect(r.notes.some(n => n.includes('2 Brennstoffen'))).toBe(true);
+    expect(r.isCrossYear).toBe(false);
   });
 });
 
@@ -238,7 +229,6 @@ describe('Direct CO2 cost input (net/gross)', () => {
 describe('CHP variants', () => {
   it('natural gas CHP applies heat share factor', () => {
     const r = calculateSingleFuel('erdgas_kwk', 45000, 30);
-    // 45000 * 0.903 * 0.4375 = 17772.19
     expect(round2(r.energyHeatingValueKwh)).toBe(round2(45000 * (3.2508 / 3.6) * 0.4375));
     expect(r.co2Kg).toBeGreaterThan(0);
     expect(r.co2CostGross).toBeGreaterThan(0);
@@ -248,5 +238,71 @@ describe('CHP variants', () => {
     const r = calculateSingleFuel('heizoel_kwk', 3000, 30);
     expect(round2(r.energyHeatingValueKwh)).toBe(round2(3000 * 10.0625 * 0.3984));
     expect(r.co2Kg).toBeGreaterThan(0);
+  });
+});
+
+// ===== NEW: Billing period validation =====
+
+describe('Billing period validation', () => {
+  it('rejects end before start', () => {
+    const err = validateBillingPeriod('2023-12-31', '2023-01-01');
+    expect(err).toBe('Das Enddatum muss nach dem Startdatum liegen.');
+  });
+
+  it('rejects period longer than 365 days', () => {
+    const err = validateBillingPeriod('2023-01-01', '2024-01-02');
+    expect(err).toBe('Der angegebene Zeitraum darf nicht länger als 365 Tage sein.');
+  });
+
+  it('accepts exactly 365 days', () => {
+    const err = validateBillingPeriod('2023-01-01', '2024-01-01');
+    expect(err).toBeNull();
+  });
+
+  it('accepts same-year period', () => {
+    const err = validateBillingPeriod('2023-03-01', '2023-09-30');
+    expect(err).toBeNull();
+  });
+});
+
+describe('Cross-year detection', () => {
+  it('detects cross-year period', () => {
+    expect(isCrossYearPeriod('2024-02-01', '2025-01-31')).toBe(true);
+  });
+
+  it('detects same-year period', () => {
+    expect(isCrossYearPeriod('2023-01-01', '2023-12-31')).toBe(false);
+  });
+
+  it('generates correct year boundaries', () => {
+    const boundaries = getYearBoundaries('2024-02-01', '2025-01-31');
+    expect(boundaries).toHaveLength(2);
+    expect(boundaries[0]).toEqual({ year: 2024, periodStart: '2024-02-01', periodEnd: '2024-12-31' });
+    expect(boundaries[1]).toEqual({ year: 2025, periodStart: '2025-01-01', periodEnd: '2025-01-31' });
+  });
+});
+
+describe('Cross-year calculation', () => {
+  it('calculates with separate CO2 prices per year segment', () => {
+    const data: WizardData = {
+      userRole: 'vermieter', buildingType: 'wohngebaeude', heatSupplyType: 'zentral',
+      restrictionCase: 'fall3', billingPeriodStart: '2024-02-01', billingPeriodEnd: '2025-01-31',
+      fuelType: 'erdgas', buildingArea: 290,
+      yearlySegments: [
+        { year: 2024, periodStart: '2024-02-01', periodEnd: '2024-12-31', amount: 35000, co2PricePerTon: 45 },
+        { year: 2025, periodStart: '2025-01-01', periodEnd: '2025-01-31', amount: 10000, co2PricePerTon: 55 },
+      ],
+    };
+
+    const r = calculateCO2Allocation(data);
+    expect(r.isCrossYear).toBe(true);
+    expect(r.segmentResults).toHaveLength(2);
+    expect(r.segmentResults![0].co2PricePerTon).toBe(45);
+    expect(r.segmentResults![1].co2PricePerTon).toBe(55);
+    // Total should be sum of segments
+    const totalFromSegments = r.segmentResults!.reduce((s, seg) => s + seg.co2CostGross, 0);
+    expect(round2(r.totalCO2Cost)).toBe(round2(totalFromSegments));
+    expect(r.totalEmissionsKg).toBeGreaterThan(0);
+    expect(r.notes.some(n => n.includes('Jahresübergreifend'))).toBe(true);
   });
 });
