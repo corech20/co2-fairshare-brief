@@ -156,6 +156,9 @@ export function getIntroText(data: WizardData, _result: CalculationResult): stri
     case 'D':
       return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Als Mieter/in mit direkter Wärmebelieferung ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) ein möglicher Erstattungsanspruch gegenüber dem Vermieter in Höhe des ausgewiesenen Vermieteranteils der CO2-Kosten.`;
     case 'E':
+      if (data.restrictionCase === 'fall1und2') {
+        return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Da für das Nichtwohngebäude sowohl Einschränkungen bei der energetischen Verbesserung des Gebäudes (Fall 1) als auch bei der Wärmeversorgung (Fall 2) vorliegen, trägt der Mieter die CO2-Kosten gemäß Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) vollständig.`;
+      }
       return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Für das Nichtwohngebäude ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Mieter und Vermieter.`;
   }
 }
