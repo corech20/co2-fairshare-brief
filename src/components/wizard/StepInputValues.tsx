@@ -1,6 +1,8 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
+import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 function InputField({ label, hint, value, onChange, type = 'number', placeholder, unit }: {
   label: string; hint?: string; value: string | number | undefined;
@@ -8,7 +10,7 @@ function InputField({ label, hint, value, onChange, type = 'number', placeholder
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
       <div className="relative">
         <input
           type={type}
@@ -69,7 +71,7 @@ function AddressFields({ title, address, onChangeAddress, showApartment }: {
         </div>
       </div>
       {showApartment && (
-        <InputField label="" value={addr.apartmentDesignation} onChange={v => set('apartmentDesignation', v)} type="text" placeholder="Wohnungsbezeichnung (optional)" />
+        <InputField label="" value={addr.apartmentDesignation} onChange={v => set('apartmentDesignation', v)} type="text" placeholder="Wohnungsbezeichnung / Lage (optional)" />
       )}
     </div>
   );
@@ -77,6 +79,11 @@ function AddressFields({ title, address, onChangeAddress, showApartment }: {
 
 export default function StepInputValues() {
   const { wizardData, setWizardField } = useCalculator();
+  const [showPdfSection, setShowPdfSection] = useState(() => {
+    // Show if any address data already entered
+    const hasAddr = wizardData.tenantAddress || wizardData.landlordAddress;
+    return !!hasAddr;
+  });
 
   const isMultiFuel = wizardData.fuelEntries && wizardData.fuelEntries.length > 0;
   const needsApartmentArea = wizardData.heatSupplyType === 'etage' ||
@@ -84,6 +91,7 @@ export default function StepInputValues() {
   const needsBuildingArea = !needsApartmentArea;
   const isTenantApartmentHeating = wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'etage';
   const isTenant = wizardData.userRole === 'mieter';
+  const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
 
   // Cross-year: fuel amount is entered per segment on billing period step
   const crossYear = wizardData.billingPeriodStart && wizardData.billingPeriodEnd
@@ -99,11 +107,12 @@ export default function StepInputValues() {
     }
   })();
 
+  // Dynamic fuel label
   const fuelLabel = (() => {
     switch (wizardData.fuelType) {
       case 'heizoel': case 'heizoel_kwk': return 'Heizölverbrauch';
-      case 'fernwaerme': return 'Wärmemenge';
-      case 'fluessiggas': case 'fluessiggas_kwk': return 'Flüssiggasverbrauch';
+      case 'fernwaerme': return 'Fernwärmemenge';
+      case 'fluessiggas': case 'fluessiggas_kwk': return 'Flüssiggasmenge';
       case 'pellets': return 'Pelletverbrauch';
       case 'hackschnitzel': return 'Hackschnitzelverbrauch';
       case 'braunkohle': return 'Braunkohleverbrauch';
@@ -111,12 +120,25 @@ export default function StepInputValues() {
     }
   })();
 
+  // Dynamic area label
+  const getAreaLabel = () => {
+    if (isNonResidential) return 'Bezugsfläche';
+    if (needsApartmentArea) return 'Wohnungswohnfläche';
+    return 'Gebäudewohnfläche';
+  };
+
+  const getAreaHint = () => {
+    if (isNonResidential) return 'Maßgebliche Fläche des Nichtwohngebäudes';
+    if (needsApartmentArea) return 'Wohnfläche Ihrer Wohnung';
+    return 'Gesamte Wohnfläche des Gebäudes';
+  };
+
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Ihre Angaben</h2>
+        <h2 className="text-2xl font-bold text-foreground">Berechnungsdaten</h2>
         <p className="text-muted-foreground mt-2">Geben Sie die Verbrauchsdaten und Flächen ein.</p>
       </div>
 
@@ -124,8 +146,8 @@ export default function StepInputValues() {
         {/* Area fields */}
         {needsBuildingArea && (
           <InputField
-            label="Gebäudewohnfläche"
-            hint="Gesamte Wohnfläche des Gebäudes"
+            label={getAreaLabel()}
+            hint={getAreaHint()}
             value={wizardData.buildingArea}
             onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
             placeholder="z. B. 500"
@@ -133,10 +155,10 @@ export default function StepInputValues() {
           />
         )}
 
-        {(needsApartmentArea || !needsBuildingArea) && (
+        {needsApartmentArea && (
           <InputField
-            label={needsApartmentArea ? 'Wohnungsfläche' : 'Wohnungsfläche (optional)'}
-            hint={needsApartmentArea ? 'Fläche Ihrer Wohnung (Pflichtfeld bei Etagenheizung/Wohnungsfernwärme)' : 'Fläche Ihrer Wohnung, falls relevant'}
+            label={getAreaLabel()}
+            hint={getAreaHint()}
             value={wizardData.apartmentArea}
             onChange={v => setWizardField('apartmentArea', v ? parseFloat(v) : undefined)}
             placeholder="z. B. 80"
@@ -264,28 +286,38 @@ export default function StepInputValues() {
           </div>
         )}
 
-        {/* ── Address section ─────────────────────────────────────── */}
-        <div className="border-t border-border pt-5 mt-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Angaben für das Schreiben (optional)</h3>
-            <p className="text-xs text-muted-foreground mt-1">Diese Daten werden nur für die Erstellung des PDF-Dokuments verwendet.</p>
-          </div>
+        {/* ── PDF Address section (collapsible) ─────────────────────────── */}
+        <div className="border-t border-border pt-5 mt-6 space-y-4">
+          <button
+            onClick={() => setShowPdfSection(!showPdfSection)}
+            className="flex items-center gap-2 w-full text-left"
+          >
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showPdfSection ? 'rotate-180' : ''}`} />
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Angaben für das Schreiben (optional)</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Diese Daten werden nur für die Erstellung des PDF-Dokuments verwendet.</p>
+            </div>
+          </button>
 
-          {/* Sender = current user role */}
-          <AddressFields
-            title={isTenant ? 'Ihre Daten (Mieter/in)' : 'Ihre Daten (Vermieter/in)'}
-            address={isTenant ? wizardData.tenantAddress : wizardData.landlordAddress}
-            onChangeAddress={a => setWizardField(isTenant ? 'tenantAddress' : 'landlordAddress', a)}
-            showApartment={isTenant}
-          />
+          {showPdfSection && (
+            <div className="space-y-6 pt-2">
+              {/* Sender = current user role */}
+              <AddressFields
+                title={isTenant ? 'Ihre Daten (Mieter/in)' : 'Ihre Daten (Vermieter/in)'}
+                address={isTenant ? wizardData.tenantAddress : wizardData.landlordAddress}
+                onChangeAddress={a => setWizardField(isTenant ? 'tenantAddress' : 'landlordAddress', a)}
+                showApartment={isTenant}
+              />
 
-          {/* Recipient = opposite role */}
-          <AddressFields
-            title={isTenant ? 'Vermieter/in (Empfänger)' : 'Mieter/in (Empfänger)'}
-            address={isTenant ? wizardData.landlordAddress : wizardData.tenantAddress}
-            onChangeAddress={a => setWizardField(isTenant ? 'landlordAddress' : 'tenantAddress', a)}
-            showApartment={!isTenant}
-          />
+              {/* Recipient = opposite role */}
+              <AddressFields
+                title={isTenant ? 'Vermieter/in (Empfänger)' : 'Mieter/in (Empfänger)'}
+                address={isTenant ? wizardData.landlordAddress : wizardData.tenantAddress}
+                onChangeAddress={a => setWizardField(isTenant ? 'landlordAddress' : 'tenantAddress', a)}
+                showApartment={!isTenant}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

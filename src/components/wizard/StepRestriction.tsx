@@ -15,12 +15,12 @@ const OPTIONS: { value: RestrictionCase; label: string; desc: string }[] = [
   {
     value: 'fall1und2',
     label: 'Beide Einschränkungen treffen zu',
-    desc: 'Sowohl die energetische Gebäudesanierung als auch die Verbesserung der Wärmeversorgung sind nicht möglich.',
+    desc: 'Sowohl die energetische Verbesserung des Gebäudes als auch der Wärmeversorgung ist nicht möglich.',
   },
   {
     value: 'fall3',
     label: 'Keine rechtlichen Einschränkungen bekannt',
-    desc: 'Es liegen keine öffentlich-rechtlichen Einschränkungen vor – Standardberechnung.',
+    desc: 'Es sind keine öffentlich-rechtlichen Einschränkungen bekannt.',
   },
 ];
 
@@ -32,7 +32,7 @@ export default function StepRestriction() {
       <div>
         <h2 className="text-2xl font-bold text-foreground">Öffentlich-rechtliche Einschränkungen</h2>
         <p className="text-muted-foreground mt-2">
-          Gibt es Einschränkungen, die eine energetische Sanierung verhindern?
+          Bestehen rechtliche Vorgaben, die eine energetische Verbesserung des Gebäudes oder der Wärmeversorgung einschränken?
         </p>
       </div>
       <div className="grid gap-3">

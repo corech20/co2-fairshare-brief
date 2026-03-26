@@ -1,23 +1,34 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import type { FuelType, FuelEntry } from '@/lib/calculator/types';
-import { Flame, Droplets, Thermometer, Zap, Leaf, Trees, Factory, Plus, X } from 'lucide-react';
+import { Flame, Droplets, Thermometer, Zap, Leaf, Trees, Factory, Plus, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
-const ALL_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Flame; group: string }[] = [
-  { value: 'erdgas', label: 'Erdgas', desc: 'z.\u00A0B. Gasheizung oder Gasetagenheizung', icon: Flame, group: 'standard' },
-  { value: 'heizoel', label: 'Heizöl', desc: 'z.\u00A0B. Ölheizung', icon: Droplets, group: 'standard' },
-  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Der Emissionsfaktor wird aus Ihrer Fernwärmeabrechnung übernommen.', icon: Thermometer, group: 'standard' },
-  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'z.\u00A0B. Flüssiggasheizung', icon: Zap, group: 'standard' },
-  { value: 'pellets', label: 'Holzpellets', desc: 'CO2-Kosten = 0 EUR (nicht BEHG-pflichtig, Emissionsfaktor wird berechnet)', icon: Leaf, group: 'biomass' },
-  { value: 'hackschnitzel', label: 'Holzhackschnitzel', desc: 'CO2-Kosten = 0 EUR (nicht BEHG-pflichtig)', icon: Trees, group: 'biomass' },
-  { value: 'braunkohle', label: 'Braunkohlebriketts', desc: 'z.\u00A0B. Braunkohleheizung', icon: Factory, group: 'standard' },
-  { value: 'erdgas_kwk', label: 'Erdgas (KWK)', desc: 'Kraft-Wärme-Kopplung mit Erdgas', icon: Flame, group: 'kwk' },
-  { value: 'fluessiggas_kwk', label: 'Flüssiggas (KWK)', desc: 'Kraft-Wärme-Kopplung mit Flüssiggas', icon: Zap, group: 'kwk' },
-  { value: 'heizoel_kwk', label: 'Heizöl (KWK)', desc: 'Kraft-Wärme-Kopplung mit Heizöl', icon: Droplets, group: 'kwk' },
+const STANDARD_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Flame }[] = [
+  { value: 'erdgas', label: 'Erdgas', desc: 'z.\u00A0B. Gasheizung oder Gasetagenheizung', icon: Flame },
+  { value: 'heizoel', label: 'Heizöl', desc: 'z.\u00A0B. Ölheizung', icon: Droplets },
+  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Der Emissionsfaktor wird aus Ihrer Fernwärmeabrechnung übernommen.', icon: Thermometer },
+  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'z.\u00A0B. Flüssiggasheizung', icon: Zap },
+  { value: 'pellets', label: 'Holzpellets', desc: 'CO2-Kosten = 0 EUR (nicht BEHG-pflichtig)', icon: Leaf },
 ];
+
+const ADVANCED_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Flame }[] = [
+  { value: 'hackschnitzel', label: 'Holzhackschnitzel', desc: 'z.\u00A0B. naturbelassene Holzhackschnitzel (nicht BEHG-pflichtig)', icon: Trees },
+  { value: 'braunkohle', label: 'Braunkohlebriketts', desc: 'z.\u00A0B. Braunkohleheizung', icon: Factory },
+  { value: 'erdgas_kwk', label: 'Erdgas (KWK)', desc: 'Nur auswählen, wenn Ihre Anlage ausdrücklich als Kraft-Wärme-Kopplungsanlage betrieben wird.', icon: Flame },
+  { value: 'fluessiggas_kwk', label: 'Flüssiggas (KWK)', desc: 'Nur auswählen, wenn Ihre Anlage ausdrücklich als Kraft-Wärme-Kopplungsanlage betrieben wird.', icon: Zap },
+  { value: 'heizoel_kwk', label: 'Heizöl (KWK)', desc: 'Nur auswählen, wenn Ihre Anlage ausdrücklich als Kraft-Wärme-Kopplungsanlage betrieben wird.', icon: Droplets },
+];
+
+const ALL_FUELS = [...STANDARD_FUELS, ...ADVANCED_FUELS];
 
 export default function StepFuelSource() {
   const { wizardData, setWizardField } = useCalculator();
+  const [showAdvanced, setShowAdvanced] = useState(() => {
+    // Show advanced if current selection is an advanced fuel
+    const currentFuel = wizardData.fuelType;
+    return currentFuel ? ADVANCED_FUELS.some(f => f.value === currentFuel) : false;
+  });
 
   const fuelEntries = wizardData.fuelEntries ?? [];
   const isMultiFuel = fuelEntries.length > 0;
@@ -61,10 +72,12 @@ export default function StepFuelSource() {
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Brennstoff / Wärmequelle</h2>
-          <p className="text-muted-foreground mt-2">Welcher Brennstoff wird verwendet?</p>
+          <p className="text-muted-foreground mt-2">Bitte wählen Sie den verwendeten Brennstoff bzw. die Wärmequelle aus.</p>
         </div>
+
+        {/* Standard fuels */}
         <div className="grid gap-3">
-          {ALL_FUELS.map(opt => (
+          {STANDARD_FUELS.map(opt => (
             <button
               key={opt.value}
               onClick={() => selectSingleFuel(opt.value)}
@@ -82,10 +95,48 @@ export default function StepFuelSource() {
             </button>
           ))}
         </div>
-        <Button variant="outline" size="sm" onClick={addFuelEntry} className="mt-2">
-          <Plus className="h-4 w-4 mr-1" />
-          Weiteren Brennstoff hinzufügen
-        </Button>
+
+        {/* Advanced fuels toggle */}
+        <div>
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+            Weitere Brennstoffe anzeigen
+          </button>
+          {showAdvanced && (
+            <div className="grid gap-3 mt-3">
+              {ADVANCED_FUELS.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => selectSingleFuel(opt.value)}
+                  className={`rounded-xl border-2 p-4 text-left transition-all hover:shadow-md flex items-start gap-4 ${
+                    wizardData.fuelType === opt.value
+                      ? 'border-accent bg-accent/5 shadow-sm'
+                      : 'border-border bg-card hover:border-primary/30'
+                  }`}
+                >
+                  <opt.icon className={`h-5 w-5 mt-0.5 shrink-0 ${wizardData.fuelType === opt.value ? 'text-accent' : 'text-muted-foreground'}`} />
+                  <div>
+                    <div className="font-semibold text-foreground text-sm">{opt.label}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{opt.desc}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Button variant="outline" size="sm" onClick={addFuelEntry} className="mt-2">
+            <Plus className="h-4 w-4 mr-1" />
+            Weiteren Brennstoff hinzufügen
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Falls mehrere Brennstoffe oder Erzeugungstechniken verwendet wurden, können Sie hier weitere hinzufügen.
+          </p>
+        </div>
       </div>
     );
   }

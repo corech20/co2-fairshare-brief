@@ -4,7 +4,7 @@ import { Home, Building } from 'lucide-react';
 
 const OPTIONS: { value: BuildingType; label: string; desc: string; icon: typeof Home }[] = [
   { value: 'wohngebaeude', label: 'Wohngebäude', desc: 'Gesetzliche Aufteilung nach dem Stufenmodell für Wohngebäude', icon: Home },
-  { value: 'nichtwohngebaeude', label: 'Nichtwohngebäude', desc: 'In der Regel hälftige Aufteilung zwischen Mieter und Vermieter', icon: Building },
+  { value: 'nichtwohngebaeude', label: 'Nichtwohngebäude', desc: 'Im Standardfall hälftige Aufteilung zwischen Mieter und Vermieter', icon: Building },
 ];
 
 export default function StepBuildingType() {
@@ -14,7 +14,7 @@ export default function StepBuildingType() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Gebäudetyp</h2>
-        <p className="text-muted-foreground mt-2">Handelt es sich um ein Wohn- oder Nichtwohngebäude?</p>
+        <p className="text-muted-foreground mt-2">Bitte wählen Sie aus, ob es sich insgesamt um ein Wohngebäude oder ein Nichtwohngebäude handelt.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {OPTIONS.map(opt => (
@@ -34,7 +34,7 @@ export default function StepBuildingType() {
         ))}
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">
-        Maßgeblich ist, ob das Gebäude insgesamt überwiegend zu Wohnzwecken oder überwiegend nicht zu Wohnzwecken genutzt wird. Bei gemischt genutzten Gebäuden ist die überwiegende Nutzung der Gesamtfläche entscheidend.
+        Entscheidend ist, ob das Gebäude insgesamt überwiegend zu Wohnzwecken oder überwiegend nicht zu Wohnzwecken genutzt wird. Bei gemischt genutzten Gebäuden kommt es auf die überwiegende Nutzung der Gesamtfläche an.
       </p>
     </div>
   );

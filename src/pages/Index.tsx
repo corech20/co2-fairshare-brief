@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Shield, Calculator, FileText, CheckCircle, ChevronDown } from 'lucide-react';
+import { Shield, Calculator, FileText, CheckCircle, ChevronDown, Home, Flame, ListChecks, FileDown } from 'lucide-react';
 import { useState } from 'react';
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
@@ -54,7 +54,7 @@ export default function Index() {
               CO2-Kosten fair aufteilen
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              Berechnen Sie schnell und rechtssicher, wie die CO2-Kosten zwischen Mieter und Vermieter
+              Berechnen Sie schnell und nachvollziehbar, wie die CO2-Kosten zwischen Mieter und Vermieter
               aufgeteilt werden – und erstellen Sie direkt ein fertiges Schreiben.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -80,17 +80,17 @@ export default function Index() {
               {
                 icon: Calculator,
                 title: 'Schnelle Berechnung',
-                desc: 'In wenigen Schritten berechnen Sie die korrekte Aufteilung der CO2-Kosten nach dem Stufenmodell des CO2KostAufG.',
+                desc: 'In wenigen Schritten berechnen Sie die gesetzliche Aufteilung der CO2-Kosten.',
               },
               {
                 icon: Shield,
-                title: 'Rechtssicher',
-                desc: 'Die Berechnung basiert auf den gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes und aktuellen CO2-Preisen.',
+                title: 'Nachvollziehbar',
+                desc: 'Die Berechnung orientiert sich an den Vorgaben des CO2KostAufG und den hinterlegten CO2-Preisen.',
               },
               {
                 icon: FileText,
                 title: 'Fertiges Schreiben',
-                desc: 'Erstellen Sie direkt ein professionelles PDF-Schreiben mit allen Berechnungsergebnissen zum Versand.',
+                desc: 'Erstellen Sie direkt ein PDF-Schreiben mit den wichtigsten Berechnungsergebnissen.',
               },
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-8 shadow-sm hover:shadow-md transition-shadow">
@@ -109,7 +109,7 @@ export default function Index() {
       <section className="section-padding bg-background">
         <div className="container-wide">
           <div className="mx-auto max-w-3xl text-center space-y-6">
-            <h2 className="text-3xl font-bold">Vertrauenswürdig & transparent</h2>
+            <h2 className="text-3xl font-bold">Transparent & nachvollziehbar</h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
               Unser Rechner basiert auf dem 10-Stufen-Modell des CO2KostAufG für Wohngebäude
               und berücksichtigt die gesetzlich festgelegten CO2-Preise. Alle Berechnungen
@@ -117,14 +117,15 @@ export default function Index() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8">
               {[
-                { value: '10', label: 'Stufen-Modell' },
-                { value: '§7', label: 'CO2KostAufG' },
-                { value: '100%', label: 'Kostenlos' },
-                { value: 'PDF', label: 'Schreiben' },
+                { icon: Home, value: 'Wohn- &', label: 'Nichtwohngebäude' },
+                { icon: Flame, value: 'Erdgas, Öl,', label: 'Fernwärme u.\u00A0a.' },
+                { icon: ListChecks, value: 'Schritt für', label: 'Schritt' },
+                { icon: FileDown, value: 'PDF-', label: 'Ergebnis' },
               ].map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="text-3xl font-bold text-primary">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+                <div key={i} className="text-center space-y-2">
+                  <stat.icon className="h-6 w-6 text-primary mx-auto" />
+                  <div className="text-lg font-bold text-foreground">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -143,19 +144,27 @@ export default function Index() {
             />
             <FAQItem
               question="Wie funktioniert das 10-Stufen-Modell?"
-              answer="Bei Wohngebäuden werden die CO2-Emissionen pro Quadratmeter und Jahr berechnet. Je höher die Emissionen, desto größer ist der Anteil des Vermieters an den CO2-Kosten – von 0% bei unter 12 kg CO2/m²/a bis zu 95% bei über 52 kg CO2/m²/a."
+              answer="Bei Wohngebäuden werden die CO2-Emissionen pro Quadratmeter und Jahr berechnet. Je höher die Emissionen, desto größer ist der Anteil des Vermieters an den CO2-Kosten – von 0 % bei unter 12 kg CO2/m²/a bis zu 95 % bei über 52 kg CO2/m²/a."
             />
             <FAQItem
-              question="Gilt das Gesetz auch für Nichtwohngebäude?"
-              answer="Ja, bei Nichtwohngebäuden werden die CO2-Kosten hälftig (50/50) zwischen Vermieter und Mieter aufgeteilt. Das Stufenmodell kommt hier nicht zur Anwendung."
+              question="Welche Unterlagen brauche ich für die Berechnung?"
+              answer="Sie benötigen Ihre Heizkosten- oder Brennstoffabrechnung mit Angaben zum Abrechnungszeitraum und der Verbrauchsmenge (z. B. kWh, Liter). Außerdem die Wohn- bzw. Gebäudefläche. Bei Fernwärme ist zusätzlich der Emissionsfaktor Ihres Versorgers erforderlich."
             />
             <FAQItem
-              question="Welche Brennstoffe werden unterstützt?"
-              answer="Aktuell unterstützt der Rechner Erdgas, Heizöl und Fernwärme. Bei Fernwärme können Sie den individuellen Emissionsfaktor Ihres Versorgers eingeben."
+              question="Gilt das auch bei Fernwärme?"
+              answer="Ja. Bei Fernwärme benötigen Sie den individuellen Emissionsfaktor Ihres Wärmeversorgers, der in der Regel in der Abrechnung ausgewiesen ist. Der Rechner berechnet damit die CO2-Kosten und die Aufteilung."
             />
             <FAQItem
-              question="Ist die Nutzung kostenlos?"
-              answer="Ja, die Nutzung des Rechners und die Erstellung des PDF-Schreibens sind vollständig kostenlos."
+              question="Wie wird bei Nichtwohngebäuden gerechnet?"
+              answer="Bei Nichtwohngebäuden gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten zwischen Mieter und Vermieter. Liegen bestimmte öffentlich-rechtliche Einschränkungen vor, kann die Aufteilung abweichen."
+            />
+            <FAQItem
+              question="Was ist, wenn der Abrechnungszeitraum über zwei Jahre läuft?"
+              answer="Der Rechner erkennt jahresübergreifende Zeiträume automatisch. Sie geben die Verbrauchsmengen getrennt nach Kalenderjahren ein, damit die jeweils geltenden CO2-Preise korrekt berücksichtigt werden."
+            />
+            <FAQItem
+              question="Kann ich das Ergebnis direkt als Schreiben verwenden?"
+              answer="Ja. Sie können ein PDF-Dokument mit den Berechnungsergebnissen erstellen, das als Grundlage für die Kommunikation mit Ihrem Vermieter oder Mieter dienen kann. Das Dokument ersetzt jedoch keine rechtliche oder steuerliche Beratung."
             />
           </div>
         </div>
@@ -173,8 +182,7 @@ export default function Index() {
                   Dieser Rechner dient ausschließlich der unverbindlichen Information und ersetzt keine
                   rechtliche oder steuerliche Beratung. Die Ergebnisse basieren auf den von Ihnen
                   eingegebenen Daten und den gesetzlichen Vorgaben des CO2KostAufG. Für die Richtigkeit
-                  und Vollständigkeit der Berechnung wird keine Gewähr übernommen. Bitte konsultieren
-                  Sie bei Bedarf einen Rechtsanwalt oder Steuerberater.
+                  und Vollständigkeit der Berechnung wird keine Gewähr übernommen.
                 </p>
               </div>
             </div>

@@ -4,8 +4,8 @@ import { Flame, Thermometer, Heater } from 'lucide-react';
 
 const OPTIONS: { value: HeatSupplyType; label: string; desc: string; icon: typeof Flame }[] = [
   { value: 'zentral', label: 'Zentrale Heizungsanlage', desc: 'Gemeinsame Heizung für das gesamte Gebäude', icon: Flame },
-  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Wärmeversorgung durch einen Fernwärmeversorger', icon: Thermometer },
-  { value: 'etage', label: 'Etagenheizung', desc: 'Eigene Heizung in der Wohnung', icon: Heater },
+  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Wärmeversorgung über Fernwärme', icon: Thermometer },
+  { value: 'etage', label: 'Etagenheizung', desc: 'Eigene Heizung in der Wohnung, z.\u00A0B. Gastherme', icon: Heater },
 ];
 
 export default function StepHeatSupply() {
@@ -15,7 +15,7 @@ export default function StepHeatSupply() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Art der Wärmeversorgung</h2>
-        <p className="text-muted-foreground mt-2">Wie wird das Gebäude mit Wärme versorgt?</p>
+        <p className="text-muted-foreground mt-2">Wie erfolgt die Wärmeversorgung?</p>
       </div>
       <div className="grid gap-4">
         {OPTIONS.map(opt => (

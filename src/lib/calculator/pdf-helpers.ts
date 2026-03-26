@@ -285,6 +285,15 @@ export function getClosingText(data: WizardData): string {
   return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Diese Mitteilung dient der Information über die Aufteilung der CO2-Kosten gemäß den gesetzlichen Anforderungen.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
 }
 
+// ── Dynamic area label for PDF ────────────────────────────────────────────
+export function getAreaLabelForPDF(data: WizardData): string {
+  if (data.buildingType === 'nichtwohngebaeude') return 'Bezugsfläche';
+  const isApartment = data.heatSupplyType === 'etage' ||
+    (data.userRole === 'mieter' && data.heatSupplyType === 'fernwaerme');
+  if (isApartment) return 'Wohnungswohnfläche';
+  return 'Gebäudewohnfläche';
+}
+
 // Keep old getSummaryText export for Results.tsx compatibility
 export function getSummaryText(data: WizardData, result: CalculationResult): string {
   const docCase = getDocumentCase(data);
