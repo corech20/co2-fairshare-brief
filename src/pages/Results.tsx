@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
-import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle } from 'lucide-react';
+import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle, Building2, Flame } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
+import { getDocumentCase, getHeatSupplyLabel, getBuildingTypeLabel, fmt } from '@/lib/calculator/pdf-helpers';
 
 export default function ResultsPage() {
   const navigate = useNavigate();
@@ -22,10 +23,11 @@ export default function ResultsPage() {
   const handleNewCalculation = () => { reset(); navigate('/rechner'); };
   const handleGeneratePDF = () => { generatePDF(wizardData, result); };
 
-  const formatCurrency = (n: number) =>
-    new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
-  const formatNumber = (n: number, decimals = 2) =>
-    new Intl.NumberFormat('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(n);
+  const formatCurrency = (n: number) => fmt.currency(n);
+  const formatNumber = (n: number, decimals = 2) => fmt.number(n, decimals);
+
+  const docCase = getDocumentCase(wizardData);
+  const isTenantClaim = docCase === 'C' || docCase === 'D';
 
   const allocationExplanation = result.isResidential
     ? result.stufenmodellStep > 0 ? `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells nach §5 CO2KostAufG` : ''
@@ -49,6 +51,19 @@ export default function ResultsPage() {
             {allocationExplanation && <p className="text-sm text-muted-foreground mt-2">{allocationExplanation}</p>}
           </div>
 
+          {/* Context chips */}
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-muted-foreground">
+              <Building2 className="h-3 w-3" />{getBuildingTypeLabel(wizardData)}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-muted-foreground">
+              <Flame className="h-3 w-3" />{getHeatSupplyLabel(wizardData)}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-muted-foreground">
+              {fmt.date(wizardData.billingPeriodStart)} – {fmt.date(wizardData.billingPeriodEnd)}
+            </span>
+          </div>
+
           {/* Cards */}
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-xl border border-border bg-card p-6 text-center shadow-sm">
@@ -59,14 +74,38 @@ export default function ResultsPage() {
             <div className="rounded-xl border-2 border-primary bg-primary/5 p-6 text-center shadow-sm">
               <div className="text-sm text-muted-foreground mb-1">Anteil Vermieter</div>
               <div className="text-3xl font-bold text-primary">{formatCurrency(result.landlordShare)}</div>
-              <div className="text-sm text-primary font-medium mt-1">{result.landlordPercent}%</div>
+              <div className="text-sm text-primary font-medium mt-1">{result.landlordPercent} %</div>
             </div>
             <div className="rounded-xl border-2 border-accent bg-accent/5 p-6 text-center shadow-sm">
               <div className="text-sm text-muted-foreground mb-1">Anteil Mieter</div>
               <div className="text-3xl font-bold text-accent">{formatCurrency(result.tenantShare)}</div>
-              <div className="text-sm text-accent font-medium mt-1">{result.tenantPercent}%</div>
+              <div className="text-sm text-accent font-medium mt-1">{result.tenantPercent} %</div>
             </div>
           </div>
+
+          {/* Tenant reimbursement claim */}
+          {isTenantClaim && (
+            <div className="rounded-xl border-2 border-primary bg-primary/5 p-5 flex gap-3">
+              <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div className="text-sm text-foreground leading-relaxed">
+                <p className="font-semibold">Möglicher Erstattungsanspruch gegenüber dem Vermieter</p>
+                <p className="text-2xl font-bold text-primary mt-1">{formatCurrency(result.landlordShare)}</p>
+                <p className="text-muted-foreground mt-1">
+                  Dieser Betrag kann beim Vermieter zur Erstattung geltend gemacht werden.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Non-residential explicit note */}
+          {!result.isResidential && result.restrictionApplied === 'fall3' && (
+            <div className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
+              <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground">
+                Für Nichtwohngebäude gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten zwischen Mieter und Vermieter gemäß §8 CO2KostAufG.
+              </p>
+            </div>
+          )}
 
           {/* 5% reduction note */}
           {result.reimbursementReductionApplied && (
@@ -119,6 +158,10 @@ export default function ResultsPage() {
             </summary>
             <div className="px-6 pb-6 pt-2 space-y-3 text-muted-foreground text-sm leading-relaxed">
               <div className="grid grid-cols-2 gap-2">
+                <span>Gebäudetyp:</span>
+                <span className="text-foreground font-medium text-right">{getBuildingTypeLabel(wizardData)}</span>
+                <span>Wärmeversorgung:</span>
+                <span className="text-foreground font-medium text-right">{getHeatSupplyLabel(wizardData)}</span>
                 <span>CO2-Ausstoß gesamt:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.totalEmissionsKg, 1)} kg</span>
                 <span>CO2 pro m²/Jahr:</span>
@@ -150,7 +193,7 @@ export default function ResultsPage() {
                 {result.restrictionApplied !== 'fall3' && result.isResidential && (
                   <>
                     <span>Basis-Aufteilung (vor Einschränkung):</span>
-                    <span className="text-foreground font-medium text-right">{result.baseTenantPercent}% / {result.baseLandlordPercent}%</span>
+                    <span className="text-foreground font-medium text-right">{result.baseTenantPercent} % / {result.baseLandlordPercent} %</span>
                   </>
                 )}
               </div>

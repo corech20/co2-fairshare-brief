@@ -1,5 +1,5 @@
 import { useCalculator } from '@/context/CalculatorContext';
-import type { CostInputType } from '@/lib/calculator/types';
+import type { CostInputType, AddressData } from '@/lib/calculator/types';
 
 function InputField({ label, hint, value, onChange, type = 'number', placeholder, unit }: {
   label: string; hint?: string; value: string | number | undefined;
@@ -25,6 +25,59 @@ function InputField({ label, hint, value, onChange, type = 'number', placeholder
   );
 }
 
+function AddressFields({ title, address, flatName, flatAddr, onChangeAddress, onChangeFlatName, onChangeFlatAddr, showApartment }: {
+  title: string;
+  address?: AddressData;
+  flatName?: string;
+  flatAddr?: string;
+  onChangeAddress: (a: AddressData) => void;
+  onChangeFlatName: (v: string) => void;
+  onChangeFlatAddr: (v: string) => void;
+  showApartment?: boolean;
+}) {
+  const addr = address || {};
+  const set = (field: keyof AddressData, value: string) => {
+    onChangeAddress({ ...addr, [field]: value || undefined });
+  };
+
+  return (
+    <div className="space-y-3">
+      <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="sm:col-span-1">
+          <select
+            value={addr.salutation || ''}
+            onChange={e => set('salutation', e.target.value)}
+            className="w-full rounded-lg border-2 border-border bg-card px-3 py-3 text-foreground focus:border-accent focus:outline-none transition-colors text-sm"
+          >
+            <option value="">Anrede</option>
+            <option value="Herr">Herr</option>
+            <option value="Frau">Frau</option>
+            <option value="Firma">Firma</option>
+          </select>
+        </div>
+        <InputField label="" value={addr.firstName} onChange={v => set('firstName', v)} type="text" placeholder="Vorname" />
+        <InputField label="" value={addr.lastName} onChange={v => set('lastName', v)} type="text" placeholder="Nachname" />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-4">
+        <div className="sm:col-span-3">
+          <InputField label="" value={addr.street} onChange={v => set('street', v)} type="text" placeholder="Straße" />
+        </div>
+        <InputField label="" value={addr.houseNumber} onChange={v => set('houseNumber', v)} type="text" placeholder="Nr." />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <InputField label="" value={addr.postalCode} onChange={v => set('postalCode', v)} type="text" placeholder="PLZ" />
+        <div className="sm:col-span-2">
+          <InputField label="" value={addr.city} onChange={v => set('city', v)} type="text" placeholder="Ort" />
+        </div>
+      </div>
+      {showApartment && (
+        <InputField label="" value={addr.apartmentDesignation} onChange={v => set('apartmentDesignation', v)} type="text" placeholder="Wohnungsbezeichnung (optional)" />
+      )}
+    </div>
+  );
+}
+
 export default function StepInputValues() {
   const { wizardData, setWizardField } = useCalculator();
 
@@ -33,6 +86,7 @@ export default function StepInputValues() {
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
   const isTenantApartmentHeating = wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'etage';
+  const isTenant = wizardData.userRole === 'mieter';
 
   const fuelUnit = (() => {
     switch (wizardData.fuelType) {
@@ -66,14 +120,14 @@ export default function StepInputValues() {
       </div>
 
       <div className="space-y-5">
-        {/* Area fields - conditional */}
+        {/* Area fields */}
         {needsBuildingArea && (
           <InputField
             label="Gebäudewohnfläche"
             hint="Gesamte Wohnfläche des Gebäudes"
             value={wizardData.buildingArea}
             onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
-            placeholder="z.B. 500"
+            placeholder="z. B. 500"
             unit="m²"
           />
         )}
@@ -84,7 +138,7 @@ export default function StepInputValues() {
             hint={needsApartmentArea ? 'Fläche Ihrer Wohnung (Pflichtfeld bei Etagenheizung/Wohnungsfernwärme)' : 'Fläche Ihrer Wohnung, falls relevant'}
             value={wizardData.apartmentArea}
             onChange={v => setWizardField('apartmentArea', v ? parseFloat(v) : undefined)}
-            placeholder="z.B. 80"
+            placeholder="z. B. 80"
             unit="m²"
           />
         )}
@@ -95,19 +149,19 @@ export default function StepInputValues() {
             hint="Gesamte Wohnfläche des Gebäudes, falls bekannt"
             value={wizardData.buildingArea}
             onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
-            placeholder="z.B. 500"
+            placeholder="z. B. 500"
             unit="m²"
           />
         )}
 
-        {/* Fuel amount - only for single fuel */}
+        {/* Fuel amount */}
         {!isMultiFuel && (
           <InputField
             label={fuelLabel}
             hint={`Verbrauch im Abrechnungszeitraum in ${fuelUnit}`}
             value={wizardData.fuelAmount}
             onChange={v => setWizardField('fuelAmount', v ? parseFloat(v) : undefined)}
-            placeholder={`z.B. ${wizardData.fuelType === 'heizoel' ? '3000' : '50000'}`}
+            placeholder={`z. B. ${wizardData.fuelType === 'heizoel' ? '3000' : '50000'}`}
             unit={fuelUnit}
           />
         )}
@@ -119,12 +173,11 @@ export default function StepInputValues() {
             hint="Vom Fernwärmeversorger mitgeteilt (kg CO2/kWh)"
             value={wizardData.emissionFactorCustom}
             onChange={v => setWizardField('emissionFactorCustom', v ? parseFloat(v) : undefined)}
-            placeholder="z.B. 0.18"
+            placeholder="z. B. 0.18"
             unit="kg CO2/kWh"
           />
         )}
 
-        {/* District heating validation hint */}
         {!isMultiFuel && wizardData.fuelType === 'fernwaerme' && !wizardData.emissionFactorCustom && (
           <p className="text-xs text-destructive">Bitte geben Sie den Emissionsfaktor aus Ihrer Fernwärmeabrechnung an.</p>
         )}
@@ -135,11 +188,11 @@ export default function StepInputValues() {
           hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
           value={wizardData.co2CostDirect}
           onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
-          placeholder="z.B. 250"
+          placeholder="z. B. 250"
           unit="EUR"
         />
 
-        {/* Gross / Net selector - only when direct cost entered */}
+        {/* Gross / Net selector */}
         {hasDirectCost && (
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
@@ -201,15 +254,36 @@ export default function StepInputValues() {
           </div>
         )}
 
-        {/* Letter info fields */}
-        <div className="border-t border-border pt-5 mt-6 space-y-5">
-          <h3 className="text-lg font-semibold text-foreground">Angaben für das Schreiben (optional)</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="Name Vermieter" value={wizardData.landlordName} onChange={v => setWizardField('landlordName', v)} type="text" placeholder="Max Mustermann" />
-            <InputField label="Adresse Vermieter" value={wizardData.landlordAddress} onChange={v => setWizardField('landlordAddress', v)} type="text" placeholder="Musterstr. 1, 10115 Berlin" />
-            <InputField label="Name Mieter" value={wizardData.tenantName} onChange={v => setWizardField('tenantName', v)} type="text" placeholder="Erika Mustermann" />
-            <InputField label="Adresse Mieter" value={wizardData.tenantAddress} onChange={v => setWizardField('tenantAddress', v)} type="text" placeholder="Beispielweg 5, 10115 Berlin" />
+        {/* ── Address section ─────────────────────────────────────── */}
+        <div className="border-t border-border pt-5 mt-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Angaben für das Schreiben (optional)</h3>
+            <p className="text-xs text-muted-foreground mt-1">Diese Daten werden nur für die Erstellung des PDF-Dokuments verwendet.</p>
           </div>
+
+          {/* Sender = current user role */}
+          <AddressFields
+            title={isTenant ? 'Ihre Daten (Mieter/in)' : 'Ihre Daten (Vermieter/in)'}
+            address={isTenant ? wizardData.tenantAddress : wizardData.landlordAddress}
+            flatName={isTenant ? wizardData.tenantName : wizardData.landlordName}
+            flatAddr={isTenant ? wizardData.tenantAddressFlat : wizardData.landlordAddressFlat}
+            onChangeAddress={a => setWizardField(isTenant ? 'tenantAddress' : 'landlordAddress', a)}
+            onChangeFlatName={v => setWizardField(isTenant ? 'tenantName' : 'landlordName', v)}
+            onChangeFlatAddr={v => setWizardField(isTenant ? 'tenantAddressFlat' : 'landlordAddressFlat', v)}
+            showApartment={isTenant}
+          />
+
+          {/* Recipient = opposite role */}
+          <AddressFields
+            title={isTenant ? 'Vermieter/in (Empfänger)' : 'Mieter/in (Empfänger)'}
+            address={isTenant ? wizardData.landlordAddress : wizardData.tenantAddress}
+            flatName={isTenant ? wizardData.landlordName : wizardData.tenantName}
+            flatAddr={isTenant ? wizardData.landlordAddressFlat : wizardData.tenantAddressFlat}
+            onChangeAddress={a => setWizardField(isTenant ? 'landlordAddress' : 'tenantAddress', a)}
+            onChangeFlatName={v => setWizardField(isTenant ? 'landlordName' : 'tenantName', v)}
+            onChangeFlatAddr={v => setWizardField(isTenant ? 'landlordAddressFlat' : 'tenantAddressFlat', v)}
+            showApartment={!isTenant}
+          />
         </div>
       </div>
     </div>
