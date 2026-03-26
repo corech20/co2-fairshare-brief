@@ -638,10 +638,10 @@ describe('Standard residential Heizöl full case', () => {
       buildingArea: 200,
     });
     // 3000 × 10.0625 = 30187.5 kWh
-    // 30187.5 × 0.2664 = 8037.93 kg CO2
-    expect(round2(r.totalEmissionsKg)).toBe(8037.93);
-    // 8037.93 / 200 = 40.19 kg/m²/a → step 7 (37-42)
-    expect(round2(r.emissionsPerSqmYear)).toBe(40.19);
+    // 30187.5 × 0.2664 = 8041.95 kg CO2
+    expect(round2(r.totalEmissionsKg)).toBe(8041.95);
+    // 8041.95 / 200 = 40.21 kg/m²/a → step 7 (37-42)
+    expect(round2(r.emissionsPerSqmYear)).toBe(40.21);
     expect(r.stufenmodellStep).toBe(7);
     expect(r.tenantPercent).toBe(40);
     expect(r.landlordPercent).toBe(60);
