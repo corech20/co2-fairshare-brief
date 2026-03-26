@@ -26,6 +26,17 @@ export interface FuelEntry {
   co2CostDirectType?: CostInputType;
 }
 
+export interface AddressData {
+  salutation?: string;
+  firstName?: string;
+  lastName?: string;
+  street?: string;
+  houseNumber?: string;
+  postalCode?: string;
+  city?: string;
+  apartmentDesignation?: string;
+}
+
 export interface WizardData {
   userRole?: UserRole;
   buildingType?: BuildingType;
@@ -41,10 +52,19 @@ export interface WizardData {
   co2CostDirectType?: CostInputType;
   emissionFactorCustom?: number;
   fuelEntries?: FuelEntry[];
+  /** Structured address for landlord */
+  landlordAddress?: AddressData;
+  /** Structured address for tenant */
+  tenantAddress?: AddressData;
+  /** Building address if different */
+  buildingAddress?: string;
+  /** Heat supplier name */
+  heatSupplierName?: string;
+  /** Legacy flat fields – kept for backward compat */
   tenantName?: string;
-  tenantAddress?: string;
+  tenantAddressFlat?: string;
   landlordName?: string;
-  landlordAddress?: string;
+  landlordAddressFlat?: string;
   /** Tenant path: extra gas device without separate meter (5% reduction) */
   hasExtraGasDevice?: boolean;
 }
