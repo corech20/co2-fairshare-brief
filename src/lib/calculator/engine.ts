@@ -29,19 +29,27 @@ const EMISSION_FACTORS: Record<string, number> = {
   heizoel_kwk: 0.2664,
 };
 
-/** Heating value conversion factors (raw input unit → kWh Heizwert) */
+/**
+ * Heating value conversion factors (raw input unit → kWh Heizwert).
+ *
+ * Erdgas / Fernwärme: User enters kWh directly (heizwertbezogen per § 3 CO2KostAufG).
+ * No conversion needed – factor = 1.
+ *
+ * Heizöl, Flüssiggas, Pellets etc.: User enters physical units (liters, kg).
+ * Factor converts to kWh (Heizwert).
+ */
 const HEATING_VALUE_FACTORS: Record<string, number> = {
-  erdgas: 3.2508 / 3.6,        // Brennwert→Heizwert = 0.903
+  erdgas: 1,                    // kWh input (Hi) – no conversion
   heizoel: 10.0625,             // liters → kWh
   fluessiggas: 12.7778,         // kg → kWh
   pellets: 4.1667,              // kg → kWh
   hackschnitzel: 4.1667,        // kg → kWh
   abfallholz: 4.1667,           // kg → kWh
   braunkohle: 5.3889,           // kg → kWh
-  fernwaerme: 1,                // already kWh
-  erdgas_kwk: 3.2508 / 3.6,
-  fluessiggas_kwk: 12.7778,
-  heizoel_kwk: 10.0625,
+  fernwaerme: 1,                // kWh input – no conversion
+  erdgas_kwk: 1,                // kWh input (Hi) – no conversion (CHP factor applied separately)
+  fluessiggas_kwk: 12.7778,     // kg → kWh
+  heizoel_kwk: 10.0625,         // liters → kWh
 };
 
 /** CHP heat share factors */
