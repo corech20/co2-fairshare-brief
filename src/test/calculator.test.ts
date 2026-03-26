@@ -265,8 +265,7 @@ describe('Flüssiggas: kg → kWh conversion', () => {
     const r = calculateSingleFuel('fluessiggas', 500, 30);
     // 500 × 12.7778 = 6388.9 kWh
     expect(round2(r.energyHeatingValueKwh)).toBe(6388.9);
-    // 6388.9 × 0.2358 = 1506.5
-    expect(round2(r.co2Kg)).toBe(1506.54);
+    expect(round2(r.co2Kg)).toBe(round2(6388.9 * 0.2358));
   });
 });
 
