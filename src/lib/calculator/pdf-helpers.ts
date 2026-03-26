@@ -93,11 +93,19 @@ export function getPeriodString(data: WizardData): string {
 // ── Building / property reference ─────────────────────────────────────────
 export function getBuildingReference(data: WizardData): string {
   if (data.buildingAddress) return data.buildingAddress;
-  // Fall back to recipient address as property reference
   const lines = data.userRole === 'mieter'
     ? formatAddressLines(data.tenantAddress, data.tenantAddressFlat)
     : formatAddressLines(data.landlordAddress, data.landlordAddressFlat);
   return lines.length > 0 ? lines.join(', ') : '';
+}
+
+// ── Property label (Gebäude vs Wohnung) ───────────────────────────────────
+export function getPropertyLabel(data: WizardData): string {
+  const isApartment = data.heatSupplyType === 'etage' || data.heatSupplyType === 'fernwaerme';
+  if (data.userRole === 'mieter' && isApartment) {
+    return 'Berechnung erstellt für die Wohnung:';
+  }
+  return 'Berechnung erstellt für das Gebäude:';
 }
 
 // ── Subject line ──────────────────────────────────────────────────────────
@@ -152,40 +160,65 @@ export function getIntroText(data: WizardData, _result: CalculationResult): stri
   }
 }
 
+// ── Stufenmodell emission range text ──────────────────────────────────────
+const STUFEN_RANGES = [
+  { min: 0, max: 12 },
+  { min: 12, max: 17 },
+  { min: 17, max: 22 },
+  { min: 22, max: 27 },
+  { min: 27, max: 32 },
+  { min: 32, max: 37 },
+  { min: 37, max: 42 },
+  { min: 42, max: 47 },
+  { min: 47, max: 52 },
+  { min: 52, max: Infinity },
+];
+
+export function getStufenmodellRangeText(step: number): string {
+  if (step < 1 || step > 10) return '';
+  const range = STUFEN_RANGES[step - 1];
+  if (step === 1) return `≤ ${range.max} kg CO2 / m² / a`;
+  if (step === 10) return `> ${range.min} kg CO2 / m² / a`;
+  return `${range.min} bis < ${range.max} kg CO2 / m² / a`;
+}
+
 // ── Section 3: Special circumstances text ─────────────────────────────────
 export function getSpecialCircumstancesText(data: WizardData, result: CalculationResult): string {
-  const docCase = getDocumentCase(data);
   const restriction = result.restrictionApplied;
   const lines: string[] = [];
 
   if (restriction === 'fall3') {
     if (result.isResidential) {
-      lines.push('Es liegen keine bekannten öffentlich-rechtlichen Einschränkungen vor, die eine Abweichung vom Stufenmodell begründen. Die Aufteilung erfolgt nach dem gesetzlichen Stufenmodell gemäß § 5 CO2KostAufG.');
+      lines.push('Basierend auf den Anwenderangaben bestehen keine öffentlich-rechtlichen Einschränkungen, die eine Abweichung vom gesetzlichen Stufenmodell begründen würden. Die Aufteilung der Kohlendioxidkosten erfolgt daher unverändert nach dem 10-Stufen-Modell gemäß § 5 CO2KostAufG.');
     } else {
-      lines.push('Es liegen keine bekannten öffentlich-rechtlichen Einschränkungen vor. Für das Nichtwohngebäude gilt die gesetzliche hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG.');
+      lines.push('Basierend auf den Anwenderangaben bestehen keine öffentlich-rechtlichen Einschränkungen, die eine Abweichung von der hälftigen Aufteilung begründen würden. Die Aufteilung der Kohlendioxidkosten erfolgt daher hälftig (50 % / 50 %) gemäß § 8 CO2KostAufG.');
     }
   } else if (restriction === 'fall1und2') {
-    lines.push('Es liegen sowohl Einschränkungen bei der energetischen Verbesserung des Gebäudes (Fall 1) als auch bei der Wärmeversorgung (Fall 2) vor. In diesem Fall entfallen die CO2-Kosten vollständig auf den Mieter (100 % / 0 %).');
+    if (result.isResidential) {
+      lines.push('Basierend auf den Anwenderangaben liegen sowohl eine Einschränkung bei der energetischen Verbesserung des Gebäudes (Fall 1, z. B. Denkmalschutz) als auch eine Einschränkung bei der Wärmeversorgung (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz) vor. Gemäß § 7 Abs. 2 CO2KostAufG entfallen die CO2-Kosten in diesem Fall vollständig auf den Mieter (Mieter 100 % / Vermieter 0 %).');
+    } else {
+      lines.push('Basierend auf den Anwenderangaben liegen sowohl Einschränkungen bei der energetischen Verbesserung des Gebäudes (Fall 1) als auch bei der Wärmeversorgung (Fall 2) vor. Die CO2-Kosten entfallen daher vollständig auf den Mieter (Mieter 100 % / Vermieter 0 %).');
+    }
   } else if (restriction === 'fall1') {
     if (result.isResidential) {
-      lines.push('Es liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1, z. B. Denkmalschutz). Der Vermieteranteil wird daher gegenüber dem Stufenmodell halbiert.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1, z. B. Denkmalschutz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 7 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
-      lines.push('Es liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1). Bei Nichtwohngebäuden erfolgt hier eine konservative Standardbehandlung mit hälftiger Aufteilung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1). Bei Nichtwohngebäuden erfolgt im Rahmen einer konservativen Standardbehandlung weiterhin eine hälftige Aufteilung der CO2-Kosten. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
     }
   } else if (restriction === 'fall2') {
     if (result.isResidential) {
-      lines.push('Es liegt eine Einschränkung bei der energetischen Verbesserung der Wärmeversorgung vor (Fall 2, z. B. Anschlusszwang). Der Vermieteranteil wird daher gegenüber dem Stufenmodell halbiert.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 7 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
-      lines.push('Es liegt eine Einschränkung bei der energetischen Verbesserung der Wärmeversorgung vor (Fall 2). Bei Nichtwohngebäuden erfolgt hier eine konservative Standardbehandlung mit hälftiger Aufteilung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2). Bei Nichtwohngebäuden erfolgt im Rahmen einer konservativen Standardbehandlung weiterhin eine hälftige Aufteilung der CO2-Kosten. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
     }
   }
 
   if (result.reimbursementReductionApplied) {
-    lines.push(`In der Wohnung befindet sich ein zusätzliches Gasgerät ohne eigenen Zähler. Der Erstattungsanspruch gegenüber dem Vermieter wurde daher pauschal um ${result.reimbursementReductionPercent} % gekürzt.`);
+    lines.push(`In der Wohnung befindet sich ein zusätzliches Gasgerät ohne eigenen Zähler (z. B. Gasherd, Gasdurchlauferhitzer). Der Erstattungsanspruch gegenüber dem Vermieter wurde daher gemäß § 5 Abs. 5 CO2KostAufG pauschal um ${result.reimbursementReductionPercent} % gekürzt.`);
   }
 
   if (result.usedDirectCost) {
-    lines.push('Die CO2-Kosten wurden ganz oder teilweise direkt aus der Abrechnung übernommen und nicht rechnerisch ermittelt.');
+    lines.push('Die CO2-Kosten wurden ganz oder teilweise direkt aus der Abrechnung des Wärmelieferanten übernommen und nicht rechnerisch aus der Brennstoffmenge ermittelt.');
   }
 
   return lines.join('\n\n');
@@ -237,13 +270,16 @@ export function getBuildingTypeLabel(data: WizardData): string {
   return data.buildingType === 'nichtwohngebaeude' ? 'Nichtwohngebäude' : 'Wohngebäude';
 }
 
-// ── Closing text (kept for backward compat) ───────────────────────────────
+// ── Closing text ──────────────────────────────────────────────────────────
 export function getClosingText(data: WizardData): string {
   const docCase = getDocumentCase(data);
   if (docCase === 'C' || docCase === 'D') {
-    return 'Die Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des CO2KostAufG. Ich bitte um Erstattung des ausgewiesenen Vermieteranteils.\n\nFür Rückfragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
+    return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Ich bitte um Erstattung des ausgewiesenen Vermieteranteils an den CO2-Kosten innerhalb der gesetzlich vorgesehenen Frist.\n\nFür Rückfragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
   }
-  return 'Die Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des CO2KostAufG. Diese Mitteilung dient der Information gemäß den gesetzlichen Anforderungen.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
+  if (docCase === 'E') {
+    return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Diese Mitteilung dient der Information über die Aufteilung der CO2-Kosten gemäß den gesetzlichen Anforderungen für Nichtwohngebäude.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
+  }
+  return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Diese Mitteilung dient der Information über die Aufteilung der CO2-Kosten gemäß den gesetzlichen Anforderungen.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
 }
 
 // Keep old getSummaryText export for Results.tsx compatibility
