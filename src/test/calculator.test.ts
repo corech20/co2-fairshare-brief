@@ -274,8 +274,7 @@ describe('Braunkohle: kg → kWh conversion', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
     // 1000 × 5.3889 = 5388.9 kWh
     expect(round2(r.energyHeatingValueKwh)).toBe(5388.9);
-    // 5388.9 × 0.35712 = 1924.46
-    expect(round2(r.co2Kg)).toBe(1924.46);
+    expect(round2(r.co2Kg)).toBe(round2(5388.9 * 0.35712));
   });
 });
 
