@@ -139,6 +139,10 @@ export interface CalculationResult {
   isCrossYear: boolean;
   /** Per-segment results for cross-year calculations */
   segmentResults?: SegmentResult[];
+  /** Annualization factor applied for stage classification (only if < full year) */
+  annualizationFactor?: number;
+  /** Annualized emissions per m²/year (for stage model, if annualized) */
+  emissionsPerSqmAnnualized?: number;
 }
 
 export interface StufenmodellEntry {

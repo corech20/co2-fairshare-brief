@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Calculator } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Scale } from 'lucide-react';
 import StepUserRole from '@/components/wizard/StepUserRole';
 import StepBuildingType from '@/components/wizard/StepBuildingType';
 import StepHeatSupply from '@/components/wizard/StepHeatSupply';
@@ -52,19 +52,19 @@ function WizardContent() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-background sticky top-0 z-50">
-        <div className="container-narrow flex h-16 items-center justify-between px-4">
+        <div className="container-narrow flex h-14 items-center justify-between px-4">
           <button onClick={() => navigate('/')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <Calculator className="h-5 w-5" />
-            <span className="font-semibold">CO2-Rechner</span>
+            <Scale className="h-4 w-4" />
+            <span className="text-sm font-semibold">CO2-Kostenaufteilung</span>
           </button>
-          <span className="text-sm text-muted-foreground">
-            Schritt {currentStep + 1} von {totalSteps}
+          <span className="text-xs text-muted-foreground">
+            Schritt {currentStep + 1} / {totalSteps}
           </span>
         </div>
       </header>
 
       {/* Progress bar */}
-      <div className="w-full bg-secondary h-1.5">
+      <div className="w-full bg-secondary h-1">
         <div
           className="h-full bg-accent transition-all duration-500 ease-out"
           style={{ width: `${progressPercent}%` }}
@@ -74,7 +74,7 @@ function WizardContent() {
       {/* Step labels (desktop) */}
       <div className="hidden md:block border-b border-border bg-background">
         <div className="container-wide px-4">
-          <div className="flex justify-between py-3">
+          <div className="flex justify-between py-2.5">
             {STEP_LABELS.map((label, i) => (
               <div key={i} className={`text-xs font-medium transition-colors ${
                 i === currentStep ? 'text-accent' : i < currentStep ? 'text-primary' : 'text-muted-foreground'
@@ -87,18 +87,18 @@ function WizardContent() {
       </div>
 
       {/* Content */}
-      <main className="flex-1 section-padding">
+      <main className="flex-1 px-4 py-8 md:py-12">
         <div className="container-narrow px-4 animate-fade-in">
           {renderStep()}
         </div>
       </main>
 
       {/* Navigation */}
-      <div className="border-t border-border bg-background py-4">
+      <div className="border-t border-border bg-background py-3">
         <div className="container-narrow flex items-center justify-between px-4">
           <Button
             variant="outline"
-            size="lg"
+            size="default"
             onClick={goBack}
             disabled={currentStep === 0}
           >
@@ -107,7 +107,7 @@ function WizardContent() {
           </Button>
           <Button
             variant={isLastStep ? 'cta' : 'default'}
-            size="lg"
+            size="default"
             onClick={handleNext}
             disabled={!canGoNext}
           >

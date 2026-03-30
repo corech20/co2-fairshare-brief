@@ -40,12 +40,15 @@ export default function ResultsPage() {
   const allocationExplanation = (() => {
     if (result.isResidential && result.stufenmodellStep > 0) {
       const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
-      return `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells – liegt im Bereich von ${rangeText}`;
+      if (result.annualizationFactor && result.emissionsPerSqmAnnualized) {
+        return `Stufe ${result.stufenmodellStep} – Hochgerechneter Jahreswert: ${formatNumber(result.emissionsPerSqmAnnualized)} kg CO2/m²/a (${rangeText})`;
+      }
+      return `Stufe ${result.stufenmodellStep} – ${rangeText}`;
     }
     if (!result.isResidential) {
       return result.restrictionApplied === 'fall1und2'
-        ? 'Bei Vorliegen beider öffentlich-rechtlicher Einschränkungen trägt der Mieter die CO2-Kosten vollständig (100 % / 0 %).'
-        : 'Hälftige Aufteilung (50/50) nach § 8 CO2KostAufG für Nichtwohngebäude';
+        ? 'Beide öffentlich-rechtlichen Einschränkungen liegen vor – der Mieter trägt die CO2-Kosten vollständig.'
+        : 'Hälftige Aufteilung (50/50) gemäß § 8 CO2KostAufG für Nichtwohngebäude';
     }
     return '';
   })();
@@ -53,34 +56,35 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background sticky top-0 z-50">
-        <div className="container-narrow flex h-16 items-center px-4">
-          <span className="font-semibold text-foreground">Ergebnis Ihrer Berechnung</span>
+        <div className="container-narrow flex h-14 items-center px-4">
+          <span className="text-sm font-semibold text-foreground">Ergebnis</span>
         </div>
       </header>
 
-      <main className="section-padding">
-        <div className="container-narrow px-4 space-y-8 animate-fade-in">
+      <main className="px-4 py-8 md:py-12">
+        <div className="container-narrow space-y-6 animate-fade-in">
           {/* Summary */}
-          <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-6">
-            <p className="text-lg font-medium text-foreground leading-relaxed">
-              Nach Ihren Angaben entfallen <strong className="text-primary">{result.landlordPercent}&nbsp;% der CO2-Kosten auf den Vermieter</strong> und <strong className="text-accent">{result.tenantPercent}&nbsp;% auf den Mieter</strong>.
+          <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-5">
+            <p className="text-base font-medium text-foreground leading-relaxed">
+              <strong className="text-primary">{result.landlordPercent}&nbsp;%</strong> der CO2-Kosten entfallen auf den Vermieter,{' '}
+              <strong className="text-accent">{result.tenantPercent}&nbsp;%</strong> auf den Mieter.
             </p>
-            {allocationExplanation && <p className="text-sm text-muted-foreground mt-2">{allocationExplanation}</p>}
+            {allocationExplanation && <p className="text-xs text-muted-foreground mt-2">{allocationExplanation}</p>}
           </div>
 
           {/* Context chips */}
           <div className="flex flex-wrap gap-2 text-xs">
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">
               <Building2 className="h-3 w-3" />{getBuildingTypeLabel(wizardData)}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">
               <Flame className="h-3 w-3" />{getHeatSupplyLabel(wizardData)}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">
               {fmt.date(wizardData.billingPeriodStart)} – {fmt.date(wizardData.billingPeriodEnd)}
             </span>
             {result.isCrossYear && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-amber-700 dark:text-amber-400">
+              <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">
                 <CalendarDays className="h-3 w-3" />Jahresübergreifend
               </span>
             )}
@@ -88,60 +92,54 @@ export default function ResultsPage() {
 
           {/* Cards */}
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-border bg-card p-6 text-center shadow-sm">
-              <div className="text-sm text-muted-foreground mb-1">Gesamte CO2-Kosten</div>
-              <div className="text-3xl font-bold text-foreground">{formatCurrency(result.totalCO2Cost)}</div>
+            <div className="rounded-lg border border-border bg-card p-5 text-center">
+              <div className="text-xs text-muted-foreground mb-1">CO2-Kosten gesamt</div>
+              <div className="text-2xl font-bold text-foreground">{formatCurrency(result.totalCO2Cost)}</div>
               {result.usedDirectCost && <div className="text-xs text-muted-foreground mt-1">(direkt eingegeben)</div>}
             </div>
-            <div className="rounded-xl border-2 border-primary bg-primary/5 p-6 text-center shadow-sm">
-              <div className="text-sm text-muted-foreground mb-1">Anteil Vermieter</div>
-              <div className="text-3xl font-bold text-primary">{formatCurrency(result.landlordShare)}</div>
-              <div className="text-sm text-primary font-medium mt-1">{result.landlordPercent} %</div>
+            <div className="rounded-lg border-2 border-primary bg-primary/5 p-5 text-center">
+              <div className="text-xs text-muted-foreground mb-1">Vermieter</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(result.landlordShare)}</div>
+              <div className="text-xs text-primary font-medium mt-1">{result.landlordPercent} %</div>
             </div>
-            <div className="rounded-xl border-2 border-accent bg-accent/5 p-6 text-center shadow-sm">
-              <div className="text-sm text-muted-foreground mb-1">Anteil Mieter</div>
-              <div className="text-3xl font-bold text-accent">{formatCurrency(result.tenantShare)}</div>
-              <div className="text-sm text-accent font-medium mt-1">{result.tenantPercent} %</div>
+            <div className="rounded-lg border-2 border-accent bg-accent/5 p-5 text-center">
+              <div className="text-xs text-muted-foreground mb-1">Mieter</div>
+              <div className="text-2xl font-bold text-accent">{formatCurrency(result.tenantShare)}</div>
+              <div className="text-xs text-accent font-medium mt-1">{result.tenantPercent} %</div>
             </div>
           </div>
 
           {/* Tenant reimbursement claim */}
           {isTenantClaim && (
-            <div className="rounded-xl border-2 border-primary bg-primary/5 p-5 flex gap-3">
-              <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div className="rounded-lg border-2 border-primary bg-primary/5 p-4 flex gap-3">
+              <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <div className="text-sm text-foreground leading-relaxed">
-                <p className="font-semibold">Möglicher Erstattungsanspruch gegenüber dem Vermieter</p>
-                <p className="text-2xl font-bold text-primary mt-1">{formatCurrency(result.landlordShare)}</p>
-                <p className="text-muted-foreground mt-1">
+                <p className="font-semibold">Möglicher Erstattungsanspruch</p>
+                <p className="text-xl font-bold text-primary mt-1">{formatCurrency(result.landlordShare)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
                   Dieser Betrag kann beim Vermieter zur Erstattung geltend gemacht werden.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Non-residential explicit notes */}
-          {!result.isResidential && result.restrictionApplied === 'fall3' && (
-            <div className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
+          {/* Non-residential notes */}
+          {!result.isResidential && (
+            <div className="rounded-lg border border-border bg-muted/30 p-4 flex gap-3">
               <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-sm text-muted-foreground">
-                Für Nichtwohngebäude gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten zwischen Mieter und Vermieter gemäß § 8 CO2KostAufG.
-              </p>
-            </div>
-          )}
-          {!result.isResidential && result.restrictionApplied === 'fall1und2' && (
-            <div className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
-              <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-sm text-muted-foreground">
-                Da beide öffentlich-rechtlichen Einschränkungen vorliegen, trägt der Mieter die CO2-Kosten vollständig.
+              <p className="text-xs text-muted-foreground">
+                {result.restrictionApplied === 'fall1und2'
+                  ? 'Da beide öffentlich-rechtlichen Einschränkungen vorliegen, trägt der Mieter die CO2-Kosten vollständig.'
+                  : 'Für Nichtwohngebäude gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten gemäß § 8 CO2KostAufG.'}
               </p>
             </div>
           )}
 
           {/* Cross-year segment details */}
           {result.isCrossYear && result.segmentResults && result.segmentResults.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-5 space-y-3 shadow-sm">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <CalendarDays className="h-4 w-4" />Jahresabschnitte
+            <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+              <h3 className="text-xs font-semibold text-foreground flex items-center gap-2">
+                <CalendarDays className="h-3.5 w-3.5" />Jahresabschnitte
               </h3>
               <div className="space-y-2">
                 {result.segmentResults.map((seg, i) => (
@@ -154,8 +152,6 @@ export default function ResultsPage() {
                     <span className="text-xs text-muted-foreground text-right">
                       CO2-Preis: {seg.co2PricePerTon} €/t
                     </span>
-                    <span className="text-xs text-muted-foreground">Menge: {formatNumber(seg.amount, 0)}</span>
-                    <span className="text-xs text-muted-foreground text-right">{formatNumber(seg.co2Kg, 1)} kg CO2</span>
                   </div>
                 ))}
               </div>
@@ -164,11 +160,11 @@ export default function ResultsPage() {
 
           {/* 5% reduction note */}
           {result.reimbursementReductionApplied && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700 p-5 flex gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <div className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
-                <p className="font-medium">5 % Kürzung angewendet</p>
-                <p>Der Erstattungsanspruch gegenüber dem Vermieter wurde pauschal um {result.reimbursementReductionPercent} % gekürzt (zusätzliches Gasgerät ohne eigenen Zähler).</p>
+            <div className="rounded-lg border border-border bg-muted/30 p-4 flex gap-3">
+              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                <p className="font-medium text-foreground">5 % Kürzung angewendet</p>
+                <p>Erstattungsanspruch wurde pauschal um {result.reimbursementReductionPercent} % gekürzt (zusätzliches Gasgerät ohne eigenen Zähler).</p>
                 {result.landlordShareBeforeReduction != null && (
                   <p className="mt-1">Vor Kürzung: {formatCurrency(result.landlordShareBeforeReduction)}</p>
                 )}
@@ -178,18 +174,18 @@ export default function ResultsPage() {
 
           {/* Restriction note */}
           {result.restrictionNote && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700 p-5 flex gap-3">
-              <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">{result.restrictionNote}</p>
+            <div className="rounded-lg border border-border bg-muted/30 p-4 flex gap-3">
+              <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-relaxed">{result.restrictionNote}</p>
             </div>
           )}
 
           {/* Notes */}
           {result.notes.length > 0 && (
-            <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
+            <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-1">
               {result.notes.map((note, i) => (
-                <p key={i} className="text-sm text-muted-foreground flex gap-2">
-                  <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                <p key={i} className="text-xs text-muted-foreground flex gap-2">
+                  <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                   {note}
                 </p>
               ))}
@@ -197,30 +193,36 @@ export default function ResultsPage() {
           )}
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button variant="cta" size="lg" className="flex-1" onClick={handleGeneratePDF}>
-              <FileText className="h-5 w-5" />PDF-Schreiben erstellen
+              <FileText className="h-4 w-4" />PDF-Schreiben erstellen
             </Button>
             <Button variant="outline" size="lg" className="flex-1" onClick={handleNewCalculation}>
-              <RotateCcw className="h-5 w-5" />Neue Berechnung
+              <RotateCcw className="h-4 w-4" />Neue Berechnung
             </Button>
           </div>
 
           {/* Technical details */}
-          <details className="rounded-xl border border-border bg-card shadow-sm">
-            <summary className="px-6 py-4 cursor-pointer text-sm font-semibold text-card-foreground hover:bg-muted/50 rounded-xl transition-colors">
-              Technische Details anzeigen
+          <details className="rounded-lg border border-border bg-card">
+            <summary className="px-5 py-3 cursor-pointer text-xs font-semibold text-card-foreground hover:bg-muted/50 rounded-lg transition-colors">
+              Technische Details
             </summary>
-            <div className="px-6 pb-6 pt-2 space-y-3 text-muted-foreground text-sm leading-relaxed">
-              <div className="grid grid-cols-2 gap-2">
+            <div className="px-5 pb-5 pt-2 space-y-2 text-muted-foreground text-xs leading-relaxed">
+              <div className="grid grid-cols-2 gap-1.5">
                 <span>Gebäudetyp:</span>
                 <span className="text-foreground font-medium text-right">{getBuildingTypeLabel(wizardData)}</span>
                 <span>Wärmeversorgung:</span>
                 <span className="text-foreground font-medium text-right">{getHeatSupplyLabel(wizardData)}</span>
                 <span>CO2-Ausstoß gesamt:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.totalEmissionsKg, 1)} kg</span>
-                <span>CO2 pro m²/Jahr:</span>
+                <span>CO2 pro m² (Abrechnungszeitraum):</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.emissionsPerSqmYear)} kg/m²</span>
+                {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
+                  <>
+                    <span>CO2 pro m²/Jahr (hochgerechnet):</span>
+                    <span className="text-foreground font-medium text-right">{formatNumber(result.emissionsPerSqmAnnualized)} kg/m²/a</span>
+                  </>
+                )}
                 {result.isResidential && result.stufenmodellStep > 0 && (
                   <>
                     <span>Stufe (10-Stufen-Modell):</span>
@@ -231,25 +233,25 @@ export default function ResultsPage() {
                 )}
                 <span>Brennstoff:</span>
                 <span className="text-foreground font-medium text-right">{result.fuelLabel}</span>
+                <span>Emissionsfaktor:</span>
+                <span className="text-foreground font-medium text-right">{formatNumber(result.emissionFactor, 4)} kg CO2/kWh</span>
                 {result.fuelResults.length > 1 && (
                   <>
                     <span>Gewichteter Emissionsfaktor:</span>
                     <span className="text-foreground font-medium text-right">{formatNumber(result.weightedEmissionFactor, 5)} kg CO2/kWh</span>
                   </>
                 )}
-                <span>Emissionsfaktor:</span>
-                <span className="text-foreground font-medium text-right">{formatNumber(result.emissionFactor, 4)} kg CO2/kWh</span>
                 {!result.isCrossYear && (
                   <>
                     <span>CO2-Preis:</span>
-                    <span className="text-foreground font-medium text-right">{formatCurrency(result.co2PricePerTon)}/Tonne</span>
+                    <span className="text-foreground font-medium text-right">{formatCurrency(result.co2PricePerTon)}/t</span>
                   </>
                 )}
                 <span>Abrechnungsjahr:</span>
                 <span className="text-foreground font-medium text-right">{result.billingYear}</span>
                 <span>{getAreaLabel(wizardData)}:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.relevantArea, 0)} m²</span>
-                <span>Gesamtenergie (Heizwert):</span>
+                <span>Gesamtenergie (Hi):</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 0)} kWh</span>
                 {result.restrictionApplied !== 'fall3' && result.isResidential && (
                   <>
@@ -259,15 +261,14 @@ export default function ResultsPage() {
                 )}
               </div>
 
-              {/* Multi-fuel details */}
               {result.fuelResults.length > 1 && (
-                <div className="mt-4 border-t border-border pt-3 space-y-2">
-                  <p className="font-semibold text-foreground text-xs">Einzelne Brennstoffe:</p>
+                <div className="mt-3 border-t border-border pt-2 space-y-1.5">
+                  <p className="font-semibold text-foreground">Einzelne Brennstoffe:</p>
                   {result.fuelResults.map((fr, i) => (
-                    <div key={i} className="grid grid-cols-2 gap-1 text-xs pl-2 border-l-2 border-accent/30 ml-1">
+                    <div key={i} className="grid grid-cols-2 gap-1 pl-2 border-l-2 border-accent/30 ml-1">
                       <span className="font-medium text-foreground">{fr.fuelLabel}</span>
                       <span className="text-right">{formatNumber(fr.co2Kg, 1)} kg CO2</span>
-                      <span>Energie (Heizwert):</span>
+                      <span>Energie (Hi):</span>
                       <span className="text-right">{formatNumber(fr.energyHeatingValueKwh, 0)} kWh</span>
                       <span>CO2-Kosten brutto:</span>
                       <span className="text-right">{formatCurrency(fr.co2CostGross)}</span>
@@ -280,13 +281,13 @@ export default function ResultsPage() {
 
           {/* Pellets note */}
           {result.fuelResults.some(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel') && (
-            <div className="rounded-xl bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
-              <strong className="text-foreground">Hinweis Biomasse:</strong> Holzpellets und Holzhackschnitzel haben einen Emissionsfaktor, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen daher 0,00 EUR.
+            <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
+              <strong className="text-foreground">Biomasse:</strong> Holzpellets und Holzhackschnitzel haben einen Emissionsfaktor, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen 0,00 EUR.
             </div>
           )}
 
           {/* Legal note */}
-          <div className="rounded-xl bg-muted/50 border border-border p-6 text-sm text-muted-foreground">
+          <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
             <strong className="text-foreground">Hinweis:</strong> Diese Berechnung dient der unverbindlichen Information.
             Für rechtsverbindliche Auskünfte konsultieren Sie bitte einen Rechtsanwalt oder Steuerberater.
           </div>
