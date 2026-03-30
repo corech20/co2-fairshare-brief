@@ -35,21 +35,21 @@ const EMISSION_FACTORS: Record<string, number> = {
  * Erdgas / Fernwärme: User enters kWh directly (heizwertbezogen per § 3 CO2KostAufG).
  * No conversion needed – factor = 1.
  *
- * Heizöl, Flüssiggas, Pellets etc.: User enters physical units (liters, kg).
- * Factor converts to kWh (Heizwert).
+ * Heizöl: 1 Liter = 10,0461 kWh (Hi)
+ * Flüssiggas, Pellets etc.: physical units → kWh
  */
 const HEATING_VALUE_FACTORS: Record<string, number> = {
-  erdgas: 1,                    // kWh input (Hi) – no conversion
-  heizoel: 10.0625,             // liters → kWh
-  fluessiggas: 12.7778,         // kg → kWh
-  pellets: 4.1667,              // kg → kWh
-  hackschnitzel: 4.1667,        // kg → kWh
-  abfallholz: 4.1667,           // kg → kWh
-  braunkohle: 5.3889,           // kg → kWh
-  fernwaerme: 1,                // kWh input – no conversion
-  erdgas_kwk: 1,                // kWh input (Hi) – no conversion (CHP factor applied separately)
-  fluessiggas_kwk: 12.7778,     // kg → kWh
-  heizoel_kwk: 10.0625,         // liters → kWh
+  erdgas: 1,
+  heizoel: 10.0461,
+  fluessiggas: 12.7778,
+  pellets: 4.1667,
+  hackschnitzel: 4.1667,
+  abfallholz: 4.1667,
+  braunkohle: 5.3889,
+  fernwaerme: 1,
+  erdgas_kwk: 1,
+  fluessiggas_kwk: 12.7778,
+  heizoel_kwk: 10.0461,
 };
 
 /** CHP heat share factors */
@@ -67,7 +67,7 @@ const CO2_PRICE_BY_YEAR: Record<number, number> = {
   2021: 25, 2022: 30, 2023: 30, 2024: 45, 2025: 55, 2026: 65,
 };
 
-/** VAT rate on CO2 costs (7% reduced rate) */
+/** VAT rate on CO2 costs (7% reduced rate for heating) */
 const VAT_RATE = 1.07;
 
 /** Human-readable fuel labels */
@@ -160,6 +160,39 @@ export function validateBillingPeriod(start?: string, end?: string): string | nu
   const days = getBillingPeriodDays(start, end);
   if (days > 365) return 'Der angegebene Zeitraum darf nicht länger als 365 Tage sein.';
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// ANNUALIZATION HELPERS
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the number of days in the given year (accounts for leap years).
+ */
+function daysInYear(year: number): number {
+  return ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 366 : 365;
+}
+
+/**
+ * Annualize emissions for stage model classification only.
+ * If the billing period is less than a full year, scale up emissions/m²
+ * to annual equivalent for the purpose of stage classification.
+ * 
+ * CO2 costs are NEVER annualized – they are always based on actual consumption.
+ */
+function getAnnualizationFactor(start?: string, end?: string): number {
+  if (!start || !end) return 1;
+  const periodDays = getBillingPeriodDays(start, end);
+  if (periodDays <= 0) return 1;
+  
+  // Determine reference year (use end date year for days-in-year)
+  const endYear = new Date(end).getFullYear();
+  const yearDays = daysInYear(endYear);
+  
+  // If period is approximately a full year (within 2 days tolerance), no annualization
+  if (periodDays >= yearDays - 2) return 1;
+  
+  return yearDays / periodDays;
 }
 
 // ---------------------------------------------------------------------------
@@ -389,7 +422,6 @@ function calculateCrossYear(data: WizardData, notes: string[]): CalculationResul
 
   const emissionFactor = getEmissionFactor(primaryFuelType, primaryEmissionFactor);
 
-  // Build a synthetic FuelCalculationResult for the combined total
   const fuelResults: FuelCalculationResult[] = [{
     fuelType: primaryFuelType,
     fuelLabel: getFuelLabel(primaryFuelType),
@@ -405,9 +437,7 @@ function calculateCrossYear(data: WizardData, notes: string[]): CalculationResul
   const yearsUsed = segments.map(s => `${s.year}: ${s.co2PricePerTon} €/t`).join(', ');
   notes.push(`Jahresübergreifende Berechnung mit getrennten CO2-Preisen (${yearsUsed}).`);
 
-  // Use last segment year as billing year for display
   const billingYear = segments[segments.length - 1].year;
-  // co2PricePerTon is not uniform – use -1 as sentinel or the first year's price for display
   const displayCo2Price = segments[0].co2PricePerTon;
 
   return buildResult(data, fuelResults, displayCo2Price, billingYear, notes, true, segmentResults);
@@ -446,11 +476,24 @@ function buildResult(
     notes.push('Berechnung basiert auf der Wohnungsfläche.');
   }
 
-  const emissionsPerSqmYear = totalEmissionsKg / relevantArea;
+  // Calculate actual emissions per m² (based on real consumption)
+  const emissionsPerSqmActual = totalEmissionsKg / relevantArea;
 
-  // Stage model
+  // For stage model classification: annualize if period < full year
+  const annualizationFactor = getAnnualizationFactor(data.billingPeriodStart, data.billingPeriodEnd);
+  const emissionsPerSqmAnnualized = emissionsPerSqmActual * annualizationFactor;
+
+  // Use annualized value for stage classification, actual for display
+  const emissionsPerSqmForStage = emissionsPerSqmAnnualized;
+  const emissionsPerSqmYear = emissionsPerSqmActual; // Display value
+
+  if (annualizationFactor > 1) {
+    notes.push(`Für die Einstufung wurden die Emissionen auf ein volles Jahr hochgerechnet (Faktor ${annualizationFactor.toFixed(4)}).`);
+  }
+
+  // Stage model (uses annualized emissions for classification)
   const { tenantPercent: baseTenantPercent, landlordPercent: baseLandlordPercent, step } =
-    lookupStufenmodell(emissionsPerSqmYear);
+    lookupStufenmodell(emissionsPerSqmForStage);
 
   const restriction = data.restrictionCase ?? 'fall3';
 
@@ -483,6 +526,7 @@ function buildResult(
     }
   }
 
+  // CO2 costs are always based on actual consumption (never annualized)
   let landlordShare = Math.round((totalCO2Cost * landlordPercent) / 100 * 100) / 100;
   let tenantShare = Math.round((totalCO2Cost * tenantPercent) / 100 * 100) / 100;
 
@@ -540,5 +584,7 @@ function buildResult(
     notes,
     isCrossYear,
     segmentResults,
+    annualizationFactor: annualizationFactor > 1 ? annualizationFactor : undefined,
+    emissionsPerSqmAnnualized: annualizationFactor > 1 ? emissionsPerSqmAnnualized : undefined,
   };
 }
