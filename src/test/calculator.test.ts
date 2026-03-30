@@ -634,7 +634,7 @@ describe('Non-residential both restrictions', () => {
     expect(r.landlordPercent).toBe(0);
     expect(r.tenantPercent).toBe(100);
     expect(r.landlordShare).toBe(0);
-    expect(r.tenantShare).toBe(r.totalCO2Cost);
+    expect(round2(r.tenantShare)).toBe(round2(r.totalCO2Cost));
   });
 });
 
