@@ -192,9 +192,9 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       if (para.trim()) { bodyText(para.trim()); y += 2; }
     }
     y += 4;
-    if (senderName) {
+    if (senderName2) {
       doc.setFontSize(9.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40);
-      doc.text(senderName, mL, y); y += 6;
+      doc.text(senderName2, mL, y); y += 6;
     }
 
     // Start new page for calculation details
