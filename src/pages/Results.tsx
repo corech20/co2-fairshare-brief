@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle, Building2, Flame, CalendarDays } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getHeatSupplyLabel, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
+import type { OutputType } from '@/lib/calculator/types';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
   if (wizardData.buildingType === 'nichtwohngebaeude') return 'Bezugsfläche';
