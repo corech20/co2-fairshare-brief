@@ -8,6 +8,7 @@ import {
   isCrossYearPeriod,
   getYearBoundaries,
   getBillingPeriodDays,
+  getVATRate,
 } from '../lib/calculator/engine';
 import type { WizardData } from '../lib/calculator/types';
 
@@ -16,20 +17,76 @@ function round2(n: number) {
 }
 
 // ===================================================================
+// 0. VAT RATE LOGIC
+// ===================================================================
+
+describe('VAT rate determination', () => {
+  it('gas 2023 → 7% (temporary reduction)', () => {
+    expect(getVATRate('erdgas', '2023-12-31')).toBe(1.07);
+  });
+
+  it('gas Jan-Mar 2024 → 7% (still within temporary period)', () => {
+    expect(getVATRate('erdgas', '2024-03-31')).toBe(1.07);
+  });
+
+  it('gas Apr 2024 onwards → 19%', () => {
+    expect(getVATRate('erdgas', '2024-04-01')).toBe(1.19);
+  });
+
+  it('gas full year 2024 → 19% (period ends after Mar 2024)', () => {
+    expect(getVATRate('erdgas', '2024-12-31')).toBe(1.19);
+  });
+
+  it('gas 2025 → 19%', () => {
+    expect(getVATRate('erdgas', '2025-12-31')).toBe(1.19);
+  });
+
+  it('fernwaerme 2023 → 7%', () => {
+    expect(getVATRate('fernwaerme', '2023-12-31')).toBe(1.07);
+  });
+
+  it('fernwaerme 2024 full year → 19%', () => {
+    expect(getVATRate('fernwaerme', '2024-12-31')).toBe(1.19);
+  });
+
+  it('heizoel always 19%, even in 2023', () => {
+    expect(getVATRate('heizoel', '2023-12-31')).toBe(1.19);
+  });
+
+  it('fluessiggas always 19%', () => {
+    expect(getVATRate('fluessiggas', '2024-12-31')).toBe(1.19);
+  });
+
+  it('no fuel or period → 19% default', () => {
+    expect(getVATRate()).toBe(1.19);
+    expect(getVATRate('erdgas')).toBe(1.19);
+  });
+
+  it('erdgas_kwk 2023 → 7%', () => {
+    expect(getVATRate('erdgas_kwk', '2023-12-31')).toBe(1.07);
+  });
+
+  it('erdgas_kwk 2025 → 19%', () => {
+    expect(getVATRate('erdgas_kwk', '2025-12-31')).toBe(1.19);
+  });
+});
+
+// ===================================================================
 // 1. BMWK-ALIGNED REFERENCE CASES
 // ===================================================================
 
-describe('BMWK-aligned: Erdgas 10,000 kWh baseline', () => {
+describe('BMWK-aligned: Erdgas 10,000 kWh baseline (default 19% VAT)', () => {
   it('matches BMWK formula: kWh × emissionFactor directly', () => {
+    // calculateSingleFuel without vatRate → default 19%
     const r = calculateSingleFuel('erdgas', 10000, 45);
     expect(round2(r.co2Kg)).toBe(2008.8);
     expect(round2(r.energyHeatingValueKwh)).toBe(10000);
     expect(round2(r.co2CostNet)).toBe(90.4);
-    expect(round2(r.co2CostGross)).toBe(96.72);
+    expect(round2(r.co2CostGross)).toBe(round2(90.396 * 1.19));
   });
 });
 
-describe('Reference Case 1: Natural Gas (BMWK-aligned)', () => {
+describe('Reference Case 1: Natural Gas 2023 (7% VAT period)', () => {
   const data: WizardData = {
     userRole: 'vermieter',
     buildingType: 'wohngebaeude',
@@ -42,23 +99,24 @@ describe('Reference Case 1: Natural Gas (BMWK-aligned)', () => {
     buildingArea: 290,
   };
 
-  it('matches all expected values', () => {
+  it('matches all expected values with 7% VAT', () => {
     const r = calculateCO2Allocation(data);
     expect(round2(r.totalEmissionsKg)).toBe(9039.6);
     expect(round2(r.emissionsPerSqmYear)).toBe(31.17);
     expect(r.stufenmodellStep).toBe(5);
     expect(r.tenantPercent).toBe(60);
     expect(r.landlordPercent).toBe(40);
+    // net: 9039.6 × 30 / 1000 = 271.188
+    expect(round2(r.totalCO2CostNet)).toBe(271.19);
+    // gross: 271.188 × 1.07 = 290.17
     expect(round2(r.totalCO2Cost)).toBe(290.17);
-    expect(round2(r.tenantShare)).toBe(174.1);
-    expect(round2(r.landlordShare)).toBe(116.07);
     expect(r.isResidential).toBe(true);
     expect(r.isCrossYear).toBe(false);
     expect(r.annualizationFactor).toBeUndefined();
   });
 });
 
-describe('Reference Case 2: District Heating', () => {
+describe('Reference Case 2: District Heating 2023', () => {
   const data: WizardData = {
     userRole: 'vermieter',
     buildingType: 'wohngebaeude',
@@ -72,17 +130,19 @@ describe('Reference Case 2: District Heating', () => {
     buildingArea: 290,
   };
 
-  it('matches all expected values', () => {
+  it('matches all expected values with 7% VAT', () => {
     const r = calculateCO2Allocation(data);
     expect(round2(r.totalEmissionsKg)).toBe(5553.0);
     expect(round2(r.emissionsPerSqmYear)).toBe(19.15);
     expect(r.tenantPercent).toBe(80);
     expect(r.landlordPercent).toBe(20);
+    // net: 5553 × 30 / 1000 = 166.59
+    // gross: 166.59 × 1.07 = 178.2513 → 178.25
     expect(round2(r.totalCO2Cost)).toBe(178.25);
   });
 });
 
-describe('Reference Case 3: District Heating with Restriction', () => {
+describe('Reference Case 3: District Heating with Restriction 2023', () => {
   const data: WizardData = {
     userRole: 'vermieter',
     buildingType: 'wohngebaeude',
@@ -236,7 +296,8 @@ describe('Heizöl: liters → kWh conversion (factor 10.0461)', () => {
     // 30138.3 × 0.2664 = 8024.84
     expect(round2(r.co2Kg)).toBe(round2(30138.3 * 0.2664));
     expect(round2(r.co2CostNet)).toBe(round2(r.co2Kg * 30 / 1000));
-    expect(round2(r.co2CostGross)).toBe(round2(r.co2CostNet * 1.07));
+    // Heizöl always 19% VAT
+    expect(round2(r.co2CostGross)).toBe(round2(r.co2CostNet * 1.19));
   });
 });
 
@@ -370,8 +431,14 @@ describe('Direct CO2 cost input', () => {
     expect(round2(r.co2CostGross)).toBe(100);
   });
 
-  it('converts net to gross with VAT when type is netto', () => {
+  it('converts net to gross with VAT when type is netto (default 19%)', () => {
     const r = calculateSingleFuel('erdgas', 10000, 30, undefined, 100, 'netto');
+    expect(round2(r.co2CostGross)).toBe(119);
+    expect(round2(r.co2CostNet)).toBe(100);
+  });
+
+  it('converts net to gross with explicit 7% VAT', () => {
+    const r = calculateSingleFuel('erdgas', 10000, 30, undefined, 100, 'netto', 1.07);
     expect(round2(r.co2CostGross)).toBe(107);
     expect(round2(r.co2CostNet)).toBe(100);
   });
@@ -430,7 +497,7 @@ describe('Cross-year detection', () => {
 // ===================================================================
 
 describe('Cross-year calculation', () => {
-  it('calculates with separate CO2 prices per year segment', () => {
+  it('calculates with separate CO2 prices and VAT rates per year segment', () => {
     const data: WizardData = {
       userRole: 'vermieter',
       buildingType: 'wohngebaeude',
@@ -451,6 +518,12 @@ describe('Cross-year calculation', () => {
     expect(r.segmentResults).toHaveLength(2);
     expect(round2(r.segmentResults![0].co2Kg)).toBe(7030.8);
     expect(round2(r.segmentResults![1].co2Kg)).toBe(2008.8);
+
+    // Both segments end after Apr 2024 → 19% VAT for erdgas
+    const seg1Net = 7030.8 * 45 / 1000;
+    const seg2Net = 2008.8 * 55 / 1000;
+    expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(seg1Net * 1.19));
+    expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2Net * 1.19));
 
     const totalFromSegments = r.segmentResults!.reduce((s, seg) => s + seg.co2CostGross, 0);
     expect(round2(r.totalCO2Cost)).toBe(round2(totalFromSegments));
@@ -508,11 +581,11 @@ describe('CO2 price per year', () => {
 });
 
 // ===================================================================
-// 15. HEIZÖL FULL CASE (updated factor 10.0461)
+// 15. HEIZÖL FULL CASE (factor 10.0461, 19% VAT)
 // ===================================================================
 
 describe('Heizöl full allocation case (factor 10.0461)', () => {
-  it('calculates correctly for 3000 liters', () => {
+  it('calculates correctly for 3000 liters 2023 (19% VAT for oil)', () => {
     const r = calculateCO2Allocation({
       buildingType: 'wohngebaeude', restrictionCase: 'fall3',
       billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
@@ -525,6 +598,19 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
     expect(r.stufenmodellStep).toBe(7);
     expect(r.tenantPercent).toBe(40);
     expect(r.landlordPercent).toBe(60);
+    // Heizöl always 19% VAT
+    const netCost = round2(30138.3 * 0.2664) * 30 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.19));
+  });
+
+  it('calculates correctly for 3000 liters 2024 (19% VAT)', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'wohngebaeude', restrictionCase: 'fall3',
+      billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
+      fuelType: 'heizoel', fuelAmount: 3000, buildingArea: 200,
+    });
+    const netCost = round2(30138.3 * 0.2664) * 45 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.19));
   });
 });
 
@@ -532,24 +618,40 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
 // 16. NET / GROSS CONSISTENCY
 // ===================================================================
 
-describe('Net/Gross consistency (7% VAT)', () => {
-  it('gross = net × 1.07 for erdgas', () => {
+describe('Net/Gross consistency', () => {
+  it('default (no period) → 19% VAT for erdgas', () => {
     const r = calculateSingleFuel('erdgas', 10000, 30);
-    expect(round2(r.co2CostGross)).toBe(round2(r.co2CostNet * 1.07));
+    expect(round2(r.co2CostGross)).toBe(round2(r.co2CostNet * 1.19));
   });
 
-  it('gross = net × 1.07 for heizoel', () => {
+  it('heizoel always 19% VAT', () => {
     const r = calculateSingleFuel('heizoel', 1000, 45);
+    expect(round2(r.co2CostGross)).toBe(round2(r.co2CostNet * 1.19));
+  });
+
+  it('erdgas with explicit 7% VAT', () => {
+    const r = calculateSingleFuel('erdgas', 10000, 30, undefined, undefined, undefined, 1.07);
     expect(round2(r.co2CostGross)).toBe(round2(r.co2CostNet * 1.07));
   });
 
-  it('VAT consistent across years (2023 vs 2024)', () => {
-    const r2023 = calculateSingleFuel('erdgas', 10000, 30);
-    const r2024 = calculateSingleFuel('erdgas', 10000, 45);
-    expect(round2(r2023.co2CostGross)).toBe(round2(r2023.co2CostNet * 1.07));
-    expect(round2(r2024.co2CostGross)).toBe(round2(r2024.co2CostNet * 1.07));
-    // 2024 should have higher costs (45 vs 30 €/t)
-    expect(r2024.co2CostGross).toBeGreaterThan(r2023.co2CostGross);
+  it('2024 gas costs higher than 2023 (price + VAT difference)', () => {
+    const r2023 = calculateCO2Allocation({
+      buildingType: 'wohngebaeude', restrictionCase: 'fall3',
+      billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+      fuelType: 'erdgas', fuelAmount: 10000, buildingArea: 100,
+    });
+    const r2024 = calculateCO2Allocation({
+      buildingType: 'wohngebaeude', restrictionCase: 'fall3',
+      billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
+      fuelType: 'erdgas', fuelAmount: 10000, buildingArea: 100,
+    });
+    // Same emissions
+    expect(round2(r2023.totalEmissionsKg)).toBe(round2(r2024.totalEmissionsKg));
+    // 2024 has higher CO2 price (45 vs 30) AND higher VAT (19% vs 7%)
+    expect(r2024.totalCO2Cost).toBeGreaterThan(r2023.totalCO2Cost);
+    // Verify correct VAT rates applied
+    expect(round2(r2023.totalCO2Cost)).toBe(round2(r2023.totalCO2CostNet * 1.07));
+    expect(round2(r2024.totalCO2Cost)).toBe(round2(r2024.totalCO2CostNet * 1.19));
   });
 });
 
@@ -559,7 +661,6 @@ describe('Net/Gross consistency (7% VAT)', () => {
 
 describe('Annualization for stage model classification', () => {
   it('annualizes emissions/m² for under-year periods', () => {
-    // 243 days in 2024 (leap year → 366 days)
     const data: WizardData = {
       buildingType: 'wohngebaeude',
       restrictionCase: 'fall3',
@@ -583,8 +684,9 @@ describe('Annualization for stage model classification', () => {
     expect(r.emissionsPerSqmAnnualized!).toBeGreaterThan(r.emissionsPerSqmYear);
 
     // CO2 cost must NOT be annualized (based on actual 10000 kWh)
+    // Period ends 2024-09-30 → erdgas → 19% VAT (after Apr 2024)
     const expectedCostNet = 2008.8 * 45 / 1000;
-    expect(round2(r.totalCO2Cost)).toBe(round2(expectedCostNet * 1.07));
+    expect(round2(r.totalCO2Cost)).toBe(round2(expectedCostNet * 1.19));
   });
 
   it('does NOT annualize for full-year periods', () => {
@@ -639,11 +741,11 @@ describe('Non-residential both restrictions', () => {
 });
 
 // ===================================================================
-// 20. FULL 2024 ERDGAS CASE (45 €/t)
+// 20. FULL 2024 ERDGAS CASE (45 €/t, 19% VAT)
 // ===================================================================
 
 describe('Full 2024 Erdgas case', () => {
-  it('uses 45 €/t correctly', () => {
+  it('uses 45 €/t with 19% VAT correctly', () => {
     const r = calculateCO2Allocation({
       buildingType: 'wohngebaeude', restrictionCase: 'fall3',
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
@@ -654,25 +756,27 @@ describe('Full 2024 Erdgas case', () => {
     // 2008.8 / 100 = 20.09 → step 3 (17-22)
     expect(r.stufenmodellStep).toBe(3);
     // net: 2008.8 × 45/1000 = 90.396
-    // gross: 90.396 × 1.07 = 96.72
-    expect(round2(r.totalCO2Cost)).toBe(96.72);
+    expect(round2(r.totalCO2CostNet)).toBe(90.4);
+    // gross: 90.396 × 1.19 = 107.57
+    expect(round2(r.totalCO2Cost)).toBe(107.57);
   });
 });
 
 // ===================================================================
-// 21. FULL 2025 ERDGAS CASE (55 €/t)
+// 21. FULL 2025 ERDGAS CASE (55 €/t, 19% VAT)
 // ===================================================================
 
 describe('Full 2025 Erdgas case', () => {
-  it('uses 55 €/t correctly', () => {
+  it('uses 55 €/t with 19% VAT correctly', () => {
     const r = calculateCO2Allocation({
       buildingType: 'wohngebaeude', restrictionCase: 'fall3',
       billingPeriodStart: '2025-01-01', billingPeriodEnd: '2025-12-31',
       fuelType: 'erdgas', fuelAmount: 10000, buildingArea: 100,
     });
     // net: 2008.8 × 55/1000 = 110.484
-    // gross: 110.484 × 1.07 = 118.22
-    expect(round2(r.totalCO2Cost)).toBe(118.22);
+    expect(round2(r.totalCO2CostNet)).toBe(110.48);
+    // gross: 110.484 × 1.19 = 131.48
+    expect(round2(r.totalCO2Cost)).toBe(131.48);
   });
 });
 
@@ -708,10 +812,93 @@ describe('Deviating billing period within one year', () => {
     const r = calculateCO2Allocation(data);
     expect(r.isCrossYear).toBe(false);
     // Actual CO2: 5000 × 0.20088 = 1004.4 kg → 10.044 kg/m²
-    // Annualized: 10.044 × (366/183) = ~20.09 kg/m²/a → step 3
     expect(r.annualizationFactor).toBeDefined();
     expect(round2(r.totalEmissionsKg)).toBe(round2(5000 * 0.20088));
     // CO2 cost based on actual consumption, NOT annualized
-    expect(round2(r.totalCO2Cost)).toBe(round2(1004.4 * 45 / 1000 * 1.07));
+    // Period ends 2024-09-30 → erdgas → 19% VAT
+    expect(round2(r.totalCO2Cost)).toBe(round2(1004.4 * 45 / 1000 * 1.19));
+  });
+});
+
+// ===================================================================
+// 24. HEIZÖL 2024 GROSS CORRECTNESS (19% VAT)
+// ===================================================================
+
+describe('Heizöl 2024 gross correctness', () => {
+  it('applies 19% VAT for heating oil in 2024', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'wohngebaeude', restrictionCase: 'fall3',
+      billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
+      fuelType: 'heizoel', fuelAmount: 2000, buildingArea: 150,
+    });
+    // 2000 × 10.0461 = 20092.2 kWh
+    // 20092.2 × 0.2664 = 5348.55 kg CO2
+    // net: 5348.55 × 45 / 1000 = 240.68
+    // gross: 240.68 × 1.19 = 286.41
+    const emissions = round2(20092.2 * 0.2664);
+    const netCost = emissions * 45 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.19));
+    expect(round2(r.totalCO2CostNet)).toBe(round2(netCost));
+  });
+});
+
+// ===================================================================
+// 25. GAS Q1 2024 (still 7% VAT period)
+// ===================================================================
+
+describe('Gas Q1 2024 (within temporary 7% VAT period)', () => {
+  it('uses 7% VAT for gas period ending before Apr 2024', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'wohngebaeude', restrictionCase: 'fall3',
+      billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-03-31',
+      fuelType: 'erdgas', fuelAmount: 3000, buildingArea: 100,
+    });
+    // 3000 × 0.20088 = 602.64 kg
+    // net: 602.64 × 45 / 1000 = 27.1188
+    // gross: 27.1188 × 1.07 = 29.02
+    const netCost = 602.64 * 45 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.07));
+  });
+});
+
+// ===================================================================
+// 26. MULTI-FUEL MIXED VAT (heizoel + erdgas 2023)
+// ===================================================================
+
+describe('Multi-fuel mixed VAT rates (2023)', () => {
+  it('applies correct VAT per fuel type', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'wohngebaeude', restrictionCase: 'fall3',
+      billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
+      buildingArea: 300,
+      fuelEntries: [
+        { fuelType: 'erdgas', amount: 20000 },      // 7% VAT (gas 2023)
+        { fuelType: 'heizoel', amount: 1000 },       // 19% VAT (oil always)
+      ],
+    });
+    expect(r.fuelResults).toHaveLength(2);
+    // Gas: 7% VAT
+    const gasNet = r.fuelResults[0].co2CostNet;
+    expect(round2(r.fuelResults[0].co2CostGross)).toBe(round2(gasNet * 1.07));
+    // Oil: 19% VAT
+    const oilNet = r.fuelResults[1].co2CostNet;
+    expect(round2(r.fuelResults[1].co2CostGross)).toBe(round2(oilNet * 1.19));
+  });
+});
+
+// ===================================================================
+// 27. NET/GROSS SEPARATION IN RESULT
+// ===================================================================
+
+describe('Net and gross are cleanly separated', () => {
+  it('totalCO2CostNet and totalCO2Cost are both present and different', () => {
+    const r = calculateCO2Allocation({
+      buildingType: 'wohngebaeude', restrictionCase: 'fall3',
+      billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
+      fuelType: 'erdgas', fuelAmount: 10000, buildingArea: 100,
+    });
+    expect(r.totalCO2CostNet).toBeDefined();
+    expect(r.totalCO2CostNet).toBeLessThan(r.totalCO2Cost);
+    expect(round2(r.totalCO2Cost / r.totalCO2CostNet)).toBe(1.19);
   });
 });

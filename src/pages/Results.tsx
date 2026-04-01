@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FileText, RotateCcw, ArrowRight, Info, AlertTriangle, Building2, Flame, CalendarDays } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getHeatSupplyLabel, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
+import type { OutputType } from '@/lib/calculator/types';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
   if (wizardData.buildingType === 'nichtwohngebaeude') return 'Bezugsfläche';
@@ -29,7 +30,7 @@ export default function ResultsPage() {
   }
 
   const handleNewCalculation = () => { reset(); navigate('/rechner'); };
-  const handleGeneratePDF = () => { generatePDF(wizardData, result); };
+  const handleGeneratePDF = (outputType: OutputType = 'calculation') => { generatePDF(wizardData, result, outputType); };
 
   const formatCurrency = (n: number) => fmt.currency(n);
   const formatNumber = (n: number, decimals = 2) => fmt.number(n, decimals);
@@ -194,9 +195,14 @@ export default function ResultsPage() {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button variant="cta" size="lg" className="flex-1" onClick={handleGeneratePDF}>
-              <FileText className="h-4 w-4" />PDF-Schreiben erstellen
+            <Button variant="cta" size="lg" className="flex-1" onClick={() => handleGeneratePDF('calculation')}>
+              <FileText className="h-4 w-4" />Berechnung als PDF
             </Button>
+            {isTenantClaim && (
+              <Button variant="outline" size="lg" className="flex-1" onClick={() => handleGeneratePDF('letter_tenant_reimbursement')}>
+                <FileText className="h-4 w-4" />Erstattungsschreiben
+              </Button>
+            )}
             <Button variant="outline" size="lg" className="flex-1" onClick={handleNewCalculation}>
               <RotateCcw className="h-4 w-4" />Neue Berechnung
             </Button>

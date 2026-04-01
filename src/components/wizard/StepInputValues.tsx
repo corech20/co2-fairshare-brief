@@ -116,7 +116,7 @@ export default function StepInputValues() {
       case 'pellets': return 'Pelletverbrauch';
       case 'hackschnitzel': return 'Hackschnitzelverbrauch';
       case 'braunkohle': return 'Braunkohleverbrauch';
-      default: return 'Gasverbrauch';
+      default: return 'Erdgasverbrauch in kWh (Brennwert, Hs)';
     }
   })();
 
@@ -181,7 +181,9 @@ export default function StepInputValues() {
         {!isMultiFuel && !crossYear && (
           <InputField
             label={fuelLabel}
-            hint={`Verbrauch im Abrechnungszeitraum in ${fuelUnit}`}
+            hint={wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk'
+              ? 'Verbrauch in kWh lt. Abrechnung (Brennwert/Hs). Wird intern auf Heizwert umgerechnet.'
+              : `Verbrauch im Abrechnungszeitraum in ${fuelUnit}`}
             value={wizardData.fuelAmount}
             onChange={v => setWizardField('fuelAmount', v ? parseFloat(v) : undefined)}
             placeholder={`z. B. ${wizardData.fuelType === 'heizoel' ? '3000' : '50000'}`}

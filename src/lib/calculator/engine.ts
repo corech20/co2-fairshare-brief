@@ -67,8 +67,38 @@ const CO2_PRICE_BY_YEAR: Record<number, number> = {
   2021: 25, 2022: 30, 2023: 30, 2024: 45, 2025: 55, 2026: 65,
 };
 
-/** VAT rate on CO2 costs (7% reduced rate for heating) */
-const VAT_RATE = 1.07;
+// ---------------------------------------------------------------------------
+// VAT RATE LOGIC
+// ---------------------------------------------------------------------------
+
+/** Standard VAT rate (19%) */
+const STANDARD_VAT_RATE = 1.19;
+
+/** Temporarily reduced VAT rate (7%) for gas/Fernwärme: Oct 2022 – Mar 2024 */
+const REDUCED_VAT_RATE = 1.07;
+
+/** Fuels eligible for the temporary 7% VAT reduction */
+const GAS_REDUCED_VAT_FUELS = new Set<string>(['erdgas', 'erdgas_kwk', 'fernwaerme']);
+
+/**
+ * Determine the applicable VAT rate for CO2 costs.
+ *
+ * Gas and Fernwärme had a temporarily reduced VAT rate of 7% (Oct 2022 – Mar 2024).
+ * All other fuels always use the standard 19% rate.
+ *
+ * The billing period end date is used as a practical proxy to determine
+ * which VAT regime applies.
+ */
+export function getVATRate(fuelType?: string, billingPeriodEnd?: string): number {
+  if (fuelType && GAS_REDUCED_VAT_FUELS.has(fuelType) && billingPeriodEnd) {
+    const endDate = new Date(billingPeriodEnd);
+    // If billing period ends before April 2024, the temporary 7% rate applies
+    if (endDate < new Date('2024-04-01')) {
+      return REDUCED_VAT_RATE;
+    }
+  }
+  return STANDARD_VAT_RATE;
+}
 
 /** Human-readable fuel labels */
 const FUEL_LABELS: Record<FuelType, string> = {
@@ -166,32 +196,24 @@ export function validateBillingPeriod(start?: string, end?: string): string | nu
 // ANNUALIZATION HELPERS
 // ---------------------------------------------------------------------------
 
-/**
- * Returns the number of days in the given year (accounts for leap years).
- */
 function daysInYear(year: number): number {
   return ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 366 : 365;
 }
 
 /**
  * Annualize emissions for stage model classification only.
- * If the billing period is less than a full year, scale up emissions/m²
- * to annual equivalent for the purpose of stage classification.
- * 
  * CO2 costs are NEVER annualized – they are always based on actual consumption.
  */
 function getAnnualizationFactor(start?: string, end?: string): number {
   if (!start || !end) return 1;
   const periodDays = getBillingPeriodDays(start, end);
   if (periodDays <= 0) return 1;
-  
-  // Determine reference year (use end date year for days-in-year)
+
   const endYear = new Date(end).getFullYear();
   const yearDays = daysInYear(endYear);
-  
-  // If period is approximately a full year (within 2 days tolerance), no annualization
+
   if (periodDays >= yearDays - 2) return 1;
-  
+
   return yearDays / periodDays;
 }
 
@@ -206,6 +228,7 @@ export function calculateSingleFuel(
   customEmissionFactor?: number,
   directCost?: number,
   directCostType?: CostInputType,
+  vatRate: number = STANDARD_VAT_RATE,
 ): FuelCalculationResult {
   const heatingValueFactor = HEATING_VALUE_FACTORS[fuelType] ?? 1;
   const chpFactor = CHP_HEAT_SHARE[fuelType] ?? 1;
@@ -216,8 +239,8 @@ export function calculateSingleFuel(
 
   // Check for direct cost input
   if (directCost != null && directCost > 0) {
-    const co2CostGross = directCostType === 'netto' ? directCost * VAT_RATE : directCost;
-    const co2CostNet = directCostType === 'netto' ? directCost : directCost / VAT_RATE;
+    const co2CostGross = directCostType === 'netto' ? directCost * vatRate : directCost;
+    const co2CostNet = directCostType === 'netto' ? directCost : directCost / vatRate;
     return {
       fuelType, fuelLabel: getFuelLabel(fuelType), inputAmount: amount,
       energyHeatingValueKwh, emissionFactor, co2Kg,
@@ -227,7 +250,7 @@ export function calculateSingleFuel(
 
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
   const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostGross = isZeroCost ? 0 : co2CostNet * VAT_RATE;
+  const co2CostGross = isZeroCost ? 0 : co2CostNet * vatRate;
 
   return {
     fuelType, fuelLabel: getFuelLabel(fuelType), inputAmount: amount,
@@ -245,6 +268,7 @@ function calculateFuelSegment(
   amount: number,
   co2PricePerTon: number,
   customEmissionFactor?: number,
+  vatRate: number = STANDARD_VAT_RATE,
 ): { energyHeatingValueKwh: number; co2Kg: number; co2CostNet: number; co2CostGross: number } {
   const heatingValueFactor = HEATING_VALUE_FACTORS[fuelType] ?? 1;
   const chpFactor = CHP_HEAT_SHARE[fuelType] ?? 1;
@@ -254,7 +278,7 @@ function calculateFuelSegment(
   const co2Kg = energyHeatingValueKwh * emissionFactor;
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
   const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostGross = isZeroCost ? 0 : co2CostNet * VAT_RATE;
+  const co2CostGross = isZeroCost ? 0 : co2CostNet * vatRate;
 
   return { energyHeatingValueKwh, co2Kg, co2CostNet, co2CostGross };
 }
@@ -372,13 +396,15 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
         co2CostDirectType: data.co2CostDirectType,
       }];
 
-  // Calculate each fuel
-  const fuelResults: FuelCalculationResult[] = fuelEntries.map(entry =>
-    calculateSingleFuel(
+  // Calculate each fuel with the correct VAT rate
+  const fuelResults: FuelCalculationResult[] = fuelEntries.map(entry => {
+    const vatRate = getVATRate(entry.fuelType, data.billingPeriodEnd);
+    return calculateSingleFuel(
       entry.fuelType, entry.amount, co2PricePerTon,
       entry.emissionFactorCustom, entry.co2CostDirect, entry.co2CostDirectType,
-    ),
-  );
+      vatRate,
+    );
+  });
 
   return buildResult(data, fuelResults, co2PricePerTon, billingYear, notes, false, undefined);
 }
@@ -401,7 +427,8 @@ function calculateCrossYear(data: WizardData, notes: string[]): CalculationResul
 
   for (const seg of segments) {
     const co2Price = getCO2PriceForYear(seg.year);
-    const result = calculateFuelSegment(primaryFuelType, seg.amount, co2Price, primaryEmissionFactor);
+    const vatRate = getVATRate(primaryFuelType, seg.periodEnd);
+    const result = calculateFuelSegment(primaryFuelType, seg.amount, co2Price, primaryEmissionFactor, vatRate);
     segmentResults.push({
       year: seg.year,
       periodStart: seg.periodStart,
@@ -434,7 +461,7 @@ function calculateCrossYear(data: WizardData, notes: string[]): CalculationResul
     usedDirectCost: false,
   }];
 
-  const yearsUsed = segments.map(s => `${s.year}: ${s.co2PricePerTon} €/t`).join(', ');
+  const yearsUsed = segments.map(s => `${s.year}: ${getCO2PriceForYear(s.year)} €/t`).join(', ');
   notes.push(`Jahresübergreifende Berechnung mit getrennten CO2-Preisen (${yearsUsed}).`);
 
   const billingYear = segments[segments.length - 1].year;
@@ -460,9 +487,11 @@ function buildResult(
   const totalEnergyHeatingValueKwh = fuelResults.reduce((s, r) => s + r.energyHeatingValueKwh, 0);
   const totalEmissionsKg = fuelResults.reduce((s, r) => s + r.co2Kg, 0);
   const totalCO2CostGrossCalc = fuelResults.reduce((s, r) => s + r.co2CostGross, 0);
+  const totalCO2CostNetCalc = fuelResults.reduce((s, r) => s + r.co2CostNet, 0);
   const anyDirectCost = fuelResults.some(r => r.usedDirectCost);
 
   const totalCO2Cost = totalCO2CostGrossCalc;
+  const totalCO2CostNet = totalCO2CostNetCalc;
   const usedDirectCost = anyDirectCost;
 
   const weightedEmissionFactor = totalEnergyHeatingValueKwh > 0
@@ -485,7 +514,7 @@ function buildResult(
 
   // Use annualized value for stage classification, actual for display
   const emissionsPerSqmForStage = emissionsPerSqmAnnualized;
-  const emissionsPerSqmYear = emissionsPerSqmActual; // Display value
+  const emissionsPerSqmYear = emissionsPerSqmActual;
 
   if (annualizationFactor > 1) {
     notes.push(`Für die Einstufung wurden die Emissionen auf ein volles Jahr hochgerechnet (Faktor ${annualizationFactor.toFixed(4)}).`);
@@ -560,6 +589,7 @@ function buildResult(
     emissionsPerSqmYear,
     co2PricePerTon,
     totalCO2Cost,
+    totalCO2CostNet,
     landlordShare,
     tenantShare,
     landlordPercent,
