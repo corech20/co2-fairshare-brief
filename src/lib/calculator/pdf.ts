@@ -488,12 +488,13 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   }
   y += 4;
 
-  if (senderName) {
+  const senderNameClosing = getSenderName(data);
+  if (senderNameClosing) {
     ensureSpace(6);
     doc.setFontSize(9.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
-    doc.text(senderName, mL, y);
+    doc.text(senderNameClosing, mL, y);
     y += 10;
   }
 
