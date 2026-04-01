@@ -22,7 +22,7 @@ import {
   getAreaLabelForPDF,
 } from './pdf-helpers';
 
-export function generatePDF(data: WizardData, result: CalculationResult) {
+export function generatePDF(data: WizardData, result: CalculationResult, outputType: string = 'calculation') {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pw = doc.internal.pageSize.getWidth();
   const ph = doc.internal.pageSize.getHeight();
