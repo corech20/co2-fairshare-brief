@@ -4,7 +4,7 @@ import { AlertTriangle, Info, ChevronDown } from 'lucide-react';
 import type { YearlySegment } from '@/lib/calculator/types';
 import { useEffect, useState } from 'react';
 
-const AVAILABLE_YEARS = [2023, 2024, 2025, 2026];
+const AVAILABLE_YEARS = [2023, 2024, 2025];
 
 export default function StepBillingPeriod() {
   const { wizardData, setWizardField } = useCalculator();
