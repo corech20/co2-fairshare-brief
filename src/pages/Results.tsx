@@ -30,7 +30,7 @@ export default function ResultsPage() {
   }
 
   const handleNewCalculation = () => { reset(); navigate('/rechner'); };
-  const handleGeneratePDF = () => { generatePDF(wizardData, result); };
+  const handleGeneratePDF = (outputType: OutputType = 'calculation') => { generatePDF(wizardData, result, outputType); };
 
   const formatCurrency = (n: number) => fmt.currency(n);
   const formatNumber = (n: number, decimals = 2) => fmt.number(n, decimals);
