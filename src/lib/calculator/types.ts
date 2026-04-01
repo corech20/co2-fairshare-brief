@@ -18,6 +18,9 @@ export type FuelType =
 
 export type CostInputType = 'brutto' | 'netto';
 
+/** Output type for PDF generation */
+export type OutputType = 'calculation' | 'letter_tenant_reimbursement' | 'letter_landlord_info';
+
 export interface FuelEntry {
   fuelType: FuelType;
   amount: number;
@@ -110,7 +113,10 @@ export interface CalculationResult {
   totalEmissionsKg: number;
   emissionsPerSqmYear: number;
   co2PricePerTon: number;
+  /** Total CO2 cost including VAT (gross) */
   totalCO2Cost: number;
+  /** Total CO2 cost excluding VAT (net) */
+  totalCO2CostNet: number;
   landlordShare: number;
   tenantShare: number;
   landlordPercent: number;
