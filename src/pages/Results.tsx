@@ -195,9 +195,14 @@ export default function ResultsPage() {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button variant="cta" size="lg" className="flex-1" onClick={handleGeneratePDF}>
-              <FileText className="h-4 w-4" />PDF-Schreiben erstellen
+            <Button variant="cta" size="lg" className="flex-1" onClick={() => handleGeneratePDF('calculation')}>
+              <FileText className="h-4 w-4" />Berechnung als PDF
             </Button>
+            {isTenantClaim && (
+              <Button variant="outline" size="lg" className="flex-1" onClick={() => handleGeneratePDF('letter_tenant_reimbursement')}>
+                <FileText className="h-4 w-4" />Erstattungsschreiben
+              </Button>
+            )}
             <Button variant="outline" size="lg" className="flex-1" onClick={handleNewCalculation}>
               <RotateCcw className="h-4 w-4" />Neue Berechnung
             </Button>

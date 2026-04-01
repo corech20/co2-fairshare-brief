@@ -116,7 +116,7 @@ export default function StepInputValues() {
       case 'pellets': return 'Pelletverbrauch';
       case 'hackschnitzel': return 'Hackschnitzelverbrauch';
       case 'braunkohle': return 'Braunkohleverbrauch';
-      default: return 'Gasverbrauch';
+      default: return 'Erdgasverbrauch in kWh (Brennwert, Hs)';
     }
   })();
 
