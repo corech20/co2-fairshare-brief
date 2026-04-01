@@ -93,87 +93,157 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     y += 4.5;
   };
 
+  const isLetterMode = outputType === 'letter_tenant_reimbursement' || outputType === 'letter_landlord_info';
+
   // ═══════════════════════════════════════════════════════════════════════
-  // PART I — FORMAL LETTER
+  // PART I — HEADER (always) or FORMAL LETTER (letter mode only)
   // ═══════════════════════════════════════════════════════════════════════
 
-  // ═══ 1. SENDER BLOCK ═══
-  const senderName = getSenderName(data);
-  const senderLines = getSenderAddressLines(data);
+  if (isLetterMode) {
+    // ═══ 1. SENDER BLOCK ═══
+    const senderName2 = getSenderName(data);
+    const senderLines2 = getSenderAddressLines(data);
 
-  if (senderName || senderLines.length > 0) {
-    doc.setFontSize(7.5);
-    doc.setTextColor(120, 120, 120);
-    const senderCompact = [senderName, ...senderLines].filter(Boolean).join(' · ');
-    doc.text(senderCompact, mL, y);
-    y += 2.5;
-    doc.setDrawColor(180, 180, 180);
-    doc.setLineWidth(0.2);
-    doc.line(mL, y, mL + 85, y);
+    if (senderName2 || senderLines2.length > 0) {
+      doc.setFontSize(7.5);
+      doc.setTextColor(120, 120, 120);
+      const senderCompact = [senderName2, ...senderLines2].filter(Boolean).join(' · ');
+      doc.text(senderCompact, mL, y);
+      y += 2.5;
+      doc.setDrawColor(180, 180, 180);
+      doc.setLineWidth(0.2);
+      doc.line(mL, y, mL + 85, y);
+      y += 6;
+    } else {
+      y += 8;
+    }
+
+    // ═══ 2. RECIPIENT BLOCK ═══
+    const recipientName2 = getRecipientName(data);
+    const recipientLines2 = getRecipientAddressLines(data);
+
+    if (recipientName2 || recipientLines2.length > 0) {
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 30, 30);
+      doc.setFont('helvetica', 'bold');
+      if (recipientName2) { doc.text(recipientName2, mL, y); y += 5; }
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      for (const line of recipientLines2) { doc.text(line, mL, y); y += 4.5; }
+      y += 4;
+    }
+
+    // ═══ 3. DATE + CALC-ID ═══
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text(today, pw - mR, y, { align: 'right' });
+    y += 4.5;
+    doc.text(`Berechnungs-Nr.: ${calcId}`, pw - mR, y, { align: 'right' });
+    y += 8;
+
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Abrechnungszeitraum: ${period}`, mL, y);
+    if (result.isCrossYear) {
+      y += 4;
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
+    }
+    y += 8;
+
+    // ═══ 4. SUBJECT LINE ═══
+    const subjectText = getSubjectLine(data, result);
+    doc.setFontSize(11.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(20, 40, 70);
+    const subjLines = doc.splitTextToSize(subjectText, cw);
+    doc.text(subjLines, mL, y);
+    y += subjLines.length * 5 + 2;
+    doc.setDrawColor(20, 40, 70);
+    doc.setLineWidth(0.5);
+    doc.line(mL, y, pw - mR, y);
+    y += 8;
+
+    // ═══ 5. SALUTATION + INTRO ═══
+    const salutation = getSalutation(data);
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    doc.text(salutation, mL, y);
     y += 6;
+
+    const introText = getIntroText(data, result);
+    bodyText(introText);
+    y += 6;
+
+    // ═══ COMPACT RESULT SUMMARY on letter page ═══
+    ensureSpace(30);
+    detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+    detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 2, true);
+    detailRow(`Anteil Mieter (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 2, true);
+    y += 4;
+
+    // Closing on letter page
+    const closingText = getClosingText(data);
+    const closingParagraphs = closingText.split('\n\n');
+    for (const para of closingParagraphs) {
+      if (para.trim()) { bodyText(para.trim()); y += 2; }
+    }
+    y += 4;
+    if (senderName) {
+      doc.setFontSize(9.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40);
+      doc.text(senderName, mL, y); y += 6;
+    }
+
+    // Start new page for calculation details
+    addFooter();
+    doc.addPage();
+    y = 20;
+
+    // Calculation page title
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 40, 70);
+    doc.text('Berechnungsgrundlage', mL, y);
+    y += 3;
+    doc.setDrawColor(20, 40, 70); doc.setLineWidth(0.5);
+    doc.line(mL, y, pw - mR, y);
+    y += 8;
+
+    // Metadata on calc page
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+    doc.text(`Berechnungs-Nr.: ${calcId}`, mL, y); y += 4;
+    doc.text(`Abrechnungszeitraum: ${period}`, mL, y); y += 8;
+
   } else {
+    // ═══ CALCULATION-ONLY MODE: compact header ═══
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(20, 40, 70);
+    doc.text('CO2-Kostenaufteilung – Berechnungsblatt', mL, y);
+    y += 3;
+    doc.setDrawColor(20, 40, 70);
+    doc.setLineWidth(0.5);
+    doc.line(mL, y, pw - mR, y);
+    y += 7;
+
+    // Meta info
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Erstellt am: ${today}`, mL, y);
+    doc.text(`Berechnungs-Nr.: ${calcId}`, pw - mR, y, { align: 'right' });
+    y += 5;
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Abrechnungszeitraum: ${period}`, mL, y);
+    if (result.isCrossYear) {
+      y += 4;
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
+    }
     y += 8;
   }
-
-  // ═══ 2. RECIPIENT BLOCK ═══
-  const recipientName = getRecipientName(data);
-  const recipientLines = getRecipientAddressLines(data);
-
-  if (recipientName || recipientLines.length > 0) {
-    doc.setFontSize(10.5);
-    doc.setTextColor(30, 30, 30);
-    doc.setFont('helvetica', 'bold');
-    if (recipientName) { doc.text(recipientName, mL, y); y += 5; }
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9.5);
-    for (const line of recipientLines) { doc.text(line, mL, y); y += 4.5; }
-    y += 4;
-  }
-
-  // ═══ 3. DATE + CALC-ID + BILLING PERIOD ═══
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(80, 80, 80);
-  doc.text(today, pw - mR, y, { align: 'right' });
-  y += 4.5;
-  doc.text(`Berechnungs-Nr.: ${calcId}`, pw - mR, y, { align: 'right' });
-  y += 8;
-
-  doc.setFontSize(9);
-  doc.setTextColor(60, 60, 60);
-  doc.text(`Abrechnungszeitraum: ${period}`, mL, y);
-  if (result.isCrossYear) {
-    y += 4;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
-  }
-  y += 8;
-
-  // ═══ 4. SUBJECT LINE ═══
-  const subjectText = getSubjectLine(data, result);
-  doc.setFontSize(11.5);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(20, 40, 70);
-  const subjLines = doc.splitTextToSize(subjectText, cw);
-  doc.text(subjLines, mL, y);
-  y += subjLines.length * 5 + 2;
-  doc.setDrawColor(20, 40, 70);
-  doc.setLineWidth(0.5);
-  doc.line(mL, y, pw - mR, y);
-  y += 8;
-
-  // ═══ 5. SALUTATION + INTRO ═══
-  const salutation = getSalutation(data);
-  doc.setFontSize(9.5);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(40, 40, 40);
-  doc.text(salutation, mL, y);
-  y += 6;
-
-  const introText = getIntroText(data, result);
-  bodyText(introText);
-  y += 6;
 
   // ═══════════════════════════════════════════════════════════════════════
   // PART II — TECHNICAL CALCULATION
