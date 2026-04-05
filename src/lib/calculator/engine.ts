@@ -596,6 +596,8 @@ function buildResult(
     co2PricePerTon,
     totalCO2Cost,
     totalCO2CostNet,
+    appliedVATRate,
+    vatPercent,
     landlordShare,
     tenantShare,
     landlordPercent,
