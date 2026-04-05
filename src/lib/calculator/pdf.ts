@@ -249,7 +249,16 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // PART II — TECHNICAL CALCULATION
   // ═══════════════════════════════════════════════════════════════════════
 
-  sectionHeading('1. Energiegehalt der eingesetzten Brennstoffe, CO2-Emissionen und CO2-Kosten');
+  // Show fuel type(s) explicitly at the top of the calculation section
+  sectionHeading('1. Brennstoff, Energiegehalt und CO2-Kosten');
+
+  // Fuel summary line
+  if (result.fuelResults.length === 1) {
+    detailRow('Brennstoff:', result.fuelResults[0].fuelLabel, 2, true);
+  } else {
+    detailRow('Brennstoffe:', result.fuelResults.map(fr => fr.fuelLabel).join(', '), 2, true);
+  }
+  y += 2;
 
   // Cross-year segment display
   if (result.isCrossYear && result.segmentResults && result.segmentResults.length > 0) {
@@ -265,7 +274,8 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       detailRow('CO2-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
       detailRow('Energie (Heizwert):', `${fmt.number(seg.energyHeatingValueKwh, 0)} kWh`, 4);
       detailRow('CO2-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
-      detailRow('CO2-Kosten (brutto):', fmt.currency(seg.co2CostGross), 4);
+      detailRow('CO2-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
+      detailRow('CO2-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
       y += 3;
     }
     ensureSpace(12);
@@ -274,7 +284,8 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.line(mL + 2, y, pw - mR, y);
     y += 5;
     detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
-    detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+    detailRow('Gesamte CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
+    detailRow('Gesamte CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
   } else {
     // Standard per-fuel details
     for (let i = 0; i < result.fuelResults.length; i++) {
@@ -306,11 +317,14 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 0)} kWh`, 2, true);
       detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
       detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`, 2);
-      detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
-    } else {
-      ensureSpace(8);
-      detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
     }
+
+    // Net / Gross / VAT breakdown
+    ensureSpace(16);
+    y += 2;
+    detailRow('CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
+    detailRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2);
+    detailRow('CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
 
     // CO2 price note
     y += 2;
