@@ -477,21 +477,21 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     y += 5;
   }
 
-  // Tenant reimbursement highlight
-  if (docCase === 'C' || docCase === 'D') {
+  // Tenant reimbursement highlight – only when meaningful
+  if ((docCase === 'C' || docCase === 'D') && result.landlordShare > 0) {
     y += 3;
-    ensureSpace(16);
-    doc.setFillColor(232, 242, 255);
-    doc.roundedRect(mL + 4, y - 3, cw - 8, 14, 2, 2, 'F');
-    doc.setDrawColor(30, 80, 160);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(mL + 4, y - 3, cw - 8, 14, 2, 2, 'S');
-    doc.setFontSize(9.5);
+    ensureSpace(14);
+    doc.setFillColor(240, 245, 252);
+    doc.roundedRect(mL + 4, y - 3, cw - 8, 12, 2, 2, 'F');
+    doc.setDrawColor(60, 100, 160);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(mL + 4, y - 3, cw - 8, 12, 2, 2, 'S');
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(20, 50, 100);
-    doc.text('Möglicher Erstattungsanspruch gegenüber dem Vermieter:', mL + 8, y + 4);
-    doc.text(fmt.currency(result.landlordShare), pw - mR - 8, y + 4, { align: 'right' });
-    y += 16;
+    doc.setTextColor(30, 50, 90);
+    doc.text('Erstattungsanspruch:', mL + 8, y + 3);
+    doc.text(fmt.currency(result.landlordShare), pw - mR - 8, y + 3, { align: 'right' });
+    y += 14;
   }
 
   // Add bottom padding
