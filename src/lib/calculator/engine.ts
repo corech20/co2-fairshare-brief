@@ -494,6 +494,12 @@ function buildResult(
   const totalCO2CostNet = totalCO2CostNetCalc;
   const usedDirectCost = anyDirectCost;
 
+  // Determine the effective VAT rate for display purposes
+  const appliedVATRate = totalCO2CostNet > 0
+    ? totalCO2Cost / totalCO2CostNet
+    : getVATRate(data.fuelType, data.billingPeriodEnd);
+  const vatPercent = Math.round((appliedVATRate - 1) * 100);
+
   const weightedEmissionFactor = totalEnergyHeatingValueKwh > 0
     ? totalEmissionsKg / totalEnergyHeatingValueKwh : 0;
 
