@@ -6,18 +6,18 @@ import { useState } from 'react';
 const SPECIAL_OPTIONS: { value: RestrictionCase; label: string; desc: string }[] = [
   {
     value: 'fall1',
-    label: 'Fall 1: Energetische Verbesserung des Gebäudes nicht möglich',
-    desc: 'Öffentlich-rechtliche Vorgaben verhindern eine wesentliche energetische Verbesserung des Gebäudes (z. B. bestimmte Denkmalschutzvorgaben).',
+    label: 'Fall 1: Energetische Gebäudeverbesserung eingeschränkt',
+    desc: 'Öffentlich-rechtliche Vorgaben verhindern wesentliche energetische Maßnahmen am Gebäude.',
   },
   {
     value: 'fall2',
-    label: 'Fall 2: Verbesserung der Wärmeversorgung nicht möglich',
-    desc: 'Öffentlich-rechtliche Vorgaben verhindern eine wesentliche Verbesserung der Wärme- oder Warmwasserversorgung (z. B. Anschlusszwang an ein Wärmenetz).',
+    label: 'Fall 2: Verbesserung der Wärmeversorgung eingeschränkt',
+    desc: 'Öffentlich-rechtliche Vorgaben verhindern eine wesentliche Verbesserung der Wärmeversorgung (z.\u00A0B. Anschlusszwang).',
   },
   {
     value: 'fall1und2',
-    label: 'Beide Einschränkungen treffen zu',
-    desc: 'Sowohl die energetische Verbesserung des Gebäudes als auch der Wärmeversorgung ist wesentlich eingeschränkt.',
+    label: 'Beide Einschränkungen (Fall 1 und Fall 2)',
+    desc: 'Sowohl die energetische Verbesserung als auch die Wärmeversorgung ist wesentlich eingeschränkt.',
   },
 ];
 
@@ -34,7 +34,6 @@ export default function StepRestriction() {
 
   const openSpecial = () => {
     setShowSpecial(true);
-    // Clear default selection if it was set
     if (wizardData.restrictionCase === 'fall3') {
       setWizardField('restrictionCase', undefined as unknown as RestrictionCase);
     }
@@ -45,7 +44,7 @@ export default function StepRestriction() {
       <div>
         <h2 className="text-2xl font-bold text-foreground">Öffentlich-rechtliche Einschränkungen</h2>
         <p className="text-muted-foreground mt-2 text-sm">
-          Bestehen rechtliche Vorgaben, die eine energetische Verbesserung des Gebäudes oder der Wärmeversorgung einschränken?
+          Bestehen Vorgaben, die eine energetische Verbesserung einschränken?
         </p>
       </div>
 
@@ -58,9 +57,9 @@ export default function StepRestriction() {
             : 'border-border bg-card hover:border-primary/30'
         }`}
       >
-        <div className="font-semibold text-foreground">Keine rechtlichen Einschränkungen bekannt</div>
+        <div className="font-semibold text-foreground">Keine Einschränkungen bekannt</div>
         <div className="text-sm text-muted-foreground mt-1">
-          Es sind keine öffentlich-rechtlichen Einschränkungen bekannt, die eine energetische Verbesserung verhindern.
+          Standardfall – keine öffentlich-rechtlichen Hindernisse für energetische Verbesserungen.
         </div>
       </button>
 
@@ -71,17 +70,17 @@ export default function StepRestriction() {
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronDown className="h-4 w-4" />
-          Es könnten öffentlich-rechtliche Einschränkungen vorliegen
+          Sonderfall: Einschränkungen prüfen
         </button>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">Welche Einschränkung trifft zu?</span>
+            <span className="text-sm font-medium text-foreground">Welche Einschränkung liegt vor?</span>
             <button
               onClick={selectDefault}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              Zurück zur Standardauswahl
+              Zurück zum Standardfall
             </button>
           </div>
 
@@ -102,13 +101,11 @@ export default function StepRestriction() {
             ))}
           </div>
 
-          {/* Important legal clarification */}
-          <div className="rounded-lg border border-border bg-muted/50 p-4 flex gap-3">
+          <div className="rounded-lg border border-border bg-muted/50 p-3 flex gap-3">
             <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-            <div className="text-xs text-muted-foreground leading-relaxed space-y-1">
-              <p><strong className="text-foreground">Wichtig:</strong> Ein Denkmalschutzstatus allein genügt nicht. Entscheidend ist, ob öffentlich-rechtliche Vorgaben eine <em>wesentliche</em> energetische Verbesserung tatsächlich verhindern.</p>
-              <p>Im Streitfall muss der Vermieter die relevanten Umstände nachweisen.</p>
-            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">Hinweis:</strong> Denkmalschutzstatus allein genügt nicht. Entscheidend ist, ob eine <em>wesentliche</em> Verbesserung tatsächlich verhindert wird. Im Streitfall liegt die Nachweispflicht beim Vermieter.
+            </p>
           </div>
         </div>
       )}

@@ -3,8 +3,8 @@ import type { UserRole } from '@/lib/calculator/types';
 import { User, Building2 } from 'lucide-react';
 
 const OPTIONS: { value: UserRole; label: string; desc: string; icon: typeof User }[] = [
-  { value: 'mieter', label: 'Ich bin Mieter', desc: 'Ich möchte wissen, welchen Anteil mein Vermieter übernehmen muss.', icon: User },
-  { value: 'vermieter', label: 'Ich bin Vermieter', desc: 'Ich möchte den Anteil von Mieter und Vermieter berechnen.', icon: Building2 },
+  { value: 'mieter', label: 'Berechnung als Mieter', desc: 'Ermittlung des Vermieteranteils an den CO2-Kosten und ggf. eines Erstattungsanspruchs.', icon: User },
+  { value: 'vermieter', label: 'Berechnung als Vermieter', desc: 'Ermittlung der gesetzlichen Aufteilung der CO2-Kosten zwischen Vermieter und Mieter.', icon: Building2 },
 ];
 
 export default function StepUserRole() {
@@ -13,8 +13,8 @@ export default function StepUserRole() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Wer sind Sie?</h2>
-        <p className="text-muted-foreground mt-2">Bitte wählen Sie aus, ob Sie die Berechnung als Mieter oder Vermieter durchführen möchten.</p>
+        <h2 className="text-2xl font-bold text-foreground">Rolle auswählen</h2>
+        <p className="text-muted-foreground mt-2">Führen Sie die Berechnung als Mieter oder als Vermieter durch?</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {OPTIONS.map(opt => (

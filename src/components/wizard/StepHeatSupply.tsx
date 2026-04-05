@@ -3,9 +3,9 @@ import type { HeatSupplyType } from '@/lib/calculator/types';
 import { Flame, Thermometer, Heater } from 'lucide-react';
 
 const ALL_OPTIONS: { value: HeatSupplyType; label: string; desc: string; icon: typeof Flame; tenantOnly?: boolean }[] = [
-  { value: 'zentral', label: 'Zentrale Heizungsanlage', desc: 'Gemeinsame Heizung für das gesamte Gebäude', icon: Flame },
-  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Wärmeversorgung über Fernwärme', icon: Thermometer },
-  { value: 'etage', label: 'Etagenheizung', desc: 'Eigene Heizung in der Wohnung, z.\u00A0B. Gastherme', icon: Heater, tenantOnly: true },
+  { value: 'zentral', label: 'Zentrale Heizungsanlage', desc: 'Gemeinsame Heizung für das gesamte Gebäude (z.\u00A0B. Zentralheizung im Keller)', icon: Flame },
+  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'Wärmeversorgung über ein Fernwärme- oder Nahwärmenetz', icon: Thermometer },
+  { value: 'etage', label: 'Wohnungseigene Heizung', desc: 'Eigene Heizungsanlage in der Wohnung (z.\u00A0B. Gastherme, Gasetagenheizung)', icon: Heater, tenantOnly: true },
 ];
 
 export default function StepHeatSupply() {
@@ -25,7 +25,7 @@ export default function StepHeatSupply() {
     <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Art der Wärmeversorgung</h2>
-        <p className="text-muted-foreground mt-2 text-sm">Wie erfolgt die Wärmeversorgung?</p>
+        <p className="text-muted-foreground mt-2 text-sm">Wie wird das Gebäude bzw. die Wohnung mit Wärme versorgt?</p>
       </div>
       <div className="grid gap-3">
         {options.map(opt => (

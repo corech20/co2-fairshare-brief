@@ -249,7 +249,16 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // PART II — TECHNICAL CALCULATION
   // ═══════════════════════════════════════════════════════════════════════
 
-  sectionHeading('1. Energiegehalt der eingesetzten Brennstoffe, CO2-Emissionen und CO2-Kosten');
+  // Show fuel type(s) explicitly at the top of the calculation section
+  sectionHeading('1. Brennstoff, Energiegehalt und CO2-Kosten');
+
+  // Fuel summary line
+  if (result.fuelResults.length === 1) {
+    detailRow('Brennstoff:', result.fuelResults[0].fuelLabel, 2, true);
+  } else {
+    detailRow('Brennstoffe:', result.fuelResults.map(fr => fr.fuelLabel).join(', '), 2, true);
+  }
+  y += 2;
 
   // Cross-year segment display
   if (result.isCrossYear && result.segmentResults && result.segmentResults.length > 0) {
@@ -265,7 +274,8 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       detailRow('CO2-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
       detailRow('Energie (Heizwert):', `${fmt.number(seg.energyHeatingValueKwh, 0)} kWh`, 4);
       detailRow('CO2-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
-      detailRow('CO2-Kosten (brutto):', fmt.currency(seg.co2CostGross), 4);
+      detailRow('CO2-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
+      detailRow('CO2-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
       y += 3;
     }
     ensureSpace(12);
@@ -274,7 +284,8 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.line(mL + 2, y, pw - mR, y);
     y += 5;
     detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
-    detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+    detailRow('Gesamte CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
+    detailRow('Gesamte CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
   } else {
     // Standard per-fuel details
     for (let i = 0; i < result.fuelResults.length; i++) {
@@ -306,11 +317,14 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 0)} kWh`, 2, true);
       detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
       detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`, 2);
-      detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
-    } else {
-      ensureSpace(8);
-      detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
     }
+
+    // Net / Gross / VAT breakdown
+    ensureSpace(16);
+    y += 2;
+    detailRow('CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
+    detailRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2);
+    detailRow('CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
 
     // CO2 price note
     y += 2;
@@ -362,13 +376,31 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     detailRow(`${areaLabel}:`, `${fmt.number(result.relevantArea, 0)} m²`, 2);
   }
 
-  detailRow('Spezifischer CO2-Ausstoß:', `${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m² / a`, 2);
+  detailRow('Spezifischer CO2-Ausstoß (Abrechnungszeitraum):', `${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m²`, 2);
+
+  // Annualized value – clearly labeled as classification-only
+  if (result.annualizationFactor && result.emissionsPerSqmAnnualized) {
+    detailRow('Hochgerechneter Jahreswert (nur für Einstufung):', `${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`, 2);
+    y += 1;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    const annNote = doc.splitTextToSize(
+      `Hochrechnung: ${fmt.number(result.emissionsPerSqmYear, 2)} × ${fmt.number(result.annualizationFactor, 4)} = ${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im Stufenmodell verwendet, nicht für die Kostenberechnung.`,
+      cw - 6,
+    );
+    for (const line of annNote) {
+      ensureSpace(4);
+      doc.text(line, mL + 2, y);
+      y += 3.5;
+    }
+  }
 
   // Stufenmodell display with emission range
   if (result.isResidential && result.stufenmodellStep > 0) {
     y += 2;
     const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
-    bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
+    const classificationValue = result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear;
+    bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(classificationValue, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
     y += 1;
     detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2, true);
     detailRow('Aufteilung:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2, true);
@@ -445,21 +477,21 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     y += 5;
   }
 
-  // Tenant reimbursement highlight
-  if (docCase === 'C' || docCase === 'D') {
+  // Tenant reimbursement highlight – only when meaningful
+  if ((docCase === 'C' || docCase === 'D') && result.landlordShare > 0) {
     y += 3;
-    ensureSpace(16);
-    doc.setFillColor(232, 242, 255);
-    doc.roundedRect(mL + 4, y - 3, cw - 8, 14, 2, 2, 'F');
-    doc.setDrawColor(30, 80, 160);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(mL + 4, y - 3, cw - 8, 14, 2, 2, 'S');
-    doc.setFontSize(9.5);
+    ensureSpace(14);
+    doc.setFillColor(240, 245, 252);
+    doc.roundedRect(mL + 4, y - 3, cw - 8, 12, 2, 2, 'F');
+    doc.setDrawColor(60, 100, 160);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(mL + 4, y - 3, cw - 8, 12, 2, 2, 'S');
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(20, 50, 100);
-    doc.text('Möglicher Erstattungsanspruch gegenüber dem Vermieter:', mL + 8, y + 4);
-    doc.text(fmt.currency(result.landlordShare), pw - mR - 8, y + 4, { align: 'right' });
-    y += 16;
+    doc.setTextColor(30, 50, 90);
+    doc.text('Erstattungsanspruch:', mL + 8, y + 3);
+    doc.text(fmt.currency(result.landlordShare), pw - mR - 8, y + 3, { align: 'right' });
+    y += 14;
   }
 
   // Add bottom padding
@@ -539,56 +571,60 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // FINAL SUMMARY BOX
   // ═══════════════════════════════════════════════════════════════════════
 
-  const summaryH = (docCase === 'C' || docCase === 'D') ? 36 : 30;
+  const showReimbursement = (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
+  const summaryH = showReimbursement ? 41 : 35;
   ensureSpace(summaryH + 8);
 
   const summaryY = y;
 
-  // Background
-  doc.setFillColor(235, 240, 248);
-  doc.roundedRect(mL, summaryY, cw, summaryH, 2.5, 2.5, 'F');
-  doc.setDrawColor(30, 55, 90);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(mL, summaryY, cw, summaryH, 2.5, 2.5, 'S');
+  // Background – subtle, restrained
+  doc.setFillColor(242, 245, 250);
+  doc.roundedRect(mL, summaryY, cw, summaryH, 2, 2, 'F');
+  doc.setDrawColor(60, 80, 120);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(mL, summaryY, cw, summaryH, 2, 2, 'S');
 
-  // Heading with enough top padding
   const yearLabel = result.isCrossYear && result.segmentResults?.length
     ? `${result.segmentResults[0].year}/${result.billingYear}`
     : String(result.billingYear);
 
-  let sy = summaryY + 7;
-  doc.setFontSize(9.5);
+  let sy = summaryY + 6;
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(30, 55, 90);
-  doc.text(`Zusammenfassung – CO2-Kosten ${yearLabel} inkl. Mehrwertsteuer`, mL + 5, sy);
+  doc.setTextColor(40, 50, 70);
+  doc.text(`Zusammenfassung – CO2-Kosten ${yearLabel}`, mL + 5, sy);
 
-  sy += 5;
-  doc.setDrawColor(30, 55, 90);
-  doc.setLineWidth(0.2);
+  sy += 4;
+  doc.setDrawColor(100, 120, 150);
+  doc.setLineWidth(0.15);
   doc.line(mL + 5, sy, mL + cw - 5, sy);
 
-  // Values
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(40, 40, 40);
-  sy += 5;
-  doc.text('CO2-Kosten gesamt (brutto):', mL + 5, sy);
+  doc.setTextColor(50, 50, 50);
+
+  sy += 4.5;
+  doc.text(`CO2-Kosten netto:`, mL + 5, sy);
+  doc.text(fmt.currency(result.totalCO2CostNet), mL + cw - 5, sy, { align: 'right' });
+
+  sy += 4;
+  doc.text(`CO2-Kosten brutto (inkl. ${result.vatPercent} % USt.):`, mL + 5, sy);
   doc.setFont('helvetica', 'bold');
   doc.text(fmt.currency(result.totalCO2Cost), mL + cw - 5, sy, { align: 'right' });
 
-  sy += 5;
+  sy += 4.5;
   doc.setFont('helvetica', 'normal');
   doc.text(`Anteil Vermieter (${result.landlordPercent} %):`, mL + 5, sy);
   doc.text(fmt.currency(result.landlordShare), mL + cw - 5, sy, { align: 'right' });
 
-  sy += 5;
-  doc.text(`Anteil Mieter / Mietergemeinschaft (${result.tenantPercent} %):`, mL + 5, sy);
+  sy += 4;
+  doc.text(`Anteil Mieter (${result.tenantPercent} %):`, mL + 5, sy);
   doc.text(fmt.currency(result.tenantShare), mL + cw - 5, sy, { align: 'right' });
 
-  if (docCase === 'C' || docCase === 'D') {
-    sy += 5;
+  if (showReimbursement) {
+    sy += 4.5;
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(20, 50, 100);
+    doc.setTextColor(30, 50, 90);
     doc.text('Erstattungsanspruch:', mL + 5, sy);
     doc.text(fmt.currency(result.landlordShare), mL + cw - 5, sy, { align: 'right' });
   }
