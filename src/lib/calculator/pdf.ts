@@ -376,13 +376,31 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     detailRow(`${areaLabel}:`, `${fmt.number(result.relevantArea, 0)} m²`, 2);
   }
 
-  detailRow('Spezifischer CO2-Ausstoß:', `${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m² / a`, 2);
+  detailRow('Spezifischer CO2-Ausstoß (Abrechnungszeitraum):', `${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m²`, 2);
+
+  // Annualized value – clearly labeled as classification-only
+  if (result.annualizationFactor && result.emissionsPerSqmAnnualized) {
+    detailRow('Hochgerechneter Jahreswert (nur für Einstufung):', `${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`, 2);
+    y += 1;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    const annNote = doc.splitTextToSize(
+      `Hochrechnung: ${fmt.number(result.emissionsPerSqmYear, 2)} × ${fmt.number(result.annualizationFactor, 4)} = ${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im Stufenmodell verwendet, nicht für die Kostenberechnung.`,
+      cw - 6,
+    );
+    for (const line of annNote) {
+      ensureSpace(4);
+      doc.text(line, mL + 2, y);
+      y += 3.5;
+    }
+  }
 
   // Stufenmodell display with emission range
   if (result.isResidential && result.stufenmodellStep > 0) {
     y += 2;
     const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
-    bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
+    const classificationValue = result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear;
+    bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(classificationValue, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
     y += 1;
     detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2, true);
     detailRow('Aufteilung:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2, true);
