@@ -36,7 +36,7 @@ export default function ResultsPage() {
   const formatNumber = (n: number, decimals = 2) => fmt.number(n, decimals);
 
   const docCase = getDocumentCase(wizardData);
-  const isTenantClaim = docCase === 'C' || docCase === 'D';
+  const isTenantClaim = (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
 
   const allocationExplanation = (() => {
     if (result.isResidential && result.stufenmodellStep > 0) {
@@ -94,9 +94,12 @@ export default function ResultsPage() {
           {/* Cards */}
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-lg border border-border bg-card p-5 text-center">
-              <div className="text-xs text-muted-foreground mb-1">CO2-Kosten gesamt</div>
+              <div className="text-xs text-muted-foreground mb-1">CO2-Kosten gesamt (brutto)</div>
               <div className="text-2xl font-bold text-foreground">{formatCurrency(result.totalCO2Cost)}</div>
-              {result.usedDirectCost && <div className="text-xs text-muted-foreground mt-1">(direkt eingegeben)</div>}
+              <div className="text-xs text-muted-foreground mt-1">
+                netto: {formatCurrency(result.totalCO2CostNet)} · USt. {result.vatPercent} %
+              </div>
+              {result.usedDirectCost && <div className="text-xs text-muted-foreground mt-0.5">(direkt eingegeben)</div>}
             </div>
             <div className="rounded-lg border-2 border-primary bg-primary/5 p-5 text-center">
               <div className="text-xs text-muted-foreground mb-1">Vermieter</div>
@@ -110,7 +113,7 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          {/* Tenant reimbursement claim */}
+          {/* Tenant reimbursement claim – only when meaningful */}
           {isTenantClaim && (
             <div className="rounded-lg border-2 border-primary bg-primary/5 p-4 flex gap-3">
               <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
@@ -193,7 +196,7 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* Actions */}
+          {/* Actions – calculation PDF is always primary */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Button variant="cta" size="lg" className="flex-1" onClick={() => handleGeneratePDF('calculation')}>
               <FileText className="h-4 w-4" />Berechnung als PDF
@@ -225,7 +228,7 @@ export default function ResultsPage() {
                 <span className="text-foreground font-medium text-right">{formatNumber(result.emissionsPerSqmYear)} kg/m²</span>
                 {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
                   <>
-                    <span>CO2 pro m²/Jahr (hochgerechnet):</span>
+                    <span>CO2 pro m²/Jahr (hochgerechnet, nur für Einstufung):</span>
                     <span className="text-foreground font-medium text-right">{formatNumber(result.emissionsPerSqmAnnualized)} kg/m²/a</span>
                   </>
                 )}
@@ -259,6 +262,12 @@ export default function ResultsPage() {
                 <span className="text-foreground font-medium text-right">{formatNumber(result.relevantArea, 0)} m²</span>
                 <span>Gesamtenergie (Hi):</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 0)} kWh</span>
+                <span>CO2-Kosten netto:</span>
+                <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2CostNet)}</span>
+                <span>USt.-Satz:</span>
+                <span className="text-foreground font-medium text-right">{result.vatPercent} %</span>
+                <span>CO2-Kosten brutto:</span>
+                <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2Cost)}</span>
                 {result.restrictionApplied !== 'fall3' && result.isResidential && (
                   <>
                     <span>Basis-Aufteilung (vor Einschränkung):</span>
@@ -276,6 +285,8 @@ export default function ResultsPage() {
                       <span className="text-right">{formatNumber(fr.co2Kg, 1)} kg CO2</span>
                       <span>Energie (Hi):</span>
                       <span className="text-right">{formatNumber(fr.energyHeatingValueKwh, 0)} kWh</span>
+                      <span>CO2-Kosten netto:</span>
+                      <span className="text-right">{formatCurrency(fr.co2CostNet)}</span>
                       <span>CO2-Kosten brutto:</span>
                       <span className="text-right">{formatCurrency(fr.co2CostGross)}</span>
                     </div>

@@ -247,10 +247,10 @@ export default function StepInputValues() {
                   {opt.label}
                 </button>
               ))}
-            </div>
+          </div>
             <p className="text-xs text-muted-foreground">
               {(wizardData.co2CostDirectType ?? 'brutto') === 'netto'
-                ? 'Der Nettobetrag wird mit 7 % USt. auf den Bruttobetrag hochgerechnet.'
+                ? 'Der Nettobetrag wird mit dem jeweils geltenden USt.-Satz auf den Bruttobetrag hochgerechnet.'
                 : 'Der eingegebene Betrag wird als Bruttobetrag (inkl. USt.) verwendet.'}
             </p>
           </div>
@@ -296,8 +296,14 @@ export default function StepInputValues() {
           >
             <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showPdfSection ? 'rotate-180' : ''}`} />
             <div>
-              <h3 className="text-lg font-semibold text-foreground">Angaben für das Schreiben (optional)</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Diese Daten werden nur für die Erstellung des PDF-Dokuments verwendet.</p>
+              <h3 className="text-lg font-semibold text-foreground">
+                {isTenant ? 'Angaben für das Erstattungsschreiben (optional)' : 'Angaben für das PDF-Dokument (optional)'}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isTenant
+                  ? 'Adressdaten für ein personalisiertes Schreiben an den Vermieter.'
+                  : 'Adressdaten werden nur für die Erstellung des PDF-Dokuments verwendet.'}
+              </p>
             </div>
           </button>
 
