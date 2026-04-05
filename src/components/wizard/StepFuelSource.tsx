@@ -5,19 +5,19 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 const STANDARD_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Flame }[] = [
-  { value: 'erdgas', label: 'Erdgas', desc: 'z.\u00A0B. Gasheizung oder Gasetagenheizung', icon: Flame },
-  { value: 'heizoel', label: 'Heizöl', desc: 'z.\u00A0B. Ölheizung', icon: Droplets },
-  { value: 'fernwaerme', label: 'Fernwärme', desc: 'Der Emissionsfaktor wird aus Ihrer Fernwärmeabrechnung übernommen.', icon: Thermometer },
-  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'z.\u00A0B. Flüssiggasheizung', icon: Zap },
-  { value: 'pellets', label: 'Holzpellets', desc: 'CO2-Kosten = 0 EUR (nicht BEHG-pflichtig)', icon: Leaf },
+  { value: 'erdgas', label: 'Erdgas', desc: 'Eingabe in kWh (Brennwert/Hs) lt. Gasabrechnung', icon: Flame },
+  { value: 'heizoel', label: 'Heizöl', desc: 'Eingabe in Litern lt. Lieferschein oder Abrechnung', icon: Droplets },
+  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'Eingabe in kWh – Emissionsfaktor wird separat abgefragt', icon: Thermometer },
+  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'Eingabe in kg lt. Abrechnung', icon: Zap },
+  { value: 'pellets', label: 'Holzpellets', desc: 'Nicht BEHG-pflichtig – CO2-Kosten betragen 0 EUR', icon: Leaf },
 ];
 
 const ADVANCED_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Flame }[] = [
-  { value: 'hackschnitzel', label: 'Holzhackschnitzel', desc: 'z.\u00A0B. naturbelassene Holzhackschnitzel (nicht BEHG-pflichtig)', icon: Trees },
-  { value: 'braunkohle', label: 'Braunkohlebriketts', desc: 'z.\u00A0B. Braunkohleheizung', icon: Factory },
-  { value: 'erdgas_kwk', label: 'Erdgas (KWK)', desc: 'Nur auswählen, wenn Ihre Anlage ausdrücklich als Kraft-Wärme-Kopplungsanlage betrieben wird.', icon: Flame },
-  { value: 'fluessiggas_kwk', label: 'Flüssiggas (KWK)', desc: 'Nur auswählen, wenn Ihre Anlage ausdrücklich als Kraft-Wärme-Kopplungsanlage betrieben wird.', icon: Zap },
-  { value: 'heizoel_kwk', label: 'Heizöl (KWK)', desc: 'Nur auswählen, wenn Ihre Anlage ausdrücklich als Kraft-Wärme-Kopplungsanlage betrieben wird.', icon: Droplets },
+  { value: 'hackschnitzel', label: 'Holzhackschnitzel', desc: 'Nicht BEHG-pflichtig – CO2-Kosten betragen 0 EUR', icon: Trees },
+  { value: 'braunkohle', label: 'Braunkohlebriketts', desc: 'Eingabe in kg', icon: Factory },
+  { value: 'erdgas_kwk', label: 'Erdgas (KWK)', desc: 'Nur bei ausdrücklichem KWK-Betrieb der Anlage', icon: Flame },
+  { value: 'fluessiggas_kwk', label: 'Flüssiggas (KWK)', desc: 'Nur bei ausdrücklichem KWK-Betrieb der Anlage', icon: Zap },
+  { value: 'heizoel_kwk', label: 'Heizöl (KWK)', desc: 'Nur bei ausdrücklichem KWK-Betrieb der Anlage', icon: Droplets },
 ];
 
 const ALL_FUELS = [...STANDARD_FUELS, ...ADVANCED_FUELS];
@@ -25,7 +25,6 @@ const ALL_FUELS = [...STANDARD_FUELS, ...ADVANCED_FUELS];
 export default function StepFuelSource() {
   const { wizardData, setWizardField } = useCalculator();
   const [showAdvanced, setShowAdvanced] = useState(() => {
-    // Show advanced if current selection is an advanced fuel
     const currentFuel = wizardData.fuelType;
     return currentFuel ? ADVANCED_FUELS.some(f => f.value === currentFuel) : false;
   });
@@ -72,10 +71,9 @@ export default function StepFuelSource() {
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Brennstoff / Wärmequelle</h2>
-          <p className="text-muted-foreground mt-2">Bitte wählen Sie den verwendeten Brennstoff bzw. die Wärmequelle aus.</p>
+          <p className="text-muted-foreground mt-2">Welcher Brennstoff wird für die Wärmeversorgung verwendet?</p>
         </div>
 
-        {/* Standard fuels */}
         <div className="grid gap-3">
           {STANDARD_FUELS.map(opt => (
             <button
@@ -96,14 +94,13 @@ export default function StepFuelSource() {
           ))}
         </div>
 
-        {/* Advanced fuels toggle */}
         <div>
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-            Weitere Brennstoffe anzeigen
+            Weitere Brennstoffe
           </button>
           {showAdvanced && (
             <div className="grid gap-3 mt-3">
@@ -134,7 +131,7 @@ export default function StepFuelSource() {
             Weiteren Brennstoff hinzufügen
           </Button>
           <p className="text-xs text-muted-foreground">
-            Falls mehrere Brennstoffe oder Erzeugungstechniken verwendet wurden, können Sie hier weitere hinzufügen.
+            Falls mehrere Brennstoffe verwendet werden, können Sie hier weitere ergänzen.
           </p>
         </div>
       </div>
@@ -146,7 +143,7 @@ export default function StepFuelSource() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Brennstoffe / Wärmequellen</h2>
-        <p className="text-muted-foreground mt-2">Sie können mehrere Brennstoffe für eine Berechnung angeben.</p>
+        <p className="text-muted-foreground mt-2">Mehrere Brennstoffe für eine Berechnung.</p>
       </div>
 
       <div className="space-y-4">

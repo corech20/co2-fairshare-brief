@@ -3,8 +3,8 @@ import type { BuildingType } from '@/lib/calculator/types';
 import { Home, Building } from 'lucide-react';
 
 const OPTIONS: { value: BuildingType; label: string; desc: string; icon: typeof Home }[] = [
-  { value: 'wohngebaeude', label: 'Wohngebäude', desc: 'Gesetzliche Aufteilung nach dem Stufenmodell für Wohngebäude', icon: Home },
-  { value: 'nichtwohngebaeude', label: 'Nichtwohngebäude', desc: 'Im Standardfall hälftige Aufteilung zwischen Mieter und Vermieter', icon: Building },
+  { value: 'wohngebaeude', label: 'Wohngebäude', desc: 'Aufteilung nach dem 10-Stufen-Modell gemäß § 5 CO2KostAufG', icon: Home },
+  { value: 'nichtwohngebaeude', label: 'Nichtwohngebäude', desc: 'Hälftige Aufteilung gemäß § 8 CO2KostAufG (Standardfall)', icon: Building },
 ];
 
 export default function StepBuildingType() {
@@ -14,7 +14,7 @@ export default function StepBuildingType() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Gebäudetyp</h2>
-        <p className="text-muted-foreground mt-2">Bitte wählen Sie aus, ob es sich insgesamt um ein Wohngebäude oder ein Nichtwohngebäude handelt.</p>
+        <p className="text-muted-foreground mt-2">Handelt es sich um ein Wohn- oder Nichtwohngebäude?</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {OPTIONS.map(opt => (
@@ -34,7 +34,7 @@ export default function StepBuildingType() {
         ))}
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">
-        Entscheidend ist, ob das Gebäude insgesamt überwiegend zu Wohnzwecken oder überwiegend nicht zu Wohnzwecken genutzt wird. Bei gemischt genutzten Gebäuden kommt es auf die überwiegende Nutzung der Gesamtfläche an.
+        Maßgeblich ist die überwiegende Nutzung der Gesamtfläche. Bei gemischt genutzten Gebäuden entscheidet der Schwerpunkt der Flächennutzung.
       </p>
     </div>
   );

@@ -111,12 +111,17 @@ export interface FuelCalculationResult {
 
 export interface CalculationResult {
   totalEmissionsKg: number;
+  /** Actual emissions per m² for the billing period (not annualized) */
   emissionsPerSqmYear: number;
   co2PricePerTon: number;
   /** Total CO2 cost including VAT (gross) */
   totalCO2Cost: number;
   /** Total CO2 cost excluding VAT (net) */
   totalCO2CostNet: number;
+  /** Applied VAT rate (e.g. 1.07 or 1.19) for transparency */
+  appliedVATRate: number;
+  /** Human-readable VAT percentage (e.g. "7" or "19") */
+  vatPercent: number;
   landlordShare: number;
   tenantShare: number;
   landlordPercent: number;
@@ -147,7 +152,7 @@ export interface CalculationResult {
   segmentResults?: SegmentResult[];
   /** Annualization factor applied for stage classification (only if < full year) */
   annualizationFactor?: number;
-  /** Annualized emissions per m²/year (for stage model, if annualized) */
+  /** Annualized emissions per m²/year used ONLY for stage classification */
   emissionsPerSqmAnnualized?: number;
 }
 
