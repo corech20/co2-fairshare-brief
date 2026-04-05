@@ -571,56 +571,60 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // FINAL SUMMARY BOX
   // ═══════════════════════════════════════════════════════════════════════
 
-  const summaryH = (docCase === 'C' || docCase === 'D') ? 36 : 30;
+  const showReimbursement = (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
+  const summaryH = showReimbursement ? 41 : 35;
   ensureSpace(summaryH + 8);
 
   const summaryY = y;
 
-  // Background
-  doc.setFillColor(235, 240, 248);
-  doc.roundedRect(mL, summaryY, cw, summaryH, 2.5, 2.5, 'F');
-  doc.setDrawColor(30, 55, 90);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(mL, summaryY, cw, summaryH, 2.5, 2.5, 'S');
+  // Background – subtle, restrained
+  doc.setFillColor(242, 245, 250);
+  doc.roundedRect(mL, summaryY, cw, summaryH, 2, 2, 'F');
+  doc.setDrawColor(60, 80, 120);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(mL, summaryY, cw, summaryH, 2, 2, 'S');
 
-  // Heading with enough top padding
   const yearLabel = result.isCrossYear && result.segmentResults?.length
     ? `${result.segmentResults[0].year}/${result.billingYear}`
     : String(result.billingYear);
 
-  let sy = summaryY + 7;
-  doc.setFontSize(9.5);
+  let sy = summaryY + 6;
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(30, 55, 90);
-  doc.text(`Zusammenfassung – CO2-Kosten ${yearLabel} inkl. Mehrwertsteuer`, mL + 5, sy);
+  doc.setTextColor(40, 50, 70);
+  doc.text(`Zusammenfassung – CO2-Kosten ${yearLabel}`, mL + 5, sy);
 
-  sy += 5;
-  doc.setDrawColor(30, 55, 90);
-  doc.setLineWidth(0.2);
+  sy += 4;
+  doc.setDrawColor(100, 120, 150);
+  doc.setLineWidth(0.15);
   doc.line(mL + 5, sy, mL + cw - 5, sy);
 
-  // Values
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(40, 40, 40);
-  sy += 5;
-  doc.text('CO2-Kosten gesamt (brutto):', mL + 5, sy);
+  doc.setTextColor(50, 50, 50);
+
+  sy += 4.5;
+  doc.text(`CO2-Kosten netto:`, mL + 5, sy);
+  doc.text(fmt.currency(result.totalCO2CostNet), mL + cw - 5, sy, { align: 'right' });
+
+  sy += 4;
+  doc.text(`CO2-Kosten brutto (inkl. ${result.vatPercent} % USt.):`, mL + 5, sy);
   doc.setFont('helvetica', 'bold');
   doc.text(fmt.currency(result.totalCO2Cost), mL + cw - 5, sy, { align: 'right' });
 
-  sy += 5;
+  sy += 4.5;
   doc.setFont('helvetica', 'normal');
   doc.text(`Anteil Vermieter (${result.landlordPercent} %):`, mL + 5, sy);
   doc.text(fmt.currency(result.landlordShare), mL + cw - 5, sy, { align: 'right' });
 
-  sy += 5;
-  doc.text(`Anteil Mieter / Mietergemeinschaft (${result.tenantPercent} %):`, mL + 5, sy);
+  sy += 4;
+  doc.text(`Anteil Mieter (${result.tenantPercent} %):`, mL + 5, sy);
   doc.text(fmt.currency(result.tenantShare), mL + cw - 5, sy, { align: 'right' });
 
-  if (docCase === 'C' || docCase === 'D') {
-    sy += 5;
+  if (showReimbursement) {
+    sy += 4.5;
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(20, 50, 100);
+    doc.setTextColor(30, 50, 90);
     doc.text('Erstattungsanspruch:', mL + 5, sy);
     doc.text(fmt.currency(result.landlordShare), mL + cw - 5, sy, { align: 'right' });
   }
