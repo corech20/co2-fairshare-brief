@@ -76,13 +76,13 @@ describe('VAT rate determination', () => {
 // ===================================================================
 
 describe('BMWK-aligned: Erdgas 10,000 kWh baseline (default 19% VAT)', () => {
-  it('matches BMWK formula: kWh × emissionFactor directly', () => {
-    // calculateSingleFuel without vatRate → default 19%
+  it('matches BMWK formula: kWh(Hs) × 0.9030 × emissionFactor', () => {
+    // Erdgas: user enters Brennwert (Hs), internally converted to Heizwert (Hi) via × 0.9030
     const r = calculateSingleFuel('erdgas', 10000, 45);
-    expect(round2(r.co2Kg)).toBe(2008.8);
-    expect(round2(r.energyHeatingValueKwh)).toBe(10000);
-    expect(round2(r.co2CostNet)).toBe(90.4);
-    expect(round2(r.co2CostGross)).toBe(round2(90.396 * 1.19));
+    expect(round2(r.co2Kg)).toBe(1813.95);
+    expect(round2(r.energyHeatingValueKwh)).toBe(9030);
+    expect(round2(r.co2CostNet)).toBe(81.63);
+    expect(round2(r.co2CostGross)).toBe(round2(81.63 * 1.19));
   });
 });
 
@@ -101,13 +101,14 @@ describe('Reference Case 1: Natural Gas 2023 (7% VAT period)', () => {
 
   it('matches all expected values with 7% VAT', () => {
     const r = calculateCO2Allocation(data);
-    expect(round2(r.totalEmissionsKg)).toBe(9039.6);
-    expect(round2(r.emissionsPerSqmYear)).toBe(31.17);
+    // 45000 × 0.9030 × 0.20088 = 8162.76 kg
+    expect(round2(r.totalEmissionsKg)).toBe(8162.76);
+    expect(round2(r.emissionsPerSqmYear)).toBe(28.15);
     expect(r.stufenmodellStep).toBe(5);
     expect(r.tenantPercent).toBe(60);
     expect(r.landlordPercent).toBe(40);
-    // net: 9039.6 × 30 / 1000 = 271.188
-    expect(round2(r.totalCO2CostNet)).toBe(271.19);
+    // net: 8162.76 × 30 / 1000 = 244.88
+    expect(round2(r.totalCO2CostNet)).toBe(244.88);
     // gross: 271.188 × 1.07 = 290.17
     expect(round2(r.totalCO2Cost)).toBe(290.17);
     expect(r.isResidential).toBe(true);
@@ -280,11 +281,11 @@ describe('Biomass fuel handling', () => {
 // 5. INDIVIDUAL FUEL PATH VERIFICATION
 // ===================================================================
 
-describe('Erdgas: kWh input used directly', () => {
-  it('does not apply any conversion factor', () => {
+describe('Erdgas: kWh(Hs) → kWh(Hi) conversion via 0.9030', () => {
+  it('applies 0.9030 conversion factor for Brennwert→Heizwert', () => {
     const r = calculateSingleFuel('erdgas', 20000, 30);
-    expect(r.energyHeatingValueKwh).toBe(20000);
-    expect(round2(r.co2Kg)).toBe(4017.6);
+    expect(round2(r.energyHeatingValueKwh)).toBe(18060);
+    expect(round2(r.co2Kg)).toBe(3627.89);
   });
 });
 
@@ -335,9 +336,10 @@ describe('Fernwärme: kWh input, custom emission factor', () => {
 // ===================================================================
 
 describe('CHP variants', () => {
-  it('natural gas CHP applies heat share factor only', () => {
+  it('natural gas CHP applies Hi conversion + heat share factor', () => {
     const r = calculateSingleFuel('erdgas_kwk', 45000, 30);
-    expect(round2(r.energyHeatingValueKwh)).toBe(19687.5);
+    // 45000 × 0.9030 × 0.4375 = 17777.81
+    expect(round2(r.energyHeatingValueKwh)).toBe(17777.81);
   });
 
   it('heating oil CHP applies conversion + heat share factor', () => {
@@ -386,9 +388,10 @@ describe('Tenant apartment heating with 5% reduction', () => {
   it('uses apartment area for emissions/m²', () => {
     const r = calculateCO2Allocation(data);
     expect(r.relevantArea).toBe(75);
-    expect(round2(r.totalEmissionsKg)).toBe(2410.56);
-    expect(round2(r.emissionsPerSqmYear)).toBe(32.14);
-    expect(r.stufenmodellStep).toBe(6);
+    // 12000 × 0.9030 × 0.20088 = 2176.74
+    expect(round2(r.totalEmissionsKg)).toBe(2176.74);
+    expect(round2(r.emissionsPerSqmYear)).toBe(29.02);
+    expect(r.stufenmodellStep).toBe(5);
   });
 });
 
@@ -516,12 +519,13 @@ describe('Cross-year calculation', () => {
     const r = calculateCO2Allocation(data);
     expect(r.isCrossYear).toBe(true);
     expect(r.segmentResults).toHaveLength(2);
-    expect(round2(r.segmentResults![0].co2Kg)).toBe(7030.8);
-    expect(round2(r.segmentResults![1].co2Kg)).toBe(2008.8);
+    // 35000 × 0.9030 × 0.20088 = 6348.81
+    expect(round2(r.segmentResults![0].co2Kg)).toBe(6348.81);
+    // 10000 × 0.9030 × 0.20088 = 1813.95
+    expect(round2(r.segmentResults![1].co2Kg)).toBe(1813.95);
 
-    // Both segments end after Apr 2024 → 19% VAT for erdgas
-    const seg1Net = 7030.8 * 45 / 1000;
-    const seg2Net = 2008.8 * 55 / 1000;
+    const seg1Net = 6348.81 * 45 / 1000;
+    const seg2Net = 1813.95 * 55 / 1000;
     expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(seg1Net * 1.19));
     expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2Net * 1.19));
 
@@ -675,17 +679,17 @@ describe('Annualization for stage model classification', () => {
     const periodDays = getBillingPeriodDays('2024-02-01', '2024-09-30');
     expect(periodDays).toBe(242);
 
-    // Actual emissions: 10000 × 0.20088 = 2008.8 kg → 20.09 kg/m²
-    expect(round2(r.emissionsPerSqmYear)).toBe(round2(2008.8 / 100));
+    // Actual emissions: 10000 × 0.9030 × 0.20088 = 1813.95 kg → 18.14 kg/m²
+    expect(round2(r.emissionsPerSqmYear)).toBe(round2(1813.95 / 100));
 
-    // Annualized: 20.09 × (366/242) = ~30.37 kg/m²/a
+    // Annualized: 18.14 × (366/242) = ~27.43 kg/m²/a
     expect(r.annualizationFactor).toBeDefined();
     expect(r.emissionsPerSqmAnnualized).toBeDefined();
     expect(r.emissionsPerSqmAnnualized!).toBeGreaterThan(r.emissionsPerSqmYear);
 
-    // CO2 cost must NOT be annualized (based on actual 10000 kWh)
+    // CO2 cost must NOT be annualized (based on actual 10000 kWh × 0.9030)
     // Period ends 2024-09-30 → erdgas → 19% VAT (after Apr 2024)
-    const expectedCostNet = 2008.8 * 45 / 1000;
+    const expectedCostNet = 1813.95 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(expectedCostNet * 1.19));
   });
 
@@ -719,7 +723,8 @@ describe('Non-residential Erdgas 50/50', () => {
     expect(r.landlordPercent).toBe(50);
     expect(r.tenantPercent).toBe(50);
     expect(r.stufenmodellStep).toBe(0);
-    expect(round2(r.totalEmissionsKg)).toBe(round2(20000 * 0.20088));
+    // 20000 × 0.9030 × 0.20088 = 3627.89
+    expect(round2(r.totalEmissionsKg)).toBe(round2(20000 * 0.9030 * 0.20088));
   });
 });
 
@@ -751,14 +756,14 @@ describe('Full 2024 Erdgas case', () => {
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
       fuelType: 'erdgas', fuelAmount: 10000, buildingArea: 100,
     });
-    // 10000 × 0.20088 = 2008.8 kg
-    expect(round2(r.totalEmissionsKg)).toBe(2008.8);
-    // 2008.8 / 100 = 20.09 → step 3 (17-22)
+    // 10000 × 0.9030 × 0.20088 = 1813.95 kg
+    expect(round2(r.totalEmissionsKg)).toBe(1813.95);
+    // 1813.95 / 100 = 18.14 → step 3 (17-22)
     expect(r.stufenmodellStep).toBe(3);
-    // net: 2008.8 × 45/1000 = 90.396
-    expect(round2(r.totalCO2CostNet)).toBe(90.4);
-    // gross: 90.396 × 1.19 = 107.57
-    expect(round2(r.totalCO2Cost)).toBe(107.57);
+    // net: 1813.95 × 45/1000 = 81.63
+    expect(round2(r.totalCO2CostNet)).toBe(81.63);
+    // gross: 81.63 × 1.19 = 97.14
+    expect(round2(r.totalCO2Cost)).toBe(97.14);
   });
 });
 
@@ -773,10 +778,10 @@ describe('Full 2025 Erdgas case', () => {
       billingPeriodStart: '2025-01-01', billingPeriodEnd: '2025-12-31',
       fuelType: 'erdgas', fuelAmount: 10000, buildingArea: 100,
     });
-    // net: 2008.8 × 55/1000 = 110.484
-    expect(round2(r.totalCO2CostNet)).toBe(110.48);
-    // gross: 110.484 × 1.19 = 131.48
-    expect(round2(r.totalCO2Cost)).toBe(131.48);
+    // net: 1813.95 × 55/1000 = 99.77
+    expect(round2(r.totalCO2CostNet)).toBe(99.77);
+    // gross: 99.77 × 1.19 = 118.73
+    expect(round2(r.totalCO2Cost)).toBe(round2(99.77 * 1.19));
   });
 });
 
@@ -811,12 +816,12 @@ describe('Deviating billing period within one year', () => {
     };
     const r = calculateCO2Allocation(data);
     expect(r.isCrossYear).toBe(false);
-    // Actual CO2: 5000 × 0.20088 = 1004.4 kg → 10.044 kg/m²
+    // Actual CO2: 5000 × 0.9030 × 0.20088 = 906.97 kg → 9.07 kg/m²
     expect(r.annualizationFactor).toBeDefined();
-    expect(round2(r.totalEmissionsKg)).toBe(round2(5000 * 0.20088));
+    expect(round2(r.totalEmissionsKg)).toBe(round2(5000 * 0.9030 * 0.20088));
     // CO2 cost based on actual consumption, NOT annualized
     // Period ends 2024-09-30 → erdgas → 19% VAT
-    expect(round2(r.totalCO2Cost)).toBe(round2(1004.4 * 45 / 1000 * 1.19));
+    expect(round2(r.totalCO2Cost)).toBe(round2(906.97 * 45 / 1000 * 1.19));
   });
 });
 
@@ -853,10 +858,10 @@ describe('Gas Q1 2024 (within temporary 7% VAT period)', () => {
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-03-31',
       fuelType: 'erdgas', fuelAmount: 3000, buildingArea: 100,
     });
-    // 3000 × 0.20088 = 602.64 kg
-    // net: 602.64 × 45 / 1000 = 27.1188
-    // gross: 27.1188 × 1.07 = 29.02
-    const netCost = 602.64 * 45 / 1000;
+    // 3000 × 0.9030 × 0.20088 = 544.18 kg
+    // net: 544.18 × 45 / 1000 = 24.49
+    // gross: 24.49 × 1.07 = 26.20
+    const netCost = round2(3000 * 0.9030 * 0.20088) * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.07));
   });
 });
