@@ -25,6 +25,8 @@ const FUEL_LABELS: Record<string, string> = {
 export default function ResultsPage() {
   const navigate = useNavigate();
   const { result, wizardData, reset } = useCalculator();
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [pendingOutputType, setPendingOutputType] = useState<OutputType>('calculation');
 
   if (!result) {
     return (
@@ -36,9 +38,6 @@ export default function ResultsPage() {
       </div>
     );
   }
-
-  const [paymentOpen, setPaymentOpen] = useState(false);
-  const [pendingOutputType, setPendingOutputType] = useState<OutputType>('calculation');
 
   const handleNewCalculation = () => { reset(); navigate('/rechner'); };
 
