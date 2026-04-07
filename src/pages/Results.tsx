@@ -232,33 +232,32 @@ export default function ResultsPage() {
               </p>
             </div>
 
-            {/* Calculation PDF – always available */}
-            <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium text-foreground">Berechnung als PDF</p>
-                  <p className="text-xs text-muted-foreground">Erstellt ein druckbares PDF mit Berechnungsgrundlage und Ergebnissen.</p>
-                  <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
-                </div>
-                <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
-              </div>
-              <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                <FileText className="h-4 w-4" />Berechnung als PDF erstellen – 2 Euro
-              </Button>
-            </div>
-
-            {/* Reimbursement letter – tenant only */}
-            {isTenantClaim && (
+            {isTenantClaim ? (
               <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben</p>
-                    <p className="text-xs text-muted-foreground">Erstellt ein druckfertiges Schreiben auf Grundlage Ihrer Berechnung.</p>
+                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsgrundlage</p>
+                    <p className="text-xs text-muted-foreground">Enthält Erstattungsschreiben und Berechnungsgrundlage als PDF.</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
                   </div>
                   <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
                 </div>
-                <Button variant="outline" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
+                <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
                   <FileText className="h-4 w-4" />Erstattungsschreiben erstellen – 2 Euro
+                </Button>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">Berechnung als PDF</p>
+                    <p className="text-xs text-muted-foreground">Erstellt ein druckbares PDF mit Berechnungsgrundlage und Ergebnissen.</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
+                </div>
+                <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                  <FileText className="h-4 w-4" />Berechnung als PDF erstellen – 2 Euro
                 </Button>
               </div>
             )}
