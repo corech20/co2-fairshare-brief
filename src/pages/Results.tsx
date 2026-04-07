@@ -221,34 +221,55 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* Document preview */}
-          <div className="rounded-lg border border-border bg-card p-4 space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">
-              {isLandlord ? 'Berechnungsgrundlage erstellen' : 'Dokument erstellen'}
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {isLandlord
-                ? 'Erstellen Sie ein strukturiertes Berechnungsblatt als PDF – zur Dokumentation oder als Anlage zur Abrechnung.'
-                : 'Erstellen Sie ein Berechnungsblatt als PDF. Bei bestehendem Erstattungsanspruch können Sie zusätzlich ein Erstattungsschreiben generieren.'}
-            </p>
-            <div className="text-xs text-muted-foreground pt-1 space-y-0.5">
-              <p>Inhalt: Abrechnungszeitraum · Brennstoff · Verbrauchsmenge · CO2-Ausstoß · Stufenmodell-Einstufung · Kostenaufteilung · Netto/Brutto</p>
+          {/* Document section */}
+          <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-foreground">
+                Dokument erstellen
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Die Berechnung ist abgeschlossen. Optional können Sie ein druckfertiges PDF-Dokument erstellen.
+              </p>
             </div>
+
+            {/* Calculation PDF – always available */}
+            <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-foreground">Berechnung als PDF</p>
+                  <p className="text-xs text-muted-foreground">Erstellt ein druckbares PDF mit Berechnungsgrundlage und Ergebnissen.</p>
+                  <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
+                </div>
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
+              </div>
+              <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                <FileText className="h-4 w-4" />Berechnung als PDF erstellen – 2 Euro
+              </Button>
+            </div>
+
+            {/* Reimbursement letter – tenant only */}
+            {isTenantClaim && (
+              <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben</p>
+                    <p className="text-xs text-muted-foreground">Erstellt ein druckfertiges Schreiben auf Grundlage Ihrer Berechnung.</p>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
+                </div>
+                <Button variant="outline" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
+                  <FileText className="h-4 w-4" />Erstattungsschreiben erstellen – 2 Euro
+                </Button>
+              </div>
+            )}
           </div>
 
-          {/* Actions */}
+          {/* Navigation */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Button variant="outline" size="lg" onClick={() => navigate('/rechner')}>
               <ArrowLeft className="h-4 w-4" />Zurück
             </Button>
-            <Button variant="cta" size="lg" className="flex-1" onClick={() => handleGeneratePDF('calculation')}>
-              <FileText className="h-4 w-4" />Berechnung als PDF
-            </Button>
-            {isTenantClaim && (
-              <Button variant="outline" size="lg" className="flex-1" onClick={() => handleGeneratePDF('letter_tenant_reimbursement')}>
-                <FileText className="h-4 w-4" />Erstattungsschreiben
-              </Button>
-            )}
+            <div className="flex-1" />
             <Button variant="outline" size="lg" onClick={handleNewCalculation}>
               <RotateCcw className="h-4 w-4" />Neue Berechnung
             </Button>
