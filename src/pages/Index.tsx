@@ -52,8 +52,8 @@ export default function Index() {
               CO2-Kosten zwischen Mieter und Vermieter aufteilen
             </h1>
             <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-              Berechnen Sie nachvollziehbar die gesetzliche Aufteilung der CO2-Kosten
-              und erstellen Sie ein fertiges Schreiben für Ihre Abrechnung.
+              Berechnen Sie die gesetzliche Aufteilung der CO2-Kosten nach dem CO2KostAufG –
+              nachvollziehbar, strukturiert und als PDF dokumentiert.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button variant="cta" size="lg" onClick={() => navigate('/rechner')}>
@@ -86,8 +86,8 @@ export default function Index() {
               },
               {
                 icon: FileText,
-                title: 'Fertiges Schreiben',
-                desc: 'Erstellen Sie ein PDF-Dokument mit allen Berechnungsergebnissen – direkt verwendbar für Ihre Kommunikation.',
+                title: 'PDF-Dokumentation',
+                desc: 'Erhalten Sie ein strukturiertes Berechnungsblatt als PDF – zur Dokumentation, Weitergabe oder als Anlage zur Abrechnung.',
               },
             ].map((item, i) => (
               <div key={i} className="rounded-lg border border-border bg-card p-6 shadow-sm">

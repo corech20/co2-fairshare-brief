@@ -63,7 +63,7 @@ export default function ResultsPage() {
       </header>
 
       <main className="px-4 py-8 md:py-12">
-        <div className="container-narrow space-y-6 animate-fade-in">
+        <div className="container-narrow space-y-5 animate-fade-in">
           {/* Summary */}
           <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-5">
             <p className="text-base font-medium text-foreground leading-relaxed">
@@ -92,7 +92,7 @@ export default function ResultsPage() {
           </div>
 
           {/* Cards */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-lg border border-border bg-card p-5 text-center">
               <div className="text-xs text-muted-foreground mb-1">CO2-Kosten gesamt (brutto)</div>
               <div className="text-2xl font-bold text-foreground">{formatCurrency(result.totalCO2Cost)}</div>
