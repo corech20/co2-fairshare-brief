@@ -139,7 +139,7 @@ export default function StepInputValues() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Berechnungsdaten</h2>
-        <p className="text-muted-foreground mt-2">Geben Sie die Verbrauchsdaten und Flächen ein.</p>
+        <p className="text-muted-foreground mt-2">Geben Sie die Verbrauchsdaten und Flächen ein. Die meisten Werte können direkt aus Ihrer Energieabrechnung übernommen werden.</p>
       </div>
 
       <div className="space-y-5">
@@ -301,8 +301,8 @@ export default function StepInputValues() {
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {isTenant
-                  ? 'Nur erforderlich, wenn Sie ein personalisiertes Erstattungsschreiben an den Vermieter erstellen möchten.'
-                  : 'Nur erforderlich, wenn Sie ein personalisiertes Informationsschreiben erstellen möchten. Für das Berechnungsblatt sind keine Adressdaten nötig.'}
+                  ? 'Nur erforderlich, wenn Sie ein Erstattungsschreiben an den Vermieter erstellen möchten. Für das reine Berechnungsblatt sind keine Adressdaten nötig.'
+                  : 'Nur erforderlich, wenn ein personalisiertes Dokument gewünscht ist. Für das Berechnungsblatt sind keine Adressdaten nötig.'}
               </p>
             </div>
           </button>

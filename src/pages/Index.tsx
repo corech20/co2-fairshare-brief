@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Scale, BarChart3, FileText, Building2, Flame, ListChecks, FileDown } from 'lucide-react';
+import { ChevronDown, Scale, BarChart3, FileText, Building2, Flame, ListChecks, FileDown, Users } from 'lucide-react';
 import { useState } from 'react';
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
@@ -49,11 +49,11 @@ export default function Index() {
               Gemäß CO2KostAufG
             </div>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-foreground leading-tight">
-              CO2-Kosten zwischen Mieter und Vermieter aufteilen
+              CO2-Kostenaufteilung berechnen und dokumentieren
             </h1>
             <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-              Berechnen Sie die gesetzliche Aufteilung der CO2-Kosten nach dem CO2KostAufG –
-              nachvollziehbar, strukturiert und als PDF dokumentiert.
+              Ermitteln Sie die gesetzliche Aufteilung der CO2-Kosten zwischen Mieter und Vermieter –
+              nachvollziehbar, strukturiert und als druckfähige Berechnungsgrundlage.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button variant="cta" size="lg" onClick={() => navigate('/rechner')}>
@@ -76,18 +76,18 @@ export default function Index() {
             {[
               {
                 icon: BarChart3,
-                title: 'Schnelle Berechnung',
-                desc: 'In wenigen Schritten berechnen Sie die gesetzliche Aufteilung der CO2-Kosten nach dem 10-Stufen-Modell.',
+                title: 'Gesetzliche Aufteilung',
+                desc: 'Berechnung der CO2-Kostenaufteilung nach dem 10-Stufen-Modell – Schritt für Schritt, mit nachvollziehbarer Einstufung.',
               },
               {
-                icon: Scale,
-                title: 'Nachvollziehbar',
-                desc: 'Die Berechnung orientiert sich an den Vorgaben des CO2KostAufG und den gesetzlich festgelegten CO2-Preisen.',
+                icon: Users,
+                title: 'Für Mieter und Vermieter',
+                desc: 'Nutzbar aus beiden Perspektiven: Mieter prüfen ihre Kostenaufteilung, Vermieter erstellen die Berechnungsgrundlage für die Abrechnung.',
               },
               {
                 icon: FileText,
-                title: 'PDF-Dokumentation',
-                desc: 'Erhalten Sie ein strukturiertes Berechnungsblatt als PDF – zur Dokumentation, Weitergabe oder als Anlage zur Abrechnung.',
+                title: 'Berechnungsgrundlage als PDF',
+                desc: 'Erstellen Sie ein strukturiertes Berechnungsblatt als PDF – zur Dokumentation, Weitergabe oder als Anlage zur Abrechnung.',
               },
             ].map((item, i) => (
               <div key={i} className="rounded-lg border border-border bg-card p-6 shadow-sm">
@@ -102,15 +102,16 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Quality indicators */}
+      {/* What the tool provides */}
       <section className="px-4 py-12 md:py-16 bg-background">
         <div className="container-narrow">
+          <h2 className="text-xl font-bold text-foreground mb-6">Was dieses Tool liefert</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
+              { icon: Scale, label: 'Stufenmodell-Einstufung' },
+              { icon: BarChart3, label: 'Nachvollziehbare Berechnung' },
+              { icon: FileDown, label: 'Druckfähiges PDF' },
               { icon: Building2, label: 'Wohn- & Nichtwohngebäude' },
-              { icon: Flame, label: 'Erdgas, Heizöl, Fernwärme u.\u00A0a.' },
-              { icon: ListChecks, label: 'Schritt für Schritt' },
-              { icon: FileDown, label: 'PDF-Ergebnis' },
             ].map((item, i) => (
               <div key={i} className="text-center space-y-2">
                 <item.icon className="h-5 w-5 text-primary mx-auto" />
@@ -121,8 +122,24 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Data hint */}
+      <section className="px-4 py-8 bg-secondary/40">
+        <div className="container-narrow">
+          <div className="rounded-lg border border-border bg-card p-5 flex gap-4">
+            <Flame className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-1">Daten aus Ihrer Abrechnung</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Die meisten Eingaben – wie Verbrauchsmenge, Abrechnungszeitraum und Fläche – können
+                in der Regel direkt aus Ihrer Heizkosten- oder Energieabrechnung übernommen werden.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
-      <section className="px-4 py-12 md:py-16 bg-secondary/40">
+      <section className="px-4 py-12 md:py-16 bg-background">
         <div className="container-narrow">
           <h2 className="text-xl font-bold mb-8">Häufige Fragen</h2>
           <div>
@@ -151,17 +168,17 @@ export default function Index() {
               answer="Der Rechner erkennt jahresübergreifende Zeiträume automatisch. Sie geben die Verbrauchsmengen getrennt nach Kalenderjahren ein, damit die jeweils geltenden CO2-Preise korrekt berücksichtigt werden."
             />
             <FAQItem
-              question="Kann ich das Ergebnis direkt als Schreiben verwenden?"
-              answer="Sie können ein PDF-Dokument mit den Berechnungsergebnissen erstellen, das als Grundlage für die Kommunikation mit Ihrem Vermieter oder Mieter dienen kann. Das Dokument ersetzt jedoch keine rechtliche oder steuerliche Beratung."
+              question="Was erhalte ich als Ergebnis?"
+              answer="Sie erhalten eine nachvollziehbare Berechnung mit Stufenmodell-Einstufung und Kostenaufteilung. Das Ergebnis kann als strukturiertes PDF exportiert werden – zur eigenen Dokumentation oder als Anlage zur Abrechnung."
             />
           </div>
         </div>
       </section>
 
       {/* Disclaimer */}
-      <section className="px-4 py-10 bg-background">
+      <section className="px-4 py-10 bg-secondary/40">
         <div className="container-narrow">
-          <div className="rounded-lg border border-border bg-muted/50 p-6">
+          <div className="rounded-lg border border-border bg-card p-6">
             <h3 className="text-sm font-semibold text-foreground mb-2">Rechtlicher Hinweis</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Dieser Rechner dient ausschließlich der unverbindlichen Information und ersetzt keine

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
-import { FileText, RotateCcw, ArrowRight, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays } from 'lucide-react';
+import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getHeatSupplyLabel, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
 import type { OutputType } from '@/lib/calculator/types';
@@ -14,6 +14,12 @@ function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: stri
   return 'Gebäudewohnfläche';
 }
 
+const FUEL_LABELS: Record<string, string> = {
+  erdgas: 'Erdgas', heizoel: 'Heizöl', fernwaerme: 'Fernwärme', fluessiggas: 'Flüssiggas (LPG)',
+  pellets: 'Holzpellets', hackschnitzel: 'Holzhackschnitzel', braunkohle: 'Braunkohlebriketts',
+  erdgas_kwk: 'Erdgas (KWK)', fluessiggas_kwk: 'Flüssiggas (KWK)', heizoel_kwk: 'Heizöl (KWK)',
+};
+
 export default function ResultsPage() {
   const navigate = useNavigate();
   const { result, wizardData, reset } = useCalculator();
@@ -23,7 +29,7 @@ export default function ResultsPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">Keine Berechnung vorhanden.</p>
-          <Button onClick={() => navigate('/rechner')}>Zur Berechnung<ArrowRight className="h-4 w-4" /></Button>
+          <Button onClick={() => navigate('/rechner')}>Zur Berechnung</Button>
         </div>
       </div>
     );
@@ -37,6 +43,8 @@ export default function ResultsPage() {
 
   const docCase = getDocumentCase(wizardData);
   const isTenantClaim = (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
+  const isTenant = wizardData.userRole === 'mieter';
+  const isLandlord = wizardData.userRole === 'vermieter';
 
   const allocationExplanation = (() => {
     if (result.isResidential && result.stufenmodellStep > 0) {
@@ -54,16 +62,21 @@ export default function ResultsPage() {
     return '';
   })();
 
+  // Fuel display
+  const fuelDisplay = result.fuelResults.length > 1
+    ? result.fuelResults.map(fr => FUEL_LABELS[fr.fuelType] || fr.fuelLabel).join(', ')
+    : result.fuelLabel;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="container-narrow flex h-14 items-center px-4">
-          <span className="text-sm font-semibold text-foreground">Ergebnis</span>
+          <span className="text-sm font-semibold text-foreground">Ergebnis der CO2-Kostenaufteilung</span>
         </div>
       </header>
 
-      <main className="px-4 py-8 md:py-12">
-        <div className="container-narrow space-y-5 animate-fade-in">
+      <main className="px-4 py-8 md:py-10">
+        <div className="container-narrow space-y-4 animate-fade-in">
           {/* Summary */}
           <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-5">
             <p className="text-base font-medium text-foreground leading-relaxed">
@@ -79,7 +92,7 @@ export default function ResultsPage() {
               <Building2 className="h-3 w-3" />{getBuildingTypeLabel(wizardData)}
             </span>
             <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">
-              <Flame className="h-3 w-3" />{getHeatSupplyLabel(wizardData)}
+              <Flame className="h-3 w-3" />{fuelDisplay}
             </span>
             <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">
               {fmt.date(wizardData.billingPeriodStart)} – {fmt.date(wizardData.billingPeriodEnd)}
@@ -91,9 +104,9 @@ export default function ResultsPage() {
             )}
           </div>
 
-          {/* Cards */}
+          {/* Amount cards */}
           <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-lg border border-border bg-card p-5 text-center">
+            <div className="rounded-lg border border-border bg-card p-4 text-center">
               <div className="text-xs text-muted-foreground mb-1">CO2-Kosten gesamt (brutto)</div>
               <div className="text-2xl font-bold text-foreground">{formatCurrency(result.totalCO2Cost)}</div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -101,12 +114,12 @@ export default function ResultsPage() {
               </div>
               {result.usedDirectCost && <div className="text-xs text-muted-foreground mt-0.5">(direkt eingegeben)</div>}
             </div>
-            <div className="rounded-lg border-2 border-primary bg-primary/5 p-5 text-center">
+            <div className="rounded-lg border-2 border-primary bg-primary/5 p-4 text-center">
               <div className="text-xs text-muted-foreground mb-1">Vermieter</div>
               <div className="text-2xl font-bold text-primary">{formatCurrency(result.landlordShare)}</div>
               <div className="text-xs text-primary font-medium mt-1">{result.landlordPercent} %</div>
             </div>
-            <div className="rounded-lg border-2 border-accent bg-accent/5 p-5 text-center">
+            <div className="rounded-lg border-2 border-accent bg-accent/5 p-4 text-center">
               <div className="text-xs text-muted-foreground mb-1">Mieter</div>
               <div className="text-2xl font-bold text-accent">{formatCurrency(result.tenantShare)}</div>
               <div className="text-xs text-accent font-medium mt-1">{result.tenantPercent} %</div>
@@ -121,13 +134,13 @@ export default function ResultsPage() {
                 <p className="font-semibold">Möglicher Erstattungsanspruch</p>
                 <p className="text-xl font-bold text-primary mt-1">{formatCurrency(result.landlordShare)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Dieser Betrag kann beim Vermieter zur Erstattung geltend gemacht werden.
+                  Dieser Betrag kann ggf. beim Vermieter zur Erstattung geltend gemacht werden.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Non-residential notes */}
+          {/* Non-residential note */}
           {!result.isResidential && (
             <div className="rounded-lg border border-border bg-muted/30 p-4 flex gap-3">
               <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -139,7 +152,7 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* Cross-year segment details */}
+          {/* Cross-year segments */}
           {result.isCrossYear && result.segmentResults && result.segmentResults.length > 0 && (
             <div className="rounded-lg border border-border bg-card p-4 space-y-3">
               <h3 className="text-xs font-semibold text-foreground flex items-center gap-2">
@@ -196,6 +209,21 @@ export default function ResultsPage() {
             </div>
           )}
 
+          {/* Document preview */}
+          <div className="rounded-lg border border-border bg-card p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-foreground">
+              {isLandlord ? 'Berechnungsgrundlage erstellen' : 'Dokument erstellen'}
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {isLandlord
+                ? 'Erstellen Sie ein strukturiertes Berechnungsblatt als PDF – zur Dokumentation oder als Anlage zur Abrechnung.'
+                : 'Erstellen Sie ein Berechnungsblatt als PDF. Bei bestehendem Erstattungsanspruch können Sie zusätzlich ein Erstattungsschreiben generieren.'}
+            </p>
+            <div className="text-xs text-muted-foreground pt-1 space-y-0.5">
+              <p>Inhalt: Abrechnungszeitraum · Brennstoff · Verbrauchsmenge · CO2-Ausstoß · Stufenmodell-Einstufung · Kostenaufteilung · Netto/Brutto</p>
+            </div>
+          </div>
+
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Button variant="outline" size="lg" onClick={() => navigate('/rechner')}>
@@ -209,10 +237,17 @@ export default function ResultsPage() {
                 <FileText className="h-4 w-4" />Erstattungsschreiben
               </Button>
             )}
-            <Button variant="outline" size="lg" className="flex-1" onClick={handleNewCalculation}>
+            <Button variant="outline" size="lg" onClick={handleNewCalculation}>
               <RotateCcw className="h-4 w-4" />Neue Berechnung
             </Button>
           </div>
+
+          {/* Biomass note */}
+          {result.fuelResults.some(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel') && (
+            <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
+              <strong className="text-foreground">Biomasse:</strong> Holzpellets und Holzhackschnitzel haben einen Emissionsfaktor, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen 0,00 EUR.
+            </div>
+          )}
 
           {/* Technical details */}
           <details className="rounded-lg border border-border bg-card">
@@ -225,6 +260,8 @@ export default function ResultsPage() {
                 <span className="text-foreground font-medium text-right">{getBuildingTypeLabel(wizardData)}</span>
                 <span>Wärmeversorgung:</span>
                 <span className="text-foreground font-medium text-right">{getHeatSupplyLabel(wizardData)}</span>
+                <span>Brennstoff:</span>
+                <span className="text-foreground font-medium text-right">{fuelDisplay}</span>
                 <span>CO2-Ausstoß gesamt:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.totalEmissionsKg, 1)} kg</span>
                 <span>CO2 pro m² (Abrechnungszeitraum):</span>
@@ -243,8 +280,6 @@ export default function ResultsPage() {
                     </span>
                   </>
                 )}
-                <span>Brennstoff:</span>
-                <span className="text-foreground font-medium text-right">{result.fuelLabel}</span>
                 <span>Emissionsfaktor:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.emissionFactor, 4)} kg CO2/kWh</span>
                 {result.fuelResults.length > 1 && (
@@ -263,7 +298,7 @@ export default function ResultsPage() {
                 <span className="text-foreground font-medium text-right">{result.billingYear}</span>
                 <span>{getAreaLabel(wizardData)}:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.relevantArea, 0)} m²</span>
-                <span>Gesamtenergie (Hi):</span>
+                <span>Gesamtenergie (Heizwert):</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 0)} kWh</span>
                 <span>CO2-Kosten netto:</span>
                 <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2CostNet)}</span>
@@ -286,7 +321,7 @@ export default function ResultsPage() {
                     <div key={i} className="grid grid-cols-2 gap-1 pl-2 border-l-2 border-accent/30 ml-1">
                       <span className="font-medium text-foreground">{fr.fuelLabel}</span>
                       <span className="text-right">{formatNumber(fr.co2Kg, 1)} kg CO2</span>
-                      <span>Energie (Hi):</span>
+                      <span>Energie (Heizwert):</span>
                       <span className="text-right">{formatNumber(fr.energyHeatingValueKwh, 0)} kWh</span>
                       <span>CO2-Kosten netto:</span>
                       <span className="text-right">{formatCurrency(fr.co2CostNet)}</span>
@@ -298,13 +333,6 @@ export default function ResultsPage() {
               )}
             </div>
           </details>
-
-          {/* Pellets note */}
-          {result.fuelResults.some(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel') && (
-            <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
-              <strong className="text-foreground">Biomasse:</strong> Holzpellets und Holzhackschnitzel haben einen Emissionsfaktor, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen 0,00 EUR.
-            </div>
-          )}
 
           {/* Legal note */}
           <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
