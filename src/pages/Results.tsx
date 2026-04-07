@@ -37,8 +37,19 @@ export default function ResultsPage() {
     );
   }
 
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [pendingOutputType, setPendingOutputType] = useState<OutputType>('calculation');
+
   const handleNewCalculation = () => { reset(); navigate('/rechner'); };
-  const handleGeneratePDF = (outputType: OutputType = 'calculation') => { generatePDF(wizardData, result, outputType); };
+
+  const handleRequestDocument = (outputType: OutputType) => {
+    setPendingOutputType(outputType);
+    setPaymentOpen(true);
+  };
+
+  const handlePaymentComplete = () => {
+    generatePDF(wizardData, result, pendingOutputType);
+  };
 
   const formatCurrency = (n: number) => fmt.currency(n);
   const formatNumber = (n: number, decimals = 2) => fmt.number(n, decimals);
