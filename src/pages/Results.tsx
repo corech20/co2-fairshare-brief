@@ -196,8 +196,11 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* Actions – calculation PDF is always primary */}
+          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
+            <Button variant="outline" size="lg" onClick={() => navigate('/rechner')}>
+              <ArrowLeft className="h-4 w-4" />Zurück
+            </Button>
             <Button variant="cta" size="lg" className="flex-1" onClick={() => handleGeneratePDF('calculation')}>
               <FileText className="h-4 w-4" />Berechnung als PDF
             </Button>
