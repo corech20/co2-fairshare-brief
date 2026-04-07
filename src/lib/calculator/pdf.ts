@@ -524,28 +524,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
 
   y += 6;
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // METADATA
-  // ═══════════════════════════════════════════════════════════════════════
-
-  ensureSpace(20);
-  doc.setDrawColor(180, 180, 180);
-  doc.setLineWidth(0.2);
-  doc.line(mL, y, pw - mR, y);
-  y += 5;
-
-  doc.setFontSize(7.5);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(120, 120, 120);
-  doc.text(`Erstellt am ${today} · Berechnungs-Nr. ${calcId}`, mL, y);
-
-  const buildingRef = getBuildingReference(data);
-  if (buildingRef) {
-    y += 3.5;
-    doc.text(`${getPropertyLabel(data)} ${buildingRef}`, mL, y);
-  }
-
-  y += 8;
+  y += 4;
   addFooter();
 
   doc.save(`CO2-Kostenaufteilung_${calcId}.pdf`);

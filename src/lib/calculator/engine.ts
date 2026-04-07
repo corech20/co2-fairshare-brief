@@ -32,14 +32,16 @@ const EMISSION_FACTORS: Record<string, number> = {
 /**
  * Heating value conversion factors (raw input unit → kWh Heizwert).
  *
- * Erdgas / Fernwärme: User enters kWh directly (heizwertbezogen per § 3 CO2KostAufG).
- * No conversion needed – factor = 1.
+ * Erdgas: User enters kWh Brennwert (Hs). Conversion to Heizwert (Hi):
+ *   Hi = 0.9030 × Hs (per § 3 CO2KostAufG, emissions are Heizwert-based).
+ *
+ * Fernwärme: User enters kWh directly (already Heizwert).
  *
  * Heizöl: 1 Liter = 10,0461 kWh (Hi)
- * Flüssiggas, Pellets etc.: physical units → kWh
+ * Flüssiggas, Pellets etc.: physical units → kWh (Hi)
  */
 const HEATING_VALUE_FACTORS: Record<string, number> = {
-  erdgas: 1,
+  erdgas: 0.9030,
   heizoel: 10.0461,
   fluessiggas: 12.7778,
   pellets: 4.1667,
@@ -47,7 +49,7 @@ const HEATING_VALUE_FACTORS: Record<string, number> = {
   abfallholz: 4.1667,
   braunkohle: 5.3889,
   fernwaerme: 1,
-  erdgas_kwk: 1,
+  erdgas_kwk: 0.9030,
   fluessiggas_kwk: 12.7778,
   heizoel_kwk: 10.0461,
 };
