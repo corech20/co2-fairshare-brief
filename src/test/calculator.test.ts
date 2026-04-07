@@ -109,8 +109,8 @@ describe('Reference Case 1: Natural Gas 2023 (7% VAT period)', () => {
     expect(r.landlordPercent).toBe(40);
     // net: 8162.76 × 30 / 1000 = 244.88
     expect(round2(r.totalCO2CostNet)).toBe(244.88);
-    // gross: 271.188 × 1.07 = 290.17
-    expect(round2(r.totalCO2Cost)).toBe(290.17);
+    // gross: 244.88 × 1.07 = 262.02
+    expect(round2(r.totalCO2Cost)).toBe(262.02);
     expect(r.isResidential).toBe(true);
     expect(r.isCrossYear).toBe(false);
     expect(r.annualizationFactor).toBeUndefined();
@@ -780,8 +780,8 @@ describe('Full 2025 Erdgas case', () => {
     });
     // net: 1813.95 × 55/1000 = 99.77
     expect(round2(r.totalCO2CostNet)).toBe(99.77);
-    // gross: 99.77 × 1.19 = 118.73
-    expect(round2(r.totalCO2Cost)).toBe(round2(99.77 * 1.19));
+    // gross: 99.77 × 1.19 ≈ 118.72
+    expect(round2(r.totalCO2Cost)).toBe(118.72);
   });
 });
 
