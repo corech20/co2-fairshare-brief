@@ -100,7 +100,7 @@ export default function StepFuelSource() {
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-            Weitere Brennstoffe
+            Weitere Brennstoffe / KWK
           </button>
           {showAdvanced && (
             <div className="grid gap-3 mt-3">
@@ -125,15 +125,10 @@ export default function StepFuelSource() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Button variant="outline" size="sm" onClick={addFuelEntry} className="mt-2">
-            <Plus className="h-4 w-4 mr-1" />
-            Weiteren Brennstoff hinzufügen
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Falls mehrere Brennstoffe verwendet werden, können Sie hier weitere ergänzen.
-          </p>
-        </div>
+        <Button variant="outline" size="sm" onClick={addFuelEntry} className="mt-2">
+          <Plus className="h-4 w-4 mr-1" />
+          Mehrere Brennstoffe kombinieren
+        </Button>
       </div>
     );
   }

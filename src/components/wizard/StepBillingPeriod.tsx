@@ -52,15 +52,21 @@ export default function StepBillingPeriod() {
   const yearBoundaries = crossYear && start && end ? getYearBoundaries(start, end) : [];
 
   // Auto-initialize yearly segments when cross-year is detected
+  // Serialize boundaries for comparison to detect date changes
+  const boundariesKey = JSON.stringify(yearBoundaries.map(b => [b.year, b.periodStart, b.periodEnd]));
+
   useEffect(() => {
     if (crossYear && yearBoundaries.length > 0) {
       const existing = wizardData.yearlySegments;
-      if (!existing || existing.length !== yearBoundaries.length) {
-        const segments: YearlySegment[] = yearBoundaries.map(b => ({
+      // Re-initialize if segment count changed OR if the actual dates changed
+      const needsReinit = !existing || existing.length !== yearBoundaries.length ||
+        existing.some((seg, i) => seg.periodStart !== yearBoundaries[i].periodStart || seg.periodEnd !== yearBoundaries[i].periodEnd);
+      if (needsReinit) {
+        const segments: YearlySegment[] = yearBoundaries.map((b, i) => ({
           year: b.year,
           periodStart: b.periodStart,
           periodEnd: b.periodEnd,
-          amount: 0,
+          amount: existing?.[i]?.amount ?? 0,
           co2PricePerTon: getCO2PriceForYear(b.year),
         }));
         setWizardField('yearlySegments', segments);
@@ -68,7 +74,7 @@ export default function StepBillingPeriod() {
     } else if (!crossYear && wizardData.yearlySegments) {
       setWizardField('yearlySegments', undefined);
     }
-  }, [crossYear, yearBoundaries.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [crossYear, boundariesKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateSegmentAmount = (index: number, amount: number) => {
     const segments = [...(wizardData.yearlySegments ?? [])];

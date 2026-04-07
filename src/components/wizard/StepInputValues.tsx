@@ -297,12 +297,12 @@ export default function StepInputValues() {
             <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showPdfSection ? 'rotate-180' : ''}`} />
             <div>
               <h3 className="text-lg font-semibold text-foreground">
-                {isTenant ? 'Angaben für das Erstattungsschreiben (optional)' : 'Angaben für das PDF-Dokument (optional)'}
+                {isTenant ? 'Adressdaten für ein Erstattungsschreiben (optional)' : 'Adressdaten für ein personalisiertes Dokument (optional)'}
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {isTenant
-                  ? 'Adressdaten für ein personalisiertes Schreiben an den Vermieter.'
-                  : 'Adressdaten werden nur für die Erstellung des PDF-Dokuments verwendet.'}
+                  ? 'Nur erforderlich, wenn Sie ein personalisiertes Erstattungsschreiben an den Vermieter erstellen möchten.'
+                  : 'Nur erforderlich, wenn Sie ein personalisiertes Informationsschreiben erstellen möchten. Für das Berechnungsblatt sind keine Adressdaten nötig.'}
               </p>
             </div>
           </button>
