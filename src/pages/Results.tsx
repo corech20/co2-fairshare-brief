@@ -374,6 +374,22 @@ export default function ResultsPage() {
           </div>
         </div>
       </main>
+
+      <PaymentDialog
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
+        documentLabel={
+          pendingOutputType === 'letter_tenant_reimbursement'
+            ? 'Erstattungsschreiben erstellen'
+            : 'Berechnung als PDF erstellen'
+        }
+        documentDescription={
+          pendingOutputType === 'letter_tenant_reimbursement'
+            ? 'Erstellt ein druckfertiges Schreiben auf Grundlage Ihrer Berechnung. Der Betrag wird einmalig berechnet.'
+            : 'Erstellt ein druckbares PDF mit vollständiger Berechnungsgrundlage und Ergebnissen. Der Betrag wird einmalig berechnet.'
+        }
+        onPaymentComplete={handlePaymentComplete}
+      />
     </div>
   );
 }
