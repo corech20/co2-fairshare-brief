@@ -336,7 +336,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     
     if (pdfMixedVAT) {
       const dayMs = 1000 * 60 * 60 * 24;
-      const pdfTotalDays = Math.round((pdfPEnd!.getTime() - pdfPStart!.getTime()) / dayMs);
+      const pdfTotalDays = Math.round((pdfPEnd!.getTime() - pdfPStart!.getTime()) / dayMs) + 1;
       const pdfReducedDays = Math.round((pdfVatBoundary.getTime() - pdfPStart!.getTime()) / dayMs);
       const pdfStandardDays = pdfTotalDays - pdfReducedDays;
       detailRow(
