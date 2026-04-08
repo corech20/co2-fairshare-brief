@@ -32,6 +32,14 @@ export default function StepFuelSource() {
   const fuelEntries = wizardData.fuelEntries ?? [];
   const isMultiFuel = fuelEntries.length > 0;
 
+  // Filter out Fernwärme if already selected as heat supply type in step 3
+  const visibleStandardFuels = wizardData.heatSupplyType === 'fernwaerme'
+    ? STANDARD_FUELS.filter(f => f.value !== 'fernwaerme')
+    : STANDARD_FUELS;
+  const visibleAllFuels = wizardData.heatSupplyType === 'fernwaerme'
+    ? ALL_FUELS.filter(f => f.value !== 'fernwaerme')
+    : ALL_FUELS;
+
   const selectSingleFuel = (fuelType: FuelType) => {
     setWizardField('fuelType', fuelType);
     if (fuelEntries.length > 0) setWizardField('fuelEntries', undefined);
@@ -75,7 +83,7 @@ export default function StepFuelSource() {
         </div>
 
         <div className="grid gap-3">
-          {STANDARD_FUELS.map(opt => (
+          {visibleStandardFuels.map(opt => (
             <button
               key={opt.value}
               onClick={() => selectSingleFuel(opt.value)}
@@ -157,7 +165,7 @@ export default function StepFuelSource() {
               onChange={e => updateFuelEntry(index, { fuelType: e.target.value as FuelType })}
               className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
             >
-              {ALL_FUELS.map(f => (
+              {visibleAllFuels.map(f => (
                 <option key={f.value} value={f.value}>{f.label}</option>
               ))}
             </select>

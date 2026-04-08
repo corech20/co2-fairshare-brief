@@ -22,6 +22,19 @@ const FUEL_LABELS: Record<string, string> = {
   erdgas_kwk: 'Erdgas (KWK)', fluessiggas_kwk: 'Flüssiggas (KWK)', heizoel_kwk: 'Heizöl (KWK)',
 };
 
+function getMixedVATInfo(data: { fuelType?: string; billingPeriodStart?: string; billingPeriodEnd?: string }, isCrossYear: boolean) {
+  const gasFuels = new Set(['erdgas', 'erdgas_kwk', 'fernwaerme']);
+  if (!data.fuelType || !gasFuels.has(data.fuelType) || isCrossYear) return null;
+  const start = data.billingPeriodStart ? new Date(data.billingPeriodStart) : null;
+  const end = data.billingPeriodEnd ? new Date(data.billingPeriodEnd) : null;
+  const boundary = new Date('2024-04-01');
+  if (!start || !end || start >= boundary || end < boundary) return null;
+  const dayMs = 1000 * 60 * 60 * 24;
+  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs);
+  const reducedDays = Math.round((boundary.getTime() - start.getTime()) / dayMs);
+  return { reducedDays, standardDays: totalDays - reducedDays };
+}
+
 export default function ResultsPage() {
   const navigate = useNavigate();
   const { result, wizardData, reset } = useCalculator();
@@ -57,6 +70,7 @@ export default function ResultsPage() {
   const isTenantClaim = (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
   const isTenant = wizardData.userRole === 'mieter';
   const isLandlord = wizardData.userRole === 'vermieter';
+  const mixedVAT = getMixedVATInfo(wizardData, result.isCrossYear);
 
   const allocationExplanation = (() => {
     if (result.isResidential && result.stufenmodellStep > 0) {
@@ -122,7 +136,9 @@ export default function ResultsPage() {
               <div className="text-xs text-muted-foreground mb-1">CO2-Kosten gesamt (brutto)</div>
               <div className="text-2xl font-bold text-foreground">{formatCurrency(result.totalCO2Cost)}</div>
               <div className="text-xs text-muted-foreground mt-1">
-                netto: {formatCurrency(result.totalCO2CostNet)} · USt. {result.vatPercent} %
+                {mixedVAT
+                  ? `netto: ${formatCurrency(result.totalCO2CostNet)} · USt. 7 % (${mixedVAT.reducedDays} T.) / 19 % (${mixedVAT.standardDays} T.)`
+                  : `netto: ${formatCurrency(result.totalCO2CostNet)} · USt. ${result.vatPercent} %`}
               </div>
               {result.usedDirectCost && <div className="text-xs text-muted-foreground mt-0.5">(direkt eingegeben)</div>}
             </div>
@@ -335,7 +351,9 @@ export default function ResultsPage() {
                 <span>CO2-Kosten netto:</span>
                 <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2CostNet)}</span>
                 <span>USt.-Satz:</span>
-                <span className="text-foreground font-medium text-right">{result.vatPercent} %</span>
+                <span className="text-foreground font-medium text-right">
+                  {mixedVAT ? `7 % (${mixedVAT.reducedDays} T.) / 19 % (${mixedVAT.standardDays} T.)` : `${result.vatPercent} %`}
+                </span>
                 <span>CO2-Kosten brutto:</span>
                 <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2Cost)}</span>
                 {result.restrictionApplied !== 'fall3' && result.isResidential && (

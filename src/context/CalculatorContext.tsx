@@ -35,12 +35,21 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const goNext = useCallback(() => {
-    if (currentStep < totalSteps - 1) setCurrentStep(prev => prev + 1);
-  }, [currentStep, totalSteps]);
+    let next = currentStep + 1;
+    // Skip fuel step when Fernwärme is already selected as heat supply type
+    if (next === 5 && wizardData.heatSupplyType === 'fernwaerme') {
+      setWizardData(prev => ({ ...prev, fuelType: 'fernwaerme' as WizardData['fuelType'] }));
+      next = 6;
+    }
+    if (next < totalSteps) setCurrentStep(next);
+  }, [currentStep, totalSteps, wizardData.heatSupplyType]);
 
   const goBack = useCallback(() => {
-    if (currentStep > 0) setCurrentStep(prev => prev - 1);
-  }, [currentStep]);
+    let prev = currentStep - 1;
+    // Skip fuel step when Fernwärme is already selected as heat supply type
+    if (prev === 5 && wizardData.heatSupplyType === 'fernwaerme') prev = 4;
+    if (prev >= 0) setCurrentStep(prev);
+  }, [currentStep, wizardData.heatSupplyType]);
 
   const goToStep = useCallback((step: number) => {
     if (step >= 0 && step < totalSteps) setCurrentStep(step);

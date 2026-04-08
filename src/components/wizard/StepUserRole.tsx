@@ -23,8 +23,8 @@ export default function StepUserRole() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Perspektive wählen</h2>
-        <p className="text-muted-foreground mt-2">Aus welcher Perspektive möchten Sie die Berechnung durchführen?</p>
+        <h2 className="text-2xl font-bold text-foreground">Wie möchten Sie berechnen?</h2>
+        <p className="text-muted-foreground mt-2">Bitte wählen Sie aus, ob Sie die Berechnung als Mieter oder als Vermieter durchführen möchten.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {OPTIONS.map(opt => (

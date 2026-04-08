@@ -31,7 +31,13 @@ export default function StepHeatSupply() {
         {options.map(opt => (
           <button
             key={opt.value}
-            onClick={() => setWizardField('heatSupplyType', opt.value)}
+            onClick={() => {
+              setWizardField('heatSupplyType', opt.value);
+              // Clear auto-set fuelType when switching away from Fernwärme
+              if (opt.value !== 'fernwaerme' && wizardData.fuelType === 'fernwaerme') {
+                setWizardField('fuelType', undefined as any);
+              }
+            }}
             className={`rounded-xl border-2 p-5 text-left transition-all hover:shadow-md flex items-start gap-4 ${
               wizardData.heatSupplyType === opt.value
                 ? 'border-accent bg-accent/5 shadow-sm'
