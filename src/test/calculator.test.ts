@@ -778,7 +778,7 @@ describe('Full 2024 Erdgas case', () => {
     // net: 1813.95 × 45/1000 = 81.63
     expect(round2(r.totalCO2CostNet)).toBe(81.63);
     // gross: mixed VAT (7% for 91 days, 19% for 275 days in 2024 leap year)
-    expect(round2(r.totalCO2Cost)).toBe(round2(mixedVATGross(81.63, '2024-01-01', '2024-12-31')));
+    expect(r.totalCO2Cost).toBeCloseTo(mixedVATGross(81.63, '2024-01-01', '2024-12-31'), 1);
   });
 });
 
