@@ -16,6 +16,21 @@ function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
+/** Compute expected gross with day-accurate mixed VAT for gas/Fernwärme spanning Apr 1 2024 */
+function mixedVATGross(netCost: number, periodStart: string, periodEnd: string): number {
+  const start = new Date(periodStart);
+  const end = new Date(periodEnd);
+  const boundary = new Date('2024-04-01');
+  if (end < boundary) return netCost * 1.07;
+  if (start >= boundary) return netCost * 1.19;
+  const dayMs = 86400000;
+  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs);
+  const reducedDays = Math.round((boundary.getTime() - start.getTime()) / dayMs);
+  const reducedNet = netCost * (reducedDays / totalDays);
+  const standardNet = netCost - reducedNet;
+  return reducedNet * 1.07 + standardNet * 1.19;
+}
+
 // ===================================================================
 // 0. VAT RATE LOGIC
 // ===================================================================
