@@ -138,9 +138,11 @@ function computeVAT(
 
   // Mixed: period spans the Apr 1, 2024 boundary
   const dayMs = 1000 * 60 * 60 * 24;
-  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs);
+  // Both boundary days count, so total = end - start + 1
+  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs) + 1;
   if (totalDays <= 0) return noMix(STANDARD_VAT_RATE);
 
+  // 01.01–31.03 inclusive = boundary - start (in days) gives the count including start
   const reducedDays = Math.round((boundary.getTime() - start.getTime()) / dayMs);
   const standardDays = totalDays - reducedDays;
 
