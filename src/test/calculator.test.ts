@@ -541,7 +541,7 @@ describe('Cross-year calculation', () => {
 
     const seg1Net = 6348.81 * 45 / 1000;
     const seg2Net = 1813.95 * 55 / 1000;
-    expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(seg1Net * 1.19));
+    expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(mixedVATGross(seg1Net, '2024-02-01', '2024-12-31')));
     expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2Net * 1.19));
 
     const totalFromSegments = r.segmentResults!.reduce((s, seg) => s + seg.co2CostGross, 0);
@@ -670,7 +670,7 @@ describe('Net/Gross consistency', () => {
     expect(r2024.totalCO2Cost).toBeGreaterThan(r2023.totalCO2Cost);
     // Verify correct VAT rates applied
     expect(round2(r2023.totalCO2Cost)).toBe(round2(r2023.totalCO2CostNet * 1.07));
-    expect(round2(r2024.totalCO2Cost)).toBe(round2(r2024.totalCO2CostNet * 1.19));
+    expect(round2(r2024.totalCO2Cost)).toBe(round2(mixedVATGross(r2024.totalCO2CostNet, '2024-01-01', '2024-12-31')));
   });
 });
 
@@ -705,7 +705,7 @@ describe('Annualization for stage model classification', () => {
     // CO2 cost must NOT be annualized (based on actual 10000 kWh × 0.9030)
     // Period ends 2024-09-30 → erdgas → 19% VAT (after Apr 2024)
     const expectedCostNet = 1813.95 * 45 / 1000;
-    expect(round2(r.totalCO2Cost)).toBe(round2(expectedCostNet * 1.19));
+    expect(round2(r.totalCO2Cost)).toBe(round2(mixedVATGross(expectedCostNet, '2024-02-01', '2024-09-30')));
   });
 
   it('does NOT annualize for full-year periods', () => {
@@ -777,8 +777,8 @@ describe('Full 2024 Erdgas case', () => {
     expect(r.stufenmodellStep).toBe(3);
     // net: 1813.95 × 45/1000 = 81.63
     expect(round2(r.totalCO2CostNet)).toBe(81.63);
-    // gross: 81.63 × 1.19 = 97.14
-    expect(round2(r.totalCO2Cost)).toBe(97.14);
+    // gross: mixed VAT (7% for 91 days, 19% for 275 days in 2024 leap year)
+    expect(round2(r.totalCO2Cost)).toBe(round2(mixedVATGross(81.63, '2024-01-01', '2024-12-31')));
   });
 });
 
@@ -919,6 +919,9 @@ describe('Net and gross are cleanly separated', () => {
     });
     expect(r.totalCO2CostNet).toBeDefined();
     expect(r.totalCO2CostNet).toBeLessThan(r.totalCO2Cost);
-    expect(round2(r.totalCO2Cost / r.totalCO2CostNet)).toBe(1.19);
+    // 2024 full year gas has mixed VAT (7% Q1 + 19% rest), so ratio is NOT exactly 1.19
+    const expectedRatio = r.totalCO2Cost / r.totalCO2CostNet;
+    expect(expectedRatio).toBeGreaterThan(1.07);
+    expect(expectedRatio).toBeLessThan(1.19);
   });
 });
