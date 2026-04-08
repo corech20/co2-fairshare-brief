@@ -24,7 +24,7 @@ function mixedVATGross(netCost: number, periodStart: string, periodEnd: string):
   if (end < boundary) return netCost * 1.07;
   if (start >= boundary) return netCost * 1.19;
   const dayMs = 86400000;
-  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs);
+  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs) + 1;
   const reducedDays = Math.round((boundary.getTime() - start.getTime()) / dayMs);
   const reducedNet = netCost * (reducedDays / totalDays);
   const standardNet = netCost - reducedNet;

@@ -30,7 +30,7 @@ function getMixedVATInfo(data: { fuelType?: string; billingPeriodStart?: string;
   const boundary = new Date('2024-04-01');
   if (!start || !end || start >= boundary || end < boundary) return null;
   const dayMs = 1000 * 60 * 60 * 24;
-  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs);
+  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs) + 1;
   const reducedDays = Math.round((boundary.getTime() - start.getTime()) / dayMs);
   return { reducedDays, standardDays: totalDays - reducedDays };
 }
