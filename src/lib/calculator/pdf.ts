@@ -322,8 +322,31 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     // Net / Gross / VAT breakdown
     ensureSpace(16);
     y += 2;
+    
+    // Detect mixed VAT for gas/Fernwärme spanning Apr 1, 2024
+    const gasFuelsSet = new Set(['erdgas', 'erdgas_kwk', 'fernwaerme']);
+    const pdfPrimaryFuel = data.fuelType ?? result.fuelResults[0]?.fuelType;
+    const pdfPStart = data.billingPeriodStart ? new Date(data.billingPeriodStart) : null;
+    const pdfPEnd = data.billingPeriodEnd ? new Date(data.billingPeriodEnd) : null;
+    const pdfVatBoundary = new Date('2024-04-01');
+    const pdfMixedVAT = pdfPrimaryFuel && gasFuelsSet.has(pdfPrimaryFuel) &&
+      pdfPStart && pdfPEnd && pdfPStart < pdfVatBoundary && pdfPEnd >= pdfVatBoundary;
+
     detailRow('CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
-    detailRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2);
+    
+    if (pdfMixedVAT) {
+      const dayMs = 1000 * 60 * 60 * 24;
+      const pdfTotalDays = Math.round((pdfPEnd!.getTime() - pdfPStart!.getTime()) / dayMs);
+      const pdfReducedDays = Math.round((pdfVatBoundary.getTime() - pdfPStart!.getTime()) / dayMs);
+      const pdfStandardDays = pdfTotalDays - pdfReducedDays;
+      detailRow(
+        `USt. anteilig 7 % (${pdfReducedDays} Tage) / 19 % (${pdfStandardDays} Tage):`,
+        fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2,
+      );
+    } else {
+      detailRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2);
+    }
+    
     detailRow('CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
 
     // CO2 price note

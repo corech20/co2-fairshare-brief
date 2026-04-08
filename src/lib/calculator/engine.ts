@@ -102,6 +102,56 @@ export function getVATRate(fuelType?: string, billingPeriodEnd?: string): number
   return STANDARD_VAT_RATE;
 }
 
+/**
+ * Day-accurate VAT computation for gas/Fernwärme.
+ * Handles the 7% → 19% transition on April 1, 2024.
+ * For billing periods spanning the boundary, the net cost is split
+ * proportionally by days and each portion receives its applicable rate.
+ */
+function computeVAT(
+  netCost: number,
+  fuelType: string,
+  periodStart?: string,
+  periodEnd?: string,
+): { grossCost: number; isMixed: boolean; reducedDays: number; standardDays: number } {
+  const noMix = (rate: number) => ({
+    grossCost: netCost * rate,
+    isMixed: false,
+    reducedDays: 0,
+    standardDays: 0,
+  });
+
+  if (netCost === 0) return noMix(1);
+
+  if (!GAS_REDUCED_VAT_FUELS.has(fuelType) || !periodStart || !periodEnd) {
+    return noMix(STANDARD_VAT_RATE);
+  }
+
+  const start = new Date(periodStart);
+  const end = new Date(periodEnd);
+  const boundary = new Date('2024-04-01');
+
+  // Entirely before Apr 1, 2024 → 7 %
+  if (end < boundary) return noMix(REDUCED_VAT_RATE);
+  // Entirely on/after Apr 1, 2024 → 19 %
+  if (start >= boundary) return noMix(STANDARD_VAT_RATE);
+
+  // Mixed: period spans the Apr 1, 2024 boundary
+  const dayMs = 1000 * 60 * 60 * 24;
+  const totalDays = Math.round((end.getTime() - start.getTime()) / dayMs);
+  if (totalDays <= 0) return noMix(STANDARD_VAT_RATE);
+
+  const reducedDays = Math.round((boundary.getTime() - start.getTime()) / dayMs);
+  const standardDays = totalDays - reducedDays;
+
+  const reducedNet = netCost * (reducedDays / totalDays);
+  const standardNet = netCost - reducedNet;
+
+  const grossCost = reducedNet * REDUCED_VAT_RATE + standardNet * STANDARD_VAT_RATE;
+
+  return { grossCost, isMixed: true, reducedDays, standardDays };
+}
+
 /** Human-readable fuel labels */
 const FUEL_LABELS: Record<FuelType, string> = {
   erdgas: 'Erdgas',
@@ -230,7 +280,9 @@ export function calculateSingleFuel(
   customEmissionFactor?: number,
   directCost?: number,
   directCostType?: CostInputType,
-  vatRate: number = STANDARD_VAT_RATE,
+  vatRate?: number,
+  periodStart?: string,
+  periodEnd?: string,
 ): FuelCalculationResult {
   const heatingValueFactor = HEATING_VALUE_FACTORS[fuelType] ?? 1;
   const chpFactor = CHP_HEAT_SHARE[fuelType] ?? 1;
@@ -239,10 +291,18 @@ export function calculateSingleFuel(
   const energyHeatingValueKwh = amount * heatingValueFactor * chpFactor;
   const co2Kg = energyHeatingValueKwh * emissionFactor;
 
+  // Determine gross from net: explicit vatRate takes precedence, then period-based computation
+  const applyVAT = (net: number) => {
+    if (vatRate != null) return net * vatRate;
+    return computeVAT(net, fuelType, periodStart, periodEnd).grossCost;
+  };
+
   // Check for direct cost input
   if (directCost != null && directCost > 0) {
-    const co2CostGross = directCostType === 'netto' ? directCost * vatRate : directCost;
-    const co2CostNet = directCostType === 'netto' ? directCost : directCost / vatRate;
+    const co2CostGross = directCostType === 'netto' ? applyVAT(directCost) : directCost;
+    const co2CostNet = directCostType === 'netto'
+      ? directCost
+      : directCost / (vatRate ?? getVATRate(fuelType, periodEnd));
     return {
       fuelType, fuelLabel: getFuelLabel(fuelType), inputAmount: amount,
       energyHeatingValueKwh, emissionFactor, co2Kg,
@@ -252,7 +312,7 @@ export function calculateSingleFuel(
 
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
   const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostGross = isZeroCost ? 0 : co2CostNet * vatRate;
+  const co2CostGross = isZeroCost ? 0 : applyVAT(co2CostNet);
 
   return {
     fuelType, fuelLabel: getFuelLabel(fuelType), inputAmount: amount,
@@ -270,7 +330,8 @@ function calculateFuelSegment(
   amount: number,
   co2PricePerTon: number,
   customEmissionFactor?: number,
-  vatRate: number = STANDARD_VAT_RATE,
+  periodStart?: string,
+  periodEnd?: string,
 ): { energyHeatingValueKwh: number; co2Kg: number; co2CostNet: number; co2CostGross: number } {
   const heatingValueFactor = HEATING_VALUE_FACTORS[fuelType] ?? 1;
   const chpFactor = CHP_HEAT_SHARE[fuelType] ?? 1;
@@ -280,7 +341,7 @@ function calculateFuelSegment(
   const co2Kg = energyHeatingValueKwh * emissionFactor;
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
   const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostGross = isZeroCost ? 0 : co2CostNet * vatRate;
+  const co2CostGross = isZeroCost ? 0 : computeVAT(co2CostNet, fuelType, periodStart, periodEnd).grossCost;
 
   return { energyHeatingValueKwh, co2Kg, co2CostNet, co2CostGross };
 }
@@ -398,13 +459,12 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
         co2CostDirectType: data.co2CostDirectType,
       }];
 
-  // Calculate each fuel with the correct VAT rate
+  // Calculate each fuel with day-accurate VAT based on billing period
   const fuelResults: FuelCalculationResult[] = fuelEntries.map(entry => {
-    const vatRate = getVATRate(entry.fuelType, data.billingPeriodEnd);
     return calculateSingleFuel(
       entry.fuelType, entry.amount, co2PricePerTon,
       entry.emissionFactorCustom, entry.co2CostDirect, entry.co2CostDirectType,
-      vatRate,
+      undefined, data.billingPeriodStart, data.billingPeriodEnd,
     );
   });
 
@@ -429,8 +489,7 @@ function calculateCrossYear(data: WizardData, notes: string[]): CalculationResul
 
   for (const seg of segments) {
     const co2Price = getCO2PriceForYear(seg.year);
-    const vatRate = getVATRate(primaryFuelType, seg.periodEnd);
-    const result = calculateFuelSegment(primaryFuelType, seg.amount, co2Price, primaryEmissionFactor, vatRate);
+    const result = calculateFuelSegment(primaryFuelType, seg.amount, co2Price, primaryEmissionFactor, seg.periodStart, seg.periodEnd);
     segmentResults.push({
       year: seg.year,
       periodStart: seg.periodStart,
@@ -575,7 +634,8 @@ function buildResult(
   if (
     data.userRole === 'mieter' &&
     data.heatSupplyType === 'etage' &&
-    data.hasExtraGasDevice === true
+    data.hasExtraGasDevice === true &&
+    (data.fuelType === 'erdgas' || data.fuelType === 'erdgas_kwk')
   ) {
     reimbursementReductionApplied = true;
     reimbursementReductionPercent = EXTRA_GAS_DEVICE_REDUCTION * 100;

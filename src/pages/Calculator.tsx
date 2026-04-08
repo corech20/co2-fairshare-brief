@@ -22,9 +22,15 @@ const STEP_LABELS = [
 
 function WizardContent() {
   const navigate = useNavigate();
-  const { currentStep, totalSteps, goNext, goBack, canGoNext, isLastStep, calculate } = useCalculator();
+  const { currentStep, totalSteps, goNext, goBack, canGoNext, isLastStep, calculate, wizardData } = useCalculator();
 
-  const progressPercent = ((currentStep + 1) / totalSteps) * 100;
+  const skipFuelStep = wizardData.heatSupplyType === 'fernwaerme';
+  const effectiveLabels = skipFuelStep
+    ? STEP_LABELS.filter((_, i) => i !== 5)
+    : STEP_LABELS;
+  const effectiveIndex = skipFuelStep && currentStep > 5 ? currentStep - 1 : currentStep;
+  const effectiveTotal = effectiveLabels.length;
+  const progressPercent = ((effectiveIndex + 1) / effectiveTotal) * 100;
 
   const handleNext = () => {
     if (isLastStep) {
@@ -58,7 +64,7 @@ function WizardContent() {
             <span className="text-sm font-semibold">CO2-Kostenaufteilung</span>
           </button>
           <span className="text-xs text-muted-foreground">
-            Schritt {currentStep + 1} / {totalSteps}
+            Schritt {effectiveIndex + 1} / {effectiveTotal}
           </span>
         </div>
       </header>
@@ -75,9 +81,9 @@ function WizardContent() {
       <div className="hidden md:block border-b border-border bg-background">
         <div className="container-wide px-4">
           <div className="flex justify-between py-2.5">
-            {STEP_LABELS.map((label, i) => (
+            {effectiveLabels.map((label, i) => (
               <div key={i} className={`text-xs font-medium transition-colors ${
-                i === currentStep ? 'text-accent' : i < currentStep ? 'text-primary' : 'text-muted-foreground'
+                i === effectiveIndex ? 'text-accent' : i < effectiveIndex ? 'text-primary' : 'text-muted-foreground'
               }`}>
                 {label}
               </div>

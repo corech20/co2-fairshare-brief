@@ -90,6 +90,8 @@ export default function StepInputValues() {
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
   const isTenantApartmentHeating = wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'etage';
+  const showGasDeviceQuestion = isTenantApartmentHeating &&
+    (wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk');
   const isTenant = wizardData.userRole === 'mieter';
   const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
 
@@ -257,7 +259,7 @@ export default function StepInputValues() {
         )}
 
         {/* Tenant apartment heating: extra gas device question */}
-        {isTenantApartmentHeating && (
+        {showGasDeviceQuestion && (
           <div className="rounded-xl border-2 border-border bg-card p-5 space-y-3">
             <label className="text-sm font-medium text-foreground">
               Gibt es in der Wohnung zusätzlich ein Gasgerät ohne eigenen Zähler, z.&nbsp;B. einen Gasherd?

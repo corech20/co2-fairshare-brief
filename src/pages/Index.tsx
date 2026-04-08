@@ -33,11 +33,8 @@ export default function Index() {
         <div className="container-wide flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
             <Scale className="h-5 w-5 text-primary" />
-            <span className="text-base font-semibold text-foreground tracking-tight">CO2-Kostenaufteilung</span>
+           <span className="text-base font-semibold text-foreground tracking-tight">CO2-Kostenaufteilung</span>
           </div>
-          <Button variant="default" size="sm" onClick={() => navigate('/rechner')}>
-            Berechnung starten
-          </Button>
         </div>
       </header>
 
@@ -45,9 +42,9 @@ export default function Index() {
       <section className="px-4 py-12 md:py-16 bg-background">
         <div className="container-narrow">
           <div className="space-y-5">
-            <div className="inline-block rounded-md bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground tracking-wide uppercase">
-              Gemäß CO2KostAufG
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG)
+            </p>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-foreground leading-tight">
               CO2-Kostenaufteilung berechnen und dokumentieren
             </h1>
@@ -105,7 +102,7 @@ export default function Index() {
       {/* What the tool provides */}
       <section className="px-4 py-12 md:py-16 bg-background">
         <div className="container-narrow">
-          <h2 className="text-xl font-bold text-foreground mb-6">Was dieses Tool liefert</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">Was dieses Tool kann</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { icon: Scale, label: 'Stufenmodell-Einstufung' },
