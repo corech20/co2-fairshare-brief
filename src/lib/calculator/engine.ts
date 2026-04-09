@@ -313,8 +313,9 @@ export function calculateSingleFuel(
   }
 
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
-  const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostGross = isZeroCost ? 0 : applyVAT(co2CostNet);
+  const co2CostNetRaw = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
+  const co2CostNet = Math.round(co2CostNetRaw * 100) / 100;
+  const co2CostGross = isZeroCost ? 0 : Math.round(applyVAT(co2CostNet) * 100) / 100;
 
   return {
     fuelType, fuelLabel: getFuelLabel(fuelType), inputAmount: amount,
@@ -342,8 +343,9 @@ function calculateFuelSegment(
   const energyHeatingValueKwh = amount * heatingValueFactor * chpFactor;
   const co2Kg = energyHeatingValueKwh * emissionFactor;
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
-  const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostGross = isZeroCost ? 0 : computeVAT(co2CostNet, fuelType, periodStart, periodEnd).grossCost;
+  const co2CostNetRaw = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
+  const co2CostNet = Math.round(co2CostNetRaw * 100) / 100;
+  const co2CostGross = isZeroCost ? 0 : Math.round(computeVAT(co2CostNet, fuelType, periodStart, periodEnd).grossCost * 100) / 100;
 
   return { energyHeatingValueKwh, co2Kg, co2CostNet, co2CostGross };
 }
