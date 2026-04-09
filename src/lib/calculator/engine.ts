@@ -47,7 +47,7 @@ const HEATING_VALUE_FACTORS: Record<string, number> = {
   pellets: 4.1667,
   hackschnitzel: 4.1667,
   abfallholz: 4.1667,
-  braunkohle: 5.4722,
+  braunkohle: 19.7 / 3.6,
   fernwaerme: 1,
   erdgas_kwk: 0.9030,
   fluessiggas_kwk: 12.7778,
