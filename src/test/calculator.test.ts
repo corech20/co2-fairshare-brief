@@ -326,10 +326,10 @@ describe('Flüssiggas: kg → kWh conversion', () => {
 });
 
 describe('Braunkohle: kg → kWh conversion', () => {
-  it('converts kg to kWh using factor 5.3889', () => {
+  it('converts kg to kWh using factor 5.4722', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
-    expect(round2(r.energyHeatingValueKwh)).toBe(5388.9);
-    expect(round2(r.co2Kg)).toBe(round2(5388.9 * 0.35712));
+    expect(round2(r.energyHeatingValueKwh)).toBe(5472.2);
+    expect(round2(r.co2Kg)).toBe(round2(5472.2 * 0.35712));
   });
 });
 
