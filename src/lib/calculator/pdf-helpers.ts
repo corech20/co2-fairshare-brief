@@ -180,8 +180,8 @@ const STUFEN_RANGES = [
 export function getStufenmodellRangeText(step: number): string {
   if (step < 1 || step > 10) return '';
   const range = STUFEN_RANGES[step - 1];
-  if (step === 1) return `≤ ${range.max} kg CO2 / m² / a`;
-  if (step === 10) return `> ${range.min} kg CO2 / m² / a`;
+  if (step === 1) return `< ${range.max} kg CO2 / m² / a`;
+  if (step === 10) return `≥ ${range.min} kg CO2 / m² / a`;
   return `${range.min} bis < ${range.max} kg CO2 / m² / a`;
 }
 
