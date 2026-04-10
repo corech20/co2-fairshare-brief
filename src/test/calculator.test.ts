@@ -545,8 +545,10 @@ describe('Cross-year calculation', () => {
     expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(mixedVATGross(seg1NetRaw, '2024-02-01', '2024-12-31')));
     expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2NetRaw * 1.19));
 
-    const totalFromSegments = r.segmentResults!.reduce((s, seg) => s + seg.co2CostGross, 0);
-    expect(round2(r.totalCO2Cost)).toBe(round2(totalFromSegments));
+    // Total gross is computed using full-period VAT (BMWK-aligned), not sum of segment grosses
+    const totalNetRaw = seg1NetRaw + seg2NetRaw;
+    const expectedTotalGross = mixedVATGross(totalNetRaw, '2024-02-01', '2025-01-31');
+    expect(round2(r.totalCO2Cost)).toBe(round2(expectedTotalGross));
   });
 });
 
