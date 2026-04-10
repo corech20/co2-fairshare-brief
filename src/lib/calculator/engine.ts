@@ -313,9 +313,9 @@ export function calculateSingleFuel(
   }
 
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
-  const co2CostNetRaw = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostNet = Math.round(co2CostNetRaw * 100) / 100;
-  const co2CostGross = isZeroCost ? 0 : Math.round(applyVAT(co2CostNet) * 100) / 100;
+  // Keep full precision – rounding happens only at final output in buildResult
+  const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
+  const co2CostGross = isZeroCost ? 0 : applyVAT(co2CostNet);
 
   return {
     fuelType, fuelLabel: getFuelLabel(fuelType), inputAmount: amount,
@@ -343,9 +343,9 @@ function calculateFuelSegment(
   const energyHeatingValueKwh = amount * heatingValueFactor * chpFactor;
   const co2Kg = energyHeatingValueKwh * emissionFactor;
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
-  const co2CostNetRaw = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
-  const co2CostNet = Math.round(co2CostNetRaw * 100) / 100;
-  const co2CostGross = isZeroCost ? 0 : Math.round(computeVAT(co2CostNet, fuelType, periodStart, periodEnd).grossCost * 100) / 100;
+  // Keep full precision – rounding happens only at final output in buildResult
+  const co2CostNet = isZeroCost ? 0 : (co2Kg * co2PricePerTon) / 1000;
+  const co2CostGross = isZeroCost ? 0 : computeVAT(co2CostNet, fuelType, periodStart, periodEnd).grossCost;
 
   return { energyHeatingValueKwh, co2Kg, co2CostNet, co2CostGross };
 }
@@ -555,8 +555,9 @@ function buildResult(
   const totalCO2CostNetCalc = fuelResults.reduce((s, r) => s + r.co2CostNet, 0);
   const anyDirectCost = fuelResults.some(r => r.usedDirectCost);
 
-  const totalCO2Cost = totalCO2CostGrossCalc;
-  const totalCO2CostNet = totalCO2CostNetCalc;
+  // Round only at the final output stage (BMWK-aligned: VAT applied to raw net, then round)
+  const totalCO2Cost = Math.round(totalCO2CostGrossCalc * 100) / 100;
+  const totalCO2CostNet = Math.round(totalCO2CostNetCalc * 100) / 100;
   const usedDirectCost = anyDirectCost;
 
   // Determine the effective VAT rate for display purposes
