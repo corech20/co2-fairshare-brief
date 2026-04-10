@@ -539,10 +539,11 @@ describe('Cross-year calculation', () => {
     // 10000 × 0.9030 × 0.20088 = 1813.95
     expect(round2(r.segmentResults![1].co2Kg)).toBe(1813.95);
 
-    const seg1Net = round2(6348.81 * 45 / 1000);
-    const seg2Net = round2(1813.95 * 55 / 1000);
-    expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(mixedVATGross(seg1Net, '2024-02-01', '2024-12-31')));
-    expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2Net * 1.19));
+    // Raw precision: VAT applied to unrounded net values
+    const seg1NetRaw = 6348.8064 * 45 / 1000;
+    const seg2NetRaw = 1813.9544 * 55 / 1000;
+    expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(mixedVATGross(seg1NetRaw, '2024-02-01', '2024-12-31')));
+    expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2NetRaw * 1.19));
 
     const totalFromSegments = r.segmentResults!.reduce((s, seg) => s + seg.co2CostGross, 0);
     expect(round2(r.totalCO2Cost)).toBe(round2(totalFromSegments));
@@ -617,9 +618,9 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
     expect(r.stufenmodellStep).toBe(7);
     expect(r.tenantPercent).toBe(40);
     expect(r.landlordPercent).toBe(60);
-    // Heizöl always 19% VAT – BMWK-aligned: round net to cents, then apply VAT, then round gross
-    const netCost = round2(round2(30138.3 * 0.2664) * 30 / 1000);
-    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.19));
+    // BMWK-aligned: VAT applied to raw (unrounded) net, then round gross
+    const rawNet = 30138.3 * 0.2664 * 30 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(rawNet * 1.19));
   });
 
   it('calculates correctly for 3000 liters 2024 (19% VAT)', () => {
@@ -628,8 +629,8 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
       fuelType: 'heizoel', fuelAmount: 3000, buildingArea: 200,
     });
-    const netCost = round2(round2(30138.3 * 0.2664) * 45 / 1000);
-    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.19));
+    const rawNet2024 = 30138.3 * 0.2664 * 45 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(rawNet2024 * 1.19));
   });
 });
 
@@ -795,8 +796,9 @@ describe('Full 2025 Erdgas case', () => {
     });
     // net: 1813.95 × 55/1000 = 99.77
     expect(round2(r.totalCO2CostNet)).toBe(99.77);
-    // gross: 99.77 × 1.19 = 118.73 (BMWK-aligned: net rounded first)
-    expect(round2(r.totalCO2Cost)).toBe(round2(99.77 * 1.19));
+    // BMWK-aligned: VAT applied to raw unrounded net
+    const rawNet2025 = 1813.9544 * 55 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(rawNet2025 * 1.19));
   });
 });
 
@@ -835,9 +837,9 @@ describe('Deviating billing period within one year', () => {
     expect(r.annualizationFactor).toBeDefined();
     expect(round2(r.totalEmissionsKg)).toBe(round2(5000 * 0.9030 * 0.20088));
     // CO2 cost based on actual consumption, NOT annualized
-    // Period ends 2024-09-30 → erdgas → 19% VAT. BMWK: round net first.
-    const netCost = round2(906.97 * 45 / 1000);
-    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.19));
+    // BMWK-aligned: VAT applied to raw unrounded net
+    const rawNetDev = 5000 * 0.9030 * 0.20088 * 45 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(rawNetDev * 1.19));
   });
 });
 
@@ -856,10 +858,10 @@ describe('Heizöl 2024 gross correctness', () => {
     // 20092.2 × 0.2664 = 5348.55 kg CO2
     // net: 5348.55 × 45 / 1000 = 240.68
     // gross: 240.68 × 1.19 = 286.41
-    const emissions = round2(20092.2 * 0.2664);
-    const netCost = round2(emissions * 45 / 1000);
-    expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.19));
-    expect(round2(r.totalCO2CostNet)).toBe(netCost);
+    // BMWK-aligned: VAT applied to raw unrounded net
+    const rawNetOil2024 = 2000 * 10.0461 * 0.2664 * 45 / 1000;
+    expect(round2(r.totalCO2Cost)).toBe(round2(rawNetOil2024 * 1.19));
+    expect(round2(r.totalCO2CostNet)).toBe(round2(rawNetOil2024));
   });
 });
 
