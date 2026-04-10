@@ -488,12 +488,14 @@ function calculateCrossYear(data: WizardData, notes: string[]): CalculationResul
   let totalEnergyKwh = 0;
   let totalCo2Kg = 0;
   let totalCostNet = 0;
-  let totalCostGross = 0;
   let totalAmount = 0;
 
+  // Step 1: Calculate net costs per segment (each segment uses its own CO2 price)
   for (const seg of segments) {
     const co2Price = getCO2PriceForYear(seg.year);
     const result = calculateFuelSegment(primaryFuelType, seg.amount, co2Price, primaryEmissionFactor, seg.periodStart, seg.periodEnd);
+    // Store segment-level gross using per-segment VAT for display, but
+    // the overall gross will be recomputed below using full-period VAT
     segmentResults.push({
       year: seg.year,
       periodStart: seg.periodStart,
@@ -508,9 +510,16 @@ function calculateCrossYear(data: WizardData, notes: string[]): CalculationResul
     totalEnergyKwh += result.energyHeatingValueKwh;
     totalCo2Kg += result.co2Kg;
     totalCostNet += result.co2CostNet;
-    totalCostGross += result.co2CostGross;
     totalAmount += seg.amount;
   }
+
+  // Step 2: Apply VAT to the total net cost using the FULL billing period
+  // This ensures the VAT day-split (7%/19% boundary) is calculated across
+  // the entire billing period, matching BMWK behavior exactly.
+  const totalCostGross = computeVAT(
+    totalCostNet, primaryFuelType,
+    data.billingPeriodStart, data.billingPeriodEnd,
+  ).grossCost;
 
   const emissionFactor = getEmissionFactor(primaryFuelType, primaryEmissionFactor);
 
