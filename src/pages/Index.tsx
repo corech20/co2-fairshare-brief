@@ -42,9 +42,6 @@ export default function Index() {
       <section className="px-4 py-12 md:py-16 bg-background">
         <div className="container-narrow">
           <div className="space-y-5">
-            <p className="text-xs text-muted-foreground">
-              Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG)
-            </p>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-foreground leading-tight">
               CO2-Kostenaufteilung berechnen und dokumentieren
             </h1>
