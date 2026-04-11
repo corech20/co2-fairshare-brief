@@ -198,10 +198,14 @@ export default function StepFuelSource() {
         ))}
       </div>
 
-      <Button variant="outline" size="sm" onClick={addFuelEntry}>
-        <Plus className="h-4 w-4 mr-1" />
-        Weiteren Brennstoff hinzufügen
-      </Button>
+      {fuelEntries.length < 3 ? (
+        <Button variant="outline" size="sm" onClick={addFuelEntry}>
+          <Plus className="h-4 w-4 mr-1" />
+          Weiteren Brennstoff hinzufügen
+        </Button>
+      ) : (
+        <p className="text-xs text-muted-foreground">Maximal 3 Brennstoffe / Wärmequellen pro Berechnung.</p>
+      )}
     </div>
   );
 }

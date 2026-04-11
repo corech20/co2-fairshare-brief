@@ -259,7 +259,7 @@ export default function ResultsPage() {
                   <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
                 </div>
                 <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
-                  <FileText className="h-4 w-4" />Erstattungsschreiben erstellen – 2 Euro
+                  <FileText className="h-4 w-4" />Erstattungsschreiben erstellen
                 </Button>
               </div>
             ) : (
@@ -273,7 +273,7 @@ export default function ResultsPage() {
                   <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
                 </div>
                 <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                  <FileText className="h-4 w-4" />Berechnung als PDF erstellen – 2 Euro
+                  <FileText className="h-4 w-4" />Berechnung als PDF erstellen
                 </Button>
               </div>
             )}
