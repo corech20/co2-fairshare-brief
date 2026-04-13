@@ -616,15 +616,15 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
       billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
       fuelType: 'heizoel', fuelAmount: 3000, buildingArea: 200,
     });
-    // 3000 × 10.0461 = 30138.3 kWh
-    // 30138.3 × 0.2664 = 8024.84 kg CO2
-    expect(round2(r.totalEmissionsKg)).toBe(round2(30138.3 * 0.2664));
+    // 3000 × 10.0461 = 30138.30 kWh (rounded to 2 decimals)
+    // 30138.30 × 0.2664 = 8024.8411 kg CO2
+    expect(round2(r.totalEmissionsKg)).toBe(round2(30138.30 * 0.2664));
     // 8024.84 / 200 = 40.12 kg/m²/a → step 7 (37-42)
     expect(r.stufenmodellStep).toBe(7);
     expect(r.tenantPercent).toBe(40);
     expect(r.landlordPercent).toBe(60);
-    // BMWK-aligned: VAT applied to raw (unrounded) net, then round gross
-    const rawNet = 30138.3 * 0.2664 * 30 / 1000;
+    // VAT applied to net from rounded energy
+    const rawNet = 30138.30 * 0.2664 * 30 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNet * 1.19));
   });
 
@@ -634,7 +634,7 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
       fuelType: 'heizoel', fuelAmount: 3000, buildingArea: 200,
     });
-    const rawNet2024 = 30138.3 * 0.2664 * 45 / 1000;
+    const rawNet2024 = 30138.30 * 0.2664 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNet2024 * 1.19));
   });
 });
