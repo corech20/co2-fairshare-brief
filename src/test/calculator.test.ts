@@ -939,35 +939,37 @@ describe('Net and gross are cleanly separated', () => {
 // 28. ENERGY ROUNDING TO 2 DECIMALS AFTER CONVERSION
 // ===================================================================
 
-describe('Energy conversion uses full precision (rounding only at final output)', () => {
-  it('Braunkohle: full precision energy value', () => {
+describe('Energy conversion: input unchanged, converted heating value rounded to 2 decimals', () => {
+  it('Braunkohle: converted heating value rounded to 2 decimals', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
-    // 1000 × (19.7/3.6) = 5472.2222... (full precision)
-    expect(r.energyHeatingValueKwh).toBeCloseTo(1000 * 19.7 / 3.6, 6);
+    // 1000 × (19.7/3.6) = 5472.2222... → rounded to 5472.22
+    expect(r.energyHeatingValueKwh).toBe(5472.22);
+    expect(r.inputAmount).toBe(1000); // original input unchanged
   });
 
   it('Erdgas: clean conversion stays exact', () => {
     const r = calculateSingleFuel('erdgas', 10000, 45);
-    // 10000 × 0.9030 = 9030.00
     expect(r.energyHeatingValueKwh).toBe(9030.00);
+    expect(r.inputAmount).toBe(10000);
   });
 
-  it('Heizoel: full precision energy value', () => {
+  it('Heizoel: converted heating value rounded to 2 decimals', () => {
     const r = calculateSingleFuel('heizoel', 3000, 30);
-    // 3000 × 10.0461 = 30138.3 (full precision)
-    expect(r.energyHeatingValueKwh).toBeCloseTo(3000 * 10.0461, 6);
+    // 3000 × 10.0461 = 30138.3
+    expect(r.energyHeatingValueKwh).toBe(30138.30);
+    expect(r.inputAmount).toBe(3000);
   });
 
-  it('Fluessiggas: full precision energy value', () => {
+  it('Fluessiggas: converted heating value rounded to 2 decimals', () => {
     const r = calculateSingleFuel('fluessiggas', 500, 30);
-    // 500 × 12.7778 = 6388.90
-    expect(r.energyHeatingValueKwh).toBeCloseTo(500 * 12.7778, 6);
+    expect(r.energyHeatingValueKwh).toBe(6388.90);
+    expect(r.inputAmount).toBe(500);
   });
 
-  it('downstream CO2 uses full precision energy value', () => {
+  it('downstream CO2 uses rounded converted heating value', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
-    const expectedEnergy = 1000 * 19.7 / 3.6;
-    const expectedCo2 = expectedEnergy * 0.35712;
+    // CO2 must be calculated from 5472.22 (rounded), not 5472.2222...
+    const expectedCo2 = 5472.22 * 0.35712;
     expect(r.co2Kg).toBeCloseTo(expectedCo2, 6);
   });
 });
