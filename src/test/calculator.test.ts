@@ -536,14 +536,15 @@ describe('Cross-year calculation', () => {
     const r = calculateCO2Allocation(data);
     expect(r.isCrossYear).toBe(true);
     expect(r.segmentResults).toHaveLength(2);
-    // 35000 × 0.9030 × 0.20088 = 6348.81
-    expect(round2(r.segmentResults![0].co2Kg)).toBe(6348.81);
-    // 10000 × 0.9030 × 0.20088 = 1813.95
-    expect(round2(r.segmentResults![1].co2Kg)).toBe(1813.95);
+    // Energy values are rounded to 2 decimals after conversion
+    // 35000 × 0.9030 = 31605.00 kWh → 31605.00 × 0.20088 = 6348.81 kg
+    expect(round2(r.segmentResults![0].co2Kg)).toBe(round2(31605.00 * 0.20088));
+    // 10000 × 0.9030 = 9030.00 kWh → 9030.00 × 0.20088 = 1813.95 kg
+    expect(round2(r.segmentResults![1].co2Kg)).toBe(round2(9030.00 * 0.20088));
 
-    // Raw precision: VAT applied to unrounded net values
-    const seg1NetRaw = 6348.8064 * 45 / 1000;
-    const seg2NetRaw = 1813.9544 * 55 / 1000;
+    // Net costs from rounded energy values
+    const seg1NetRaw = 31605.00 * 0.20088 * 45 / 1000;
+    const seg2NetRaw = 9030.00 * 0.20088 * 55 / 1000;
     expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(mixedVATGross(seg1NetRaw, '2024-02-01', '2024-12-31')));
     expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2NetRaw * 1.19));
 
