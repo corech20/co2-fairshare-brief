@@ -884,7 +884,8 @@ describe('Gas Q1 2024 (within temporary 7% VAT period)', () => {
     // 3000 × 0.9030 × 0.20088 = 544.18 kg
     // net: 544.18 × 45 / 1000 = 24.49
     // gross: 24.49 × 1.07 = 26.20
-    const netCost = round2(3000 * 0.9030 * 0.20088) * 45 / 1000;
+    // Energy rounded: 3000 × 0.9030 = 2709.00
+    const netCost = 2709.00 * 0.20088 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.07));
   });
 });
