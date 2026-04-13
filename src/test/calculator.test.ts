@@ -326,10 +326,12 @@ describe('Flüssiggas: kg → kWh conversion', () => {
 });
 
 describe('Braunkohle: kg → kWh conversion', () => {
-  it('converts kg to kWh using factor 19.7/3.6 (full precision)', () => {
+  it('converts kg to kWh using factor 19.7/3.6, rounded to 2 decimals', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
-    expect(round2(r.energyHeatingValueKwh)).toBe(round2(1000 * 19.7 / 3.6));
-    expect(round2(r.co2Kg)).toBe(round2(1000 * 19.7 / 3.6 * 0.35712));
+    // 1000 × (19.7/3.6) = 5472.2222... → rounded to 5472.22 kWh
+    expect(round2(r.energyHeatingValueKwh)).toBe(5472.22);
+    // CO2 calculated from rounded energy: 5472.22 × 0.35712
+    expect(round2(r.co2Kg)).toBe(round2(5472.22 * 0.35712));
   });
 });
 
