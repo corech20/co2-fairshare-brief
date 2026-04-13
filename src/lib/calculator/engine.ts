@@ -11,6 +11,16 @@ import type {
   YearlySegment,
 } from './types';
 
+/**
+ * Round a number to exactly 2 decimal places.
+ * Used after converting source-unit fuel amounts to kWh Heizwert
+ * to align with BMWK calculator intermediate precision.
+ * This is a deliberate compatibility/implementation choice, not a legal requirement.
+ */
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 // ---------------------------------------------------------------------------
 // CONSTANTS
 // ---------------------------------------------------------------------------
