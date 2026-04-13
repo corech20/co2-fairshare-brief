@@ -247,7 +247,7 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
   const steps: string[] = [];
   steps.push(`Brennstoff: ${fr.fuelLabel}`);
   steps.push(`Menge: ${fmt.number(fr.inputAmount, 0)} ${getFuelUnitLabel(fr.fuelType)}`);
-  steps.push(`Energiegehalt (Heizwert): ${fmt.number(fr.energyHeatingValueKwh, 0)} kWh`);
+  steps.push(`Energiegehalt (Heizwert): ${fmt.number(fr.energyHeatingValueKwh, 2)} kWh`);
   steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
   steps.push(`CO2-Emissionen: ${fmt.number(fr.co2Kg, 1)} kg`);
   if (fr.usedDirectCost) {
