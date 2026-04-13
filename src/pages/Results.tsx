@@ -347,7 +347,7 @@ export default function ResultsPage() {
                 <span>{getAreaLabel(wizardData)}:</span>
                 <span className="text-foreground font-medium text-right">{formatNumber(result.relevantArea, 0)} m²</span>
                 <span>Gesamtenergie (Heizwert):</span>
-                <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 0)} kWh</span>
+                <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 2)} kWh</span>
                 <span>CO2-Kosten netto:</span>
                 <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2CostNet)}</span>
                 <span>USt.-Satz:</span>
@@ -372,7 +372,7 @@ export default function ResultsPage() {
                       <span className="font-medium text-foreground">{fr.fuelLabel}</span>
                       <span className="text-right">{formatNumber(fr.co2Kg, 1)} kg CO2</span>
                       <span>Energie (Heizwert):</span>
-                      <span className="text-right">{formatNumber(fr.energyHeatingValueKwh, 0)} kWh</span>
+                      <span className="text-right">{formatNumber(fr.energyHeatingValueKwh, 2)} kWh</span>
                       <span>CO2-Kosten netto:</span>
                       <span className="text-right">{formatCurrency(fr.co2CostNet)}</span>
                       <span>CO2-Kosten brutto:</span>

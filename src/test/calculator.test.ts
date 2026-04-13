@@ -326,10 +326,12 @@ describe('Flüssiggas: kg → kWh conversion', () => {
 });
 
 describe('Braunkohle: kg → kWh conversion', () => {
-  it('converts kg to kWh using factor 19.7/3.6 (full precision)', () => {
+  it('converts kg to kWh using factor 19.7/3.6, rounded to 2 decimals', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
-    expect(round2(r.energyHeatingValueKwh)).toBe(round2(1000 * 19.7 / 3.6));
-    expect(round2(r.co2Kg)).toBe(round2(1000 * 19.7 / 3.6 * 0.35712));
+    // 1000 × (19.7/3.6) = 5472.2222... → rounded to 5472.22 kWh
+    expect(round2(r.energyHeatingValueKwh)).toBe(5472.22);
+    // CO2 calculated from rounded energy: 5472.22 × 0.35712
+    expect(round2(r.co2Kg)).toBe(round2(5472.22 * 0.35712));
   });
 });
 
@@ -534,14 +536,15 @@ describe('Cross-year calculation', () => {
     const r = calculateCO2Allocation(data);
     expect(r.isCrossYear).toBe(true);
     expect(r.segmentResults).toHaveLength(2);
-    // 35000 × 0.9030 × 0.20088 = 6348.81
-    expect(round2(r.segmentResults![0].co2Kg)).toBe(6348.81);
-    // 10000 × 0.9030 × 0.20088 = 1813.95
-    expect(round2(r.segmentResults![1].co2Kg)).toBe(1813.95);
+    // Energy values are rounded to 2 decimals after conversion
+    // 35000 × 0.9030 = 31605.00 kWh → 31605.00 × 0.20088 = 6348.81 kg
+    expect(round2(r.segmentResults![0].co2Kg)).toBe(round2(31605.00 * 0.20088));
+    // 10000 × 0.9030 = 9030.00 kWh → 9030.00 × 0.20088 = 1813.95 kg
+    expect(round2(r.segmentResults![1].co2Kg)).toBe(round2(9030.00 * 0.20088));
 
-    // Raw precision: VAT applied to unrounded net values
-    const seg1NetRaw = 6348.8064 * 45 / 1000;
-    const seg2NetRaw = 1813.9544 * 55 / 1000;
+    // Net costs from rounded energy values
+    const seg1NetRaw = 31605.00 * 0.20088 * 45 / 1000;
+    const seg2NetRaw = 9030.00 * 0.20088 * 55 / 1000;
     expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(mixedVATGross(seg1NetRaw, '2024-02-01', '2024-12-31')));
     expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2NetRaw * 1.19));
 
@@ -613,15 +616,15 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
       billingPeriodStart: '2023-01-01', billingPeriodEnd: '2023-12-31',
       fuelType: 'heizoel', fuelAmount: 3000, buildingArea: 200,
     });
-    // 3000 × 10.0461 = 30138.3 kWh
-    // 30138.3 × 0.2664 = 8024.84 kg CO2
-    expect(round2(r.totalEmissionsKg)).toBe(round2(30138.3 * 0.2664));
+    // 3000 × 10.0461 = 30138.30 kWh (rounded to 2 decimals)
+    // 30138.30 × 0.2664 = 8024.8411 kg CO2
+    expect(round2(r.totalEmissionsKg)).toBe(round2(30138.30 * 0.2664));
     // 8024.84 / 200 = 40.12 kg/m²/a → step 7 (37-42)
     expect(r.stufenmodellStep).toBe(7);
     expect(r.tenantPercent).toBe(40);
     expect(r.landlordPercent).toBe(60);
-    // BMWK-aligned: VAT applied to raw (unrounded) net, then round gross
-    const rawNet = 30138.3 * 0.2664 * 30 / 1000;
+    // VAT applied to net from rounded energy
+    const rawNet = 30138.30 * 0.2664 * 30 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNet * 1.19));
   });
 
@@ -631,7 +634,7 @@ describe('Heizöl full allocation case (factor 10.0461)', () => {
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
       fuelType: 'heizoel', fuelAmount: 3000, buildingArea: 200,
     });
-    const rawNet2024 = 30138.3 * 0.2664 * 45 / 1000;
+    const rawNet2024 = 30138.30 * 0.2664 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNet2024 * 1.19));
   });
 });
@@ -798,8 +801,8 @@ describe('Full 2025 Erdgas case', () => {
     });
     // net: 1813.95 × 55/1000 = 99.77
     expect(round2(r.totalCO2CostNet)).toBe(99.77);
-    // BMWK-aligned: VAT applied to raw unrounded net
-    const rawNet2025 = 1813.9544 * 55 / 1000;
+    // BMWK-aligned: energy rounded to 2 decimals → 9030.00 × 0.20088 = 1813.9464
+    const rawNet2025 = 9030.00 * 0.20088 * 55 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNet2025 * 1.19));
   });
 });
@@ -839,8 +842,8 @@ describe('Deviating billing period within one year', () => {
     expect(r.annualizationFactor).toBeDefined();
     expect(round2(r.totalEmissionsKg)).toBe(round2(5000 * 0.9030 * 0.20088));
     // CO2 cost based on actual consumption, NOT annualized
-    // BMWK-aligned: VAT applied to raw unrounded net
-    const rawNetDev = 5000 * 0.9030 * 0.20088 * 45 / 1000;
+    // Energy rounded to 2 decimals: 5000 × 0.9030 = 4515.00
+    const rawNetDev = 4515.00 * 0.20088 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNetDev * 1.19));
   });
 });
@@ -856,12 +859,12 @@ describe('Heizöl 2024 gross correctness', () => {
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
       fuelType: 'heizoel', fuelAmount: 2000, buildingArea: 150,
     });
-    // 2000 × 10.0461 = 20092.2 kWh
-    // 20092.2 × 0.2664 = 5348.55 kg CO2
-    // net: 5348.55 × 45 / 1000 = 240.68
-    // gross: 240.68 × 1.19 = 286.41
-    // BMWK-aligned: VAT applied to raw unrounded net
-    const rawNetOil2024 = 2000 * 10.0461 * 0.2664 * 45 / 1000;
+    // 2000 × 10.0461 = 20092.20 kWh (rounded to 2 decimals)
+    // 20092.20 × 0.2664 = 5348.56 kg CO2
+    // net: 5348.56 × 45 / 1000 = 240.69
+    // gross: 240.69 × 1.19 = 286.42
+    // Energy rounded to 2 decimals
+    const rawNetOil2024 = 20092.20 * 0.2664 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNetOil2024 * 1.19));
     expect(round2(r.totalCO2CostNet)).toBe(round2(rawNetOil2024));
   });
@@ -881,7 +884,8 @@ describe('Gas Q1 2024 (within temporary 7% VAT period)', () => {
     // 3000 × 0.9030 × 0.20088 = 544.18 kg
     // net: 544.18 × 45 / 1000 = 24.49
     // gross: 24.49 × 1.07 = 26.20
-    const netCost = round2(3000 * 0.9030 * 0.20088) * 45 / 1000;
+    // Energy rounded: 3000 × 0.9030 = 2709.00
+    const netCost = 2709.00 * 0.20088 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(netCost * 1.07));
   });
 });
@@ -928,5 +932,71 @@ describe('Net and gross are cleanly separated', () => {
     const expectedRatio = r.totalCO2Cost / r.totalCO2CostNet;
     expect(expectedRatio).toBeGreaterThan(1.07);
     expect(expectedRatio).toBeLessThan(1.19);
+  });
+});
+
+// ===================================================================
+// 28. ENERGY ROUNDING TO 2 DECIMALS AFTER CONVERSION
+// ===================================================================
+
+describe('Energy conversion rounds to 2 decimals (BMWK compatibility)', () => {
+  it('Braunkohle: irrational conversion factor rounds correctly', () => {
+    const r = calculateSingleFuel('braunkohle', 1000, 30);
+    // 1000 × (19.7/3.6) = 5472.2222... → 5472.22
+    expect(r.energyHeatingValueKwh).toBe(5472.22);
+  });
+
+  it('Erdgas: clean conversion stays exact', () => {
+    const r = calculateSingleFuel('erdgas', 10000, 45);
+    // 10000 × 0.9030 = 9030.00
+    expect(r.energyHeatingValueKwh).toBe(9030.00);
+  });
+
+  it('Heizoel: conversion rounds to 2 decimals', () => {
+    const r = calculateSingleFuel('heizoel', 3000, 30);
+    // 3000 × 10.0461 = 30138.30
+    expect(r.energyHeatingValueKwh).toBe(30138.30);
+  });
+
+  it('Fluessiggas: conversion rounds to 2 decimals', () => {
+    const r = calculateSingleFuel('fluessiggas', 500, 30);
+    // 500 × 12.7778 = 6388.90
+    expect(r.energyHeatingValueKwh).toBe(6388.90);
+  });
+
+  it('downstream CO2 uses rounded energy value', () => {
+    const r = calculateSingleFuel('braunkohle', 1000, 30);
+    // CO2 must be from 5472.22, not 5472.2222...
+    expect(round2(r.co2Kg)).toBe(round2(5472.22 * 0.35712));
+    // Verify it differs from unrounded chain
+    const unroundedCo2 = round2(1000 * 19.7 / 3.6 * 0.35712);
+    const roundedCo2 = round2(5472.22 * 0.35712);
+    // These may differ by a cent due to rounding order
+    expect(round2(r.co2Kg)).toBe(roundedCo2);
+  });
+});
+
+// ===================================================================
+// 29. STAGE BOUNDARY VALIDATION WITH ROUNDED ENERGY
+// ===================================================================
+
+describe('Stage boundary validation across fuels', () => {
+  const thresholds = [12, 17, 22, 27, 32, 37, 42, 47, 52];
+
+  thresholds.forEach((threshold, idx) => {
+    const stepBelow = idx + 1;
+    const stepAtOrAbove = idx + 2;
+
+    it(`threshold ${threshold}: value just below → step ${stepBelow}`, () => {
+      expect(lookupStufenmodell(threshold - 0.01).step).toBe(stepBelow);
+    });
+
+    it(`threshold ${threshold}: exact value → step ${stepAtOrAbove}`, () => {
+      expect(lookupStufenmodell(threshold).step).toBe(stepAtOrAbove);
+    });
+
+    it(`threshold ${threshold}: value just above → step ${stepAtOrAbove}`, () => {
+      expect(lookupStufenmodell(threshold + 0.01).step).toBe(stepAtOrAbove);
+    });
   });
 });
