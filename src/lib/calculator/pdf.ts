@@ -272,7 +272,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       doc.setFont('helvetica', 'normal');
       detailRow('Menge:', fmt.number(seg.amount, 0), 4);
       detailRow('CO2-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
-      detailRow('Energie (Heizwert):', `${fmt.number(seg.energyHeatingValueKwh, 0)} kWh`, 4);
+      detailRow('Energie (Heizwert):', `${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`, 4);
       detailRow('CO2-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
       detailRow('CO2-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
       detailRow('CO2-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
@@ -314,7 +314,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       doc.setLineWidth(0.3);
       doc.line(mL + 2, y, pw - mR, y);
       y += 5;
-      detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 0)} kWh`, 2, true);
+      detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 2)} kWh`, 2, true);
       detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
       detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`, 2);
     }
