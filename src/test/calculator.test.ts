@@ -939,11 +939,11 @@ describe('Net and gross are cleanly separated', () => {
 // 28. ENERGY ROUNDING TO 2 DECIMALS AFTER CONVERSION
 // ===================================================================
 
-describe('Energy conversion rounds to 2 decimals (BMWK compatibility)', () => {
-  it('Braunkohle: irrational conversion factor rounds correctly', () => {
+describe('Energy conversion uses full precision (rounding only at final output)', () => {
+  it('Braunkohle: full precision energy value', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
-    // 1000 × (19.7/3.6) = 5472.2222... → 5472.22
-    expect(r.energyHeatingValueKwh).toBe(5472.22);
+    // 1000 × (19.7/3.6) = 5472.2222... (full precision)
+    expect(r.energyHeatingValueKwh).toBeCloseTo(1000 * 19.7 / 3.6, 6);
   });
 
   it('Erdgas: clean conversion stays exact', () => {
@@ -952,27 +952,23 @@ describe('Energy conversion rounds to 2 decimals (BMWK compatibility)', () => {
     expect(r.energyHeatingValueKwh).toBe(9030.00);
   });
 
-  it('Heizoel: conversion rounds to 2 decimals', () => {
+  it('Heizoel: full precision energy value', () => {
     const r = calculateSingleFuel('heizoel', 3000, 30);
-    // 3000 × 10.0461 = 30138.30
-    expect(r.energyHeatingValueKwh).toBe(30138.30);
+    // 3000 × 10.0461 = 30138.3 (full precision)
+    expect(r.energyHeatingValueKwh).toBeCloseTo(3000 * 10.0461, 6);
   });
 
-  it('Fluessiggas: conversion rounds to 2 decimals', () => {
+  it('Fluessiggas: full precision energy value', () => {
     const r = calculateSingleFuel('fluessiggas', 500, 30);
     // 500 × 12.7778 = 6388.90
-    expect(r.energyHeatingValueKwh).toBe(6388.90);
+    expect(r.energyHeatingValueKwh).toBeCloseTo(500 * 12.7778, 6);
   });
 
-  it('downstream CO2 uses rounded energy value', () => {
+  it('downstream CO2 uses full precision energy value', () => {
     const r = calculateSingleFuel('braunkohle', 1000, 30);
-    // CO2 must be from 5472.22, not 5472.2222...
-    expect(round2(r.co2Kg)).toBe(round2(5472.22 * 0.35712));
-    // Verify it differs from unrounded chain
-    const unroundedCo2 = round2(1000 * 19.7 / 3.6 * 0.35712);
-    const roundedCo2 = round2(5472.22 * 0.35712);
-    // These may differ by a cent due to rounding order
-    expect(round2(r.co2Kg)).toBe(roundedCo2);
+    const expectedEnergy = 1000 * 19.7 / 3.6;
+    const expectedCo2 = expectedEnergy * 0.35712;
+    expect(r.co2Kg).toBeCloseTo(expectedCo2, 6);
   });
 });
 
