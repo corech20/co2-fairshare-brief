@@ -297,8 +297,9 @@ export function calculateSingleFuel(
   const chpFactor = CHP_HEAT_SHARE[fuelType] ?? 1;
   const emissionFactor = getEmissionFactor(fuelType, customEmissionFactor);
 
-  // Full precision – rounding only at final output
-  const energyHeatingValueKwh = amount * heatingValueFactor * chpFactor;
+  // Convert source input to heating value, then round to 2 decimals.
+  // The original entered amount is NOT rounded — only the converted result.
+  const energyHeatingValueKwh = round2(amount * heatingValueFactor * chpFactor);
   const co2Kg = energyHeatingValueKwh * emissionFactor;
 
   // Determine gross from net: explicit vatRate takes precedence, then period-based computation
@@ -348,8 +349,8 @@ function calculateFuelSegment(
   const chpFactor = CHP_HEAT_SHARE[fuelType] ?? 1;
   const emissionFactor = getEmissionFactor(fuelType, customEmissionFactor);
 
-  // Full precision – rounding only at final output
-  const energyHeatingValueKwh = amount * heatingValueFactor * chpFactor;
+  // Convert source input to heating value, then round to 2 decimals.
+  const energyHeatingValueKwh = round2(amount * heatingValueFactor * chpFactor);
   const co2Kg = energyHeatingValueKwh * emissionFactor;
   const isZeroCost = ZERO_COST_FUELS.has(fuelType);
   // Keep full precision – rounding happens only at final output in buildResult
