@@ -801,8 +801,8 @@ describe('Full 2025 Erdgas case', () => {
     });
     // net: 1813.95 × 55/1000 = 99.77
     expect(round2(r.totalCO2CostNet)).toBe(99.77);
-    // BMWK-aligned: VAT applied to raw unrounded net
-    const rawNet2025 = 1813.9544 * 55 / 1000;
+    // BMWK-aligned: energy rounded to 2 decimals → 9030.00 × 0.20088 = 1813.9464
+    const rawNet2025 = 9030.00 * 0.20088 * 55 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNet2025 * 1.19));
   });
 });
@@ -842,8 +842,8 @@ describe('Deviating billing period within one year', () => {
     expect(r.annualizationFactor).toBeDefined();
     expect(round2(r.totalEmissionsKg)).toBe(round2(5000 * 0.9030 * 0.20088));
     // CO2 cost based on actual consumption, NOT annualized
-    // BMWK-aligned: VAT applied to raw unrounded net
-    const rawNetDev = 5000 * 0.9030 * 0.20088 * 45 / 1000;
+    // Energy rounded to 2 decimals: 5000 × 0.9030 = 4515.00
+    const rawNetDev = 4515.00 * 0.20088 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNetDev * 1.19));
   });
 });
@@ -859,12 +859,12 @@ describe('Heizöl 2024 gross correctness', () => {
       billingPeriodStart: '2024-01-01', billingPeriodEnd: '2024-12-31',
       fuelType: 'heizoel', fuelAmount: 2000, buildingArea: 150,
     });
-    // 2000 × 10.0461 = 20092.2 kWh
-    // 20092.2 × 0.2664 = 5348.55 kg CO2
-    // net: 5348.55 × 45 / 1000 = 240.68
-    // gross: 240.68 × 1.19 = 286.41
-    // BMWK-aligned: VAT applied to raw unrounded net
-    const rawNetOil2024 = 2000 * 10.0461 * 0.2664 * 45 / 1000;
+    // 2000 × 10.0461 = 20092.20 kWh (rounded to 2 decimals)
+    // 20092.20 × 0.2664 = 5348.56 kg CO2
+    // net: 5348.56 × 45 / 1000 = 240.69
+    // gross: 240.69 × 1.19 = 286.42
+    // Energy rounded to 2 decimals
+    const rawNetOil2024 = 20092.20 * 0.2664 * 45 / 1000;
     expect(round2(r.totalCO2Cost)).toBe(round2(rawNetOil2024 * 1.19));
     expect(round2(r.totalCO2CostNet)).toBe(round2(rawNetOil2024));
   });
