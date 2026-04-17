@@ -362,7 +362,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     const biomassNote = doc.splitTextToSize(
-      'Hinweis: Holzpellets und Holzhackschnitzel weisen einen Emissionsfaktor auf, sind jedoch nicht dem Brennstoffemissionshandelsgesetz (BEHG) unterworfen. Die CO2-Kosten betragen daher 0,00 EUR.',
+      'Hinweis: Holzpellets weisen einen Emissionsfaktor auf, sind jedoch nicht dem Brennstoffemissionshandelsgesetz (BEHG) unterworfen. Die CO2-Kosten betragen daher 0,00 EUR.',
       cw - 4,
     );
     for (const line of biomassNote) {
@@ -426,7 +426,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(classificationValue, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
     y += 1;
     detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2, true);
-    detailRow('Aufteilung:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2, true);
+    detailRow('Basis-Aufteilung nach Stufenmodell:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2, true);
   }
 
   if (!result.isResidential) {
@@ -486,6 +486,24 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   doc.setLineWidth(0.2);
   doc.line(mL + 6, y, pw - mR - 6, y);
   y += 5;
+
+  // Show base vs final reference if they differ (residential only)
+  const baseDiffersFromFinal = result.isResidential
+    && result.stufenmodellStep > 0
+    && (result.baseLandlordPercent !== result.landlordPercent || result.baseTenantPercent !== result.tenantPercent);
+
+  if (baseDiffersFromFinal) {
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(110, 110, 110);
+    doc.text(
+      `Basis-Aufteilung nach Stufenmodell: Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`,
+      mL + 6, y,
+    );
+    y += 4;
+    doc.text('Endgültige Aufteilung nach Anwendung der vorgenannten Besonderheiten:', mL + 6, y);
+    y += 5;
+  }
 
   detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 6, true);
   detailRow(`Anteil Mieter / Mietergemeinschaft (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 6, true);
