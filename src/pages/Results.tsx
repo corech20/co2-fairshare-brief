@@ -234,47 +234,74 @@ export default function ResultsPage() {
             </div>
           </section>
 
-          {/* Document section */}
-          <div className="rounded-lg border border-border bg-card p-5 space-y-4">
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-foreground">
-                Dokument erstellen
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Die Berechnung ist abgeschlossen. Optional können Sie ein druckfertiges PDF-Dokument erstellen.
-              </p>
-            </div>
+          {/* Document section — reveals the detailed document view on click */}
+          {!detailViewOpen && (
+            <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">Dokument erstellen</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Die Berechnung ist abgeschlossen. Zur Erstellung des druckfertigen PDF-Dokuments wird zunächst die vollständige
+                  Berechnungsgrundlage angezeigt.
+                </p>
+              </div>
 
-            {isTenantClaim ? (
-              <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
-                <div className="flex items-start justify-between gap-3">
+              {isTenantClaim ? (
+                <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsgrundlage</p>
-                    <p className="text-xs text-muted-foreground">Enthält Erstattungsschreiben und Berechnungsgrundlage als PDF.</p>
                     <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
+                  <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
+                    <FileText className="h-4 w-4" />Erstattungsschreiben erstellen
+                  </Button>
                 </div>
-                <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
-                  <FileText className="h-4 w-4" />Erstattungsschreiben erstellen
+              ) : (
+                <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">Berechnungsblatt</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
+                  </div>
+                  <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                    <FileText className="h-4 w-4" />Berechnungsblatt erstellen
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ═══ Detailed document view (sections 1–4) — only after explicit user request ═══ */}
+          {detailViewOpen && (
+            <div id="detailed-calculation" className="space-y-4 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-foreground">Vollständige Berechnungsgrundlage</h3>
+                <Button variant="ghost" size="sm" onClick={() => setDetailViewOpen(false)}>
+                  <ChevronUp className="h-4 w-4" />Einklappen
                 </Button>
               </div>
-            ) : (
-              <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+
+              <DetailedCalculationView data={wizardData} result={result} />
+
+              <div className="rounded-lg border border-border bg-card p-5 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">Berechnung als PDF</p>
-                    <p className="text-xs text-muted-foreground">Erstellt ein druckbares PDF mit Berechnungsgrundlage und Ergebnissen.</p>
-                    <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {pendingOutputType === 'letter_tenant_reimbursement'
+                        ? 'Erstattungsschreiben als PDF erstellen'
+                        : 'Berechnungsblatt als PDF erstellen'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Druckfertiges PDF · einmaliger Betrag</p>
                   </div>
                   <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
                 </div>
-                <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                  <FileText className="h-4 w-4" />Berechnung als PDF erstellen
+                <Button variant="cta" size="default" className="w-full" onClick={handleBuyPdf}>
+                  <FileText className="h-4 w-4" />
+                  {pendingOutputType === 'letter_tenant_reimbursement'
+                    ? 'Kostenpflichtig erstellen'
+                    : 'Kostenpflichtig erstellen'}
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Navigation */}
           <div className="flex flex-col sm:flex-row gap-3">
@@ -286,94 +313,6 @@ export default function ResultsPage() {
               <RotateCcw className="h-4 w-4" />Neue Berechnung
             </Button>
           </div>
-
-
-          {/* Technical details */}
-          <details className="rounded-lg border border-border bg-card">
-            <summary className="px-5 py-3 cursor-pointer text-xs font-semibold text-card-foreground hover:bg-muted/50 rounded-lg transition-colors">
-              Technische Details
-            </summary>
-            <div className="px-5 pb-5 pt-2 space-y-2 text-muted-foreground text-xs leading-relaxed">
-              <div className="grid grid-cols-2 gap-1.5">
-                <span>Gebäudetyp:</span>
-                <span className="text-foreground font-medium text-right">{getBuildingTypeLabel(wizardData)}</span>
-                <span>Wärmeversorgung:</span>
-                <span className="text-foreground font-medium text-right">{getHeatSupplyLabel(wizardData)}</span>
-                <span>Brennstoff:</span>
-                <span className="text-foreground font-medium text-right">{fuelDisplay}</span>
-                <span>CO2-Ausstoß gesamt:</span>
-                <span className="text-foreground font-medium text-right">{formatNumber(result.totalEmissionsKg, 1)} kg</span>
-                <span>CO2 pro m² (Abrechnungszeitraum):</span>
-                <span className="text-foreground font-medium text-right">{formatNumber(result.emissionsPerSqmYear)} kg/m²</span>
-                {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
-                  <>
-                    <span>CO2 pro m²/Jahr (hochgerechnet, nur für Einstufung):</span>
-                    <span className="text-foreground font-medium text-right">{formatNumber(result.emissionsPerSqmAnnualized)} kg/m²/a</span>
-                  </>
-                )}
-                {result.isResidential && result.stufenmodellStep > 0 && (
-                  <>
-                    <span>Stufe (10-Stufen-Modell):</span>
-                    <span className="text-foreground font-medium text-right">
-                      Stufe {result.stufenmodellStep} ({getStufenmodellRangeText(result.stufenmodellStep)})
-                    </span>
-                  </>
-                )}
-                <span>Emissionsfaktor:</span>
-                <span className="text-foreground font-medium text-right">{formatNumber(result.emissionFactor, 4)} kg CO2/kWh</span>
-                {result.fuelResults.length > 1 && (
-                  <>
-                    <span>Gewichteter Emissionsfaktor:</span>
-                    <span className="text-foreground font-medium text-right">{formatNumber(result.weightedEmissionFactor, 5)} kg CO2/kWh</span>
-                  </>
-                )}
-                {!result.isCrossYear && (
-                  <>
-                    <span>CO2-Preis:</span>
-                    <span className="text-foreground font-medium text-right">{formatCurrency(result.co2PricePerTon)}/t</span>
-                  </>
-                )}
-                <span>Abrechnungsjahr:</span>
-                <span className="text-foreground font-medium text-right">{result.billingYear}</span>
-                <span>{getAreaLabel(wizardData)}:</span>
-                <span className="text-foreground font-medium text-right">{formatNumber(result.relevantArea, 0)} m²</span>
-                <span>Gesamtenergie (Heizwert):</span>
-                <span className="text-foreground font-medium text-right">{formatNumber(result.totalEnergyHeatingValueKwh, 2)} kWh</span>
-                <span>CO2-Kosten netto:</span>
-                <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2CostNet)}</span>
-                <span>USt.-Satz:</span>
-                <span className="text-foreground font-medium text-right">
-                  {mixedVAT ? `7 % (${mixedVAT.reducedDays} T.) / 19 % (${mixedVAT.standardDays} T.)` : `${result.vatPercent} %`}
-                </span>
-                <span>CO2-Kosten brutto:</span>
-                <span className="text-foreground font-medium text-right">{formatCurrency(result.totalCO2Cost)}</span>
-                {result.restrictionApplied !== 'fall3' && result.isResidential && (
-                  <>
-                    <span>Basis-Aufteilung (vor Einschränkung):</span>
-                    <span className="text-foreground font-medium text-right">{result.baseTenantPercent} % / {result.baseLandlordPercent} %</span>
-                  </>
-                )}
-              </div>
-
-              {result.fuelResults.length > 1 && (
-                <div className="mt-3 border-t border-border pt-2 space-y-1.5">
-                  <p className="font-semibold text-foreground">Einzelne Brennstoffe:</p>
-                  {result.fuelResults.map((fr, i) => (
-                    <div key={i} className="grid grid-cols-2 gap-1 pl-2 border-l-2 border-accent/30 ml-1">
-                      <span className="font-medium text-foreground">{fr.fuelLabel}</span>
-                      <span className="text-right">{formatNumber(fr.co2Kg, 1)} kg CO2</span>
-                      <span>Energie (Heizwert):</span>
-                      <span className="text-right">{formatNumber(fr.energyHeatingValueKwh, 2)} kWh</span>
-                      <span>CO2-Kosten netto:</span>
-                      <span className="text-right">{formatCurrency(fr.co2CostNet)}</span>
-                      <span>CO2-Kosten brutto:</span>
-                      <span className="text-right">{formatCurrency(fr.co2CostGross)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </details>
 
           {/* Legal note */}
           <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
