@@ -24,7 +24,8 @@ function WizardContent() {
   const navigate = useNavigate();
   const { currentStep, totalSteps, goNext, goBack, canGoNext, isLastStep, calculate, wizardData } = useCalculator();
 
-  const skipFuelStep = wizardData.heatSupplyType === 'fernwaerme';
+  const hasMultiFuel = !!(wizardData.fuelEntries && wizardData.fuelEntries.length > 0);
+  const skipFuelStep = wizardData.heatSupplyType === 'fernwaerme' && !hasMultiFuel;
   const effectiveLabels = skipFuelStep
     ? STEP_LABELS.filter((_, i) => i !== 5)
     : STEP_LABELS;
