@@ -142,11 +142,25 @@ export default function StepFuelSource() {
   }
 
   // Multi-fuel mode
+  const exitMultiFuel = () => {
+    const first = fuelEntries[0];
+    setWizardField('fuelEntries', undefined);
+    if (first) {
+      setWizardField('fuelType', first.fuelType);
+      setWizardField('fuelAmount', first.amount);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Brennstoffe / Wärmequellen</h2>
-        <p className="text-muted-foreground mt-2">Mehrere Brennstoffe für eine Berechnung.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Brennstoffe / Wärmequellen</h2>
+          <p className="text-muted-foreground mt-2">Mehrere Brennstoffe für eine Berechnung.</p>
+        </div>
+        <Button variant="ghost" size="sm" onClick={exitMultiFuel}>
+          Zurück zur Einzelauswahl
+        </Button>
       </div>
 
       <div className="space-y-4">
