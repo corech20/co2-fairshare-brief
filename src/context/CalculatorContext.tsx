@@ -82,13 +82,17 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'inputValues': {
         const needsApartment = wizardData.heatSupplyType === 'etage' ||
           (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
+        // Multi-fuel mode: amounts are entered & validated on the fuelSource step
+        const isMultiFuel = !!(wizardData.fuelEntries && wizardData.fuelEntries.length > 0);
         // For cross-year, fuel amount was entered in billing period step
         const crossYear = wizardData.billingPeriodStart && wizardData.billingPeriodEnd
           ? isCrossYearPeriod(wizardData.billingPeriodStart, wizardData.billingPeriodEnd)
           : false;
-        const hasFuelAmount = crossYear
-          ? (wizardData.yearlySegments?.every(s => s.amount > 0) ?? false)
-          : !!(wizardData.fuelAmount && wizardData.fuelAmount > 0);
+        const hasFuelAmount = isMultiFuel
+          ? wizardData.fuelEntries!.every(e => e.amount > 0)
+          : crossYear
+            ? (wizardData.yearlySegments?.every(s => s.amount > 0) ?? false)
+            : !!(wizardData.fuelAmount && wizardData.fuelAmount > 0);
         if (needsApartment) {
           return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasFuelAmount);
         }
