@@ -181,7 +181,7 @@ export function DetailedCalculationView({ data, result }: Props) {
             : '2. CO2-Aufteilung zwischen Vermieter und Mieter'}
         </SectionHeading>
 
-        <div className="mt-3 space-y-3">
+        <div className="mt-3 space-y-1">
           <Row label="Gebäudetyp:" value={getBuildingTypeLabel(data)} />
           <Row label="Wärmeversorgung:" value={getHeatSupplyLabel(data)} />
 
