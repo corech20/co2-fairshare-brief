@@ -290,7 +290,7 @@ export function DetailedCalculationView({ data, result }: Props) {
         )}
 
         {(docCase === 'C' || docCase === 'D') && result.landlordShare > 0 && (
-          <div className="mt-3 border-t border-border pt-3 flex items-baseline justify-between gap-4">
+          <div className="mt-3 border-t border-border pt-3 flex items-baseline gap-2">
             <span className="text-[13px] font-semibold text-foreground">Erstattungsanspruch:</span>
             <span className="text-[13px] font-semibold text-foreground tabular-nums">
               {fmt.currency(result.landlordShare)}
