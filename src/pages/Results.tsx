@@ -233,14 +233,13 @@ export default function ResultsPage() {
             </div>
           </section>
 
-          {/* Document section — reveals the detailed document view on click */}
-          {!detailViewOpen && (
+          {/* Document section — opens payment dialog directly */}
+          {!purchased && (
             <div className="rounded-lg border border-border bg-card p-5 space-y-4">
               <div className="space-y-1">
                 <h3 className="text-sm font-semibold text-foreground">Dokument erstellen</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Die Berechnung ist abgeschlossen. Zur Erstellung des druckfertigen PDF-Dokuments wird zunächst die vollständige
-                  Berechnungsgrundlage angezeigt.
+                  Die vollständige Berechnungsgrundlage wird nach dem Kauf als druckfertiges PDF bereitgestellt und hier angezeigt.
                 </p>
               </div>
 
@@ -268,37 +267,23 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* ═══ Detailed document view (sections 1–4) — only after explicit user request ═══ */}
-          {detailViewOpen && (
+          {/* ═══ Detailed document view (sections 1–4) — only AFTER purchase ═══ */}
+          {purchased && (
             <div id="detailed-calculation" className="space-y-4 animate-fade-in">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-foreground">Vollständige Berechnungsgrundlage</h3>
-                <Button variant="ghost" size="sm" onClick={() => setDetailViewOpen(false)}>
-                  <ChevronUp className="h-4 w-4" />Einklappen
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-0.5">
+                  <p className="text-sm font-semibold text-foreground">Kauf abgeschlossen</p>
+                  <p className="text-xs text-muted-foreground">
+                    Die vollständige Berechnungsgrundlage steht Ihnen jetzt zur Verfügung. Das PDF entspricht exakt der untenstehenden Ansicht.
+                  </p>
+                </div>
+                <Button variant="cta" size="sm" onClick={handleDownloadPdf}>
+                  <Download className="h-4 w-4" />PDF herunterladen
                 </Button>
               </div>
 
               <DetailedCalculationView data={wizardData} result={result} />
-
-              <div className="rounded-lg border border-border bg-card p-5 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-semibold text-foreground">
-                      {pendingOutputType === 'letter_tenant_reimbursement'
-                        ? 'Erstattungsschreiben als PDF erstellen'
-                        : 'Berechnungsblatt als PDF erstellen'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Druckfertiges PDF · einmaliger Betrag</p>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">2,00 €</span>
-                </div>
-                <Button variant="cta" size="default" className="w-full" onClick={handleBuyPdf}>
-                  <FileText className="h-4 w-4" />
-                  {pendingOutputType === 'letter_tenant_reimbursement'
-                    ? 'Kostenpflichtig erstellen'
-                    : 'Kostenpflichtig erstellen'}
-                </Button>
-              </div>
             </div>
           )}
 
