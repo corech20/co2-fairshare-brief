@@ -1,23 +1,17 @@
 
-Vereinheitliche den vertikalen Rhythmus aller Sektionen (1–4) in `DetailedCalculationView.tsx`, sodass Zeilenabstand und Block-Abstände identisch sind.
+## Problem
 
-## Beobachtung
+In Section 2 von `DetailedCalculationView.tsx` weicht der Zeilenabstand weiterhin von Section 1, 3, 4 ab. Ursachen:
 
-In `src/components/DetailedCalculationView.tsx`:
-- Section 1 nutzt `mt-3 space-y-3` als Hauptcontainer.
-- Section 2 hat zwar jetzt `mt-3 space-y-3`, enthält aber ein zusätzliches großes Padding/Block-Trennung durch separate `<div>`-Wrapper (Stufenmodell-Block) – wirkt dadurch luftiger.
-- Section 3 nutzt `space-y-2` (engere Absätze) – inkonsistent.
-- Section 4 nutzt direkte `Row`-Aufrufe ohne Container, dazwischen `<hr className="my-2">` und `mt-2 / mt-3` – ergibt unregelmäßigen Abstand.
+1. **Sub-Container nutzen `space-y-0`**: Die inneren `<div>`-Wrapper (Gebäude-Infos, Stufenmodell-Block, Nichtwohngebäude-Block) haben `space-y-0`. Dadurch kollabiert der Abstand zwischen den `Row`-Komponenten innerhalb eines Blocks – Zeilen kleben enger als in Section 1.
+2. **Section 1 hat keinen solchen Sub-Container**: Dort sitzen `Row`-Aufrufe direkt im `space-y-3`-Parent, wodurch jede Zeile den vollen Rhythmus erhält. Die `py-1` im Row-Helper allein reicht nicht für den optisch gleichen Abstand.
+3. **Zusätzliche Hinweistexte** (`<p className="... mt-1">`) brechen den Rhythmus zusätzlich.
 
-## Änderungen (nur `src/components/DetailedCalculationView.tsx`)
+## Lösung (nur `src/components/DetailedCalculationView.tsx`)
 
-1. **Section 2**: Den zusätzlichen Block-Abstand entfernen. Statt mehrerer geschachtelter `<div>` mit Standard-Block-Margin nur `space-y-1` innerhalb der Subgruppen (Gebäude-Infos, Einstufung-Block) verwenden, sodass der Zeilenabstand exakt dem von Section 1 entspricht. Den großen Abstand vor "Einstufung" durch normalen `space-y-3`-Rhythmus ersetzen.
-
-2. **Section 3**: `space-y-2` → `space-y-3`, plus äußeren Wrapper `mt-3` ergänzen, identisch zu Section 1/2.
-
-3. **Section 4**: Inhalte in `<div className="mt-3 space-y-3">` einwickeln. `<hr className="my-2">` → entfernen oder durch `my-0` ersetzen, damit `space-y-3` den Abstand bestimmt. `mt-2`/`mt-3`-Sonderfälle (Erstattungsanspruch, Hinweistexte) auf 0 setzen und den Abstand vom Container regeln lassen.
-
-4. **Row-Helper**: `py-1` bleibt unverändert – das ist der konsistente Zeilenabstand innerhalb eines Blocks.
+1. **Section 2 flach strukturieren** – Sub-Container `<div className="space-y-0">` entfernen. Stattdessen `Row`-Komponenten und Absätze direkt als Geschwister im `mt-3 space-y-3`-Hauptcontainer platzieren, exakt wie Section 1.
+2. Die conditional-Blöcke (Stufenmodell, Nichtwohngebäude) als React-Fragments (`<>...</>`) statt `<div>`-Wrapper rendern, damit `space-y-3` gleichmäßig zwischen allen Elementen wirkt.
+3. **Hinweis-Absatz** (`mt-1` unter Annualisierung) → `mt-1` entfernen, Container regelt Abstand.
 
 ## Out of scope
-- Keine inhaltlichen Änderungen, keine Anpassung von Schriftgrößen, Farben oder PDF.
+- Keine Änderungen an Inhalt, Section 1/3/4, PDF, Farben, Schriften.
