@@ -182,7 +182,7 @@ export function DetailedCalculationView({ data, result }: Props) {
         </SectionHeading>
 
         <div className="mt-3 space-y-3">
-          <div>
+          <div className="space-y-0">
             <Row label="Gebäudetyp:" value={getBuildingTypeLabel(data)} />
             <Row label="Wärmeversorgung:" value={getHeatSupplyLabel(data)} />
 
@@ -217,8 +217,8 @@ export function DetailedCalculationView({ data, result }: Props) {
           </div>
 
           {result.isResidential && result.stufenmodellStep > 0 && (
-            <div>
-              <p className="text-[13px] text-foreground/80 leading-relaxed mb-1">
+            <div className="space-y-0">
+              <p className="text-[13px] text-foreground/80 leading-relaxed">
                 Der spezifische CO2-Ausstoß von{' '}
                 {fmt.number(result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich
                 von: {getStufenmodellRangeText(result.stufenmodellStep)}.
@@ -233,11 +233,11 @@ export function DetailedCalculationView({ data, result }: Props) {
           )}
 
           {!result.isResidential && (
-            <div>
+            <div className="space-y-0">
               {result.restrictionApplied === 'fall1und2' ? (
                 <>
                   <Row label="Aufteilung:" value="Mieter 100 % / Vermieter 0 %" bold />
-                  <p className="text-[13px] text-foreground/80 leading-relaxed mt-1">
+                  <p className="text-[13px] text-foreground/80 leading-relaxed">
                     Da beide öffentlich-rechtlichen Einschränkungen (Fall 1 und Fall 2) vorliegen, trägt der Mieter die CO2-Kosten
                     vollständig.
                   </p>
@@ -245,7 +245,7 @@ export function DetailedCalculationView({ data, result }: Props) {
               ) : (
                 <>
                   <Row label="Aufteilung:" value="Hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG" bold />
-                  <p className="text-[13px] text-foreground/80 leading-relaxed mt-1">
+                  <p className="text-[13px] text-foreground/80 leading-relaxed">
                     Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Mieter und Vermieter.
                   </p>
                 </>
@@ -263,7 +263,7 @@ export function DetailedCalculationView({ data, result }: Props) {
               ? '3. Besonderheiten zur Aufteilung der CO2-Kosten'
               : '3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell'}
           </SectionHeading>
-          <div className="space-y-2">
+          <div className="mt-3 space-y-3">
             {specialParagraphs.map((p, i) => (
               <p key={i} className="text-[13px] text-foreground/80 leading-relaxed">{p}</p>
             ))}
@@ -277,37 +277,39 @@ export function DetailedCalculationView({ data, result }: Props) {
           4. Aufteilung der CO2-Kosten unter Berücksichtigung der vorgenannten Besonderheiten
         </SectionHeading>
 
-        <Row label="Gesamte CO2-Kosten (brutto):" value={fmt.currency(result.totalCO2Cost)} bold />
+        <div className="mt-3 space-y-3">
+          <Row label="Gesamte CO2-Kosten (brutto):" value={fmt.currency(result.totalCO2Cost)} bold />
 
-        <hr className="border-border my-2" />
+          {baseDiffersFromFinal && (
+            <div className="text-[12px] text-muted-foreground space-y-0.5">
+              <p>
+                Basis-Aufteilung nach Stufenmodell: Mieter {result.baseTenantPercent} % / Vermieter {result.baseLandlordPercent} %
+              </p>
+              <p>Endgültige Aufteilung nach Anwendung der vorgenannten Besonderheiten:</p>
+            </div>
+          )}
 
-        {baseDiffersFromFinal && (
-          <div className="text-[12px] text-muted-foreground mb-2 space-y-0.5">
-            <p>
-              Basis-Aufteilung nach Stufenmodell: Mieter {result.baseTenantPercent} % / Vermieter {result.baseLandlordPercent} %
+          <div className="space-y-0">
+            <Row label={`Anteil Vermieter (${result.landlordPercent} %):`} value={fmt.currency(result.landlordShare)} bold />
+            <Row label={`Anteil Mieter (${result.tenantPercent} %):`} value={fmt.currency(result.tenantShare)} bold />
+          </div>
+
+          {result.reimbursementReductionApplied && result.landlordShareBeforeReduction != null && (
+            <p className="text-[11px] text-muted-foreground">
+              Vermieteranteil vor {result.reimbursementReductionPercent} %-Kürzung:{' '}
+              {fmt.currency(result.landlordShareBeforeReduction)}
             </p>
-            <p>Endgültige Aufteilung nach Anwendung der vorgenannten Besonderheiten:</p>
-          </div>
-        )}
+          )}
 
-        <Row label={`Anteil Vermieter (${result.landlordPercent} %):`} value={fmt.currency(result.landlordShare)} bold />
-        <Row label={`Anteil Mieter (${result.tenantPercent} %):`} value={fmt.currency(result.tenantShare)} bold />
-
-        {result.reimbursementReductionApplied && result.landlordShareBeforeReduction != null && (
-          <p className="text-[11px] text-muted-foreground mt-2">
-            Vermieteranteil vor {result.reimbursementReductionPercent} %-Kürzung:{' '}
-            {fmt.currency(result.landlordShareBeforeReduction)}
-          </p>
-        )}
-
-        {(docCase === 'C' || docCase === 'D') && result.landlordShare > 0 && (
-          <div className="mt-3 border-t border-border pt-3 flex items-baseline gap-2">
-            <span className="text-[13px] font-semibold text-foreground">Erstattungsanspruch:</span>
-            <span className="ml-auto text-right text-[13px] font-semibold text-foreground tabular-nums">
-              {fmt.currency(result.landlordShare)}
-            </span>
-          </div>
-        )}
+          {(docCase === 'C' || docCase === 'D') && result.landlordShare > 0 && (
+            <div className="border-t border-border pt-3 flex items-baseline gap-2">
+              <span className="text-[13px] font-semibold text-foreground">Erstattungsanspruch:</span>
+              <span className="ml-auto text-right text-[13px] font-semibold text-foreground tabular-nums">
+                {fmt.currency(result.landlordShare)}
+              </span>
+            </div>
+          )}
+        </div>
       </section>
 
       <p className="text-[11px] text-muted-foreground leading-relaxed border-t border-border pt-3">
