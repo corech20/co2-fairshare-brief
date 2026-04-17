@@ -1,6 +1,6 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import type { FuelType, FuelEntry } from '@/lib/calculator/types';
-import { Flame, Droplets, Thermometer, Zap, Leaf, Trees, Factory, Plus, X, ChevronDown } from 'lucide-react';
+import { Flame, Droplets, Thermometer, Zap, Leaf, Factory, Plus, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { IntegerInput } from './IntegerInput';
@@ -14,7 +14,6 @@ const STANDARD_FUELS: { value: FuelType; label: string; desc: string; icon: type
 ];
 
 const ADVANCED_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Flame }[] = [
-  { value: 'hackschnitzel', label: 'Holzhackschnitzel', desc: 'Nicht BEHG-pflichtig – CO2-Kosten betragen 0 EUR', icon: Trees },
   { value: 'braunkohle', label: 'Braunkohlebriketts', desc: 'Eingabe in kg', icon: Factory },
   { value: 'erdgas_kwk', label: 'Erdgas (KWK)', desc: 'Nur bei ausdrücklichem KWK-Betrieb der Anlage', icon: Flame },
   { value: 'fluessiggas_kwk', label: 'Flüssiggas (KWK)', desc: 'Nur bei ausdrücklichem KWK-Betrieb der Anlage', icon: Zap },
