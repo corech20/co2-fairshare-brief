@@ -95,6 +95,8 @@ export interface WizardData {
   hasExtraGasDevice?: boolean;
   /** Cross-year billing: yearly segment data */
   yearlySegments?: YearlySegment[];
+  /** Fernwärme-Sonderfall: Erstmaliger Anschluss ab dem 1. Januar 2023 → CO2KostAufG nicht anwendbar */
+  districtHeatingConnectedAfter2023?: boolean;
 }
 
 export interface FuelCalculationResult {

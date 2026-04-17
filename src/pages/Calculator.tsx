@@ -34,6 +34,11 @@ function WizardContent() {
 
   const handleNext = () => {
     if (isLastStep) {
+      // V – Excluded district-heating case: skip calculation, go straight to notice
+      if (wizardData.heatSupplyType === 'fernwaerme' && wizardData.districtHeatingConnectedAfter2023) {
+        navigate('/ergebnis');
+        return;
+      }
       calculate();
       navigate('/ergebnis');
     } else {
