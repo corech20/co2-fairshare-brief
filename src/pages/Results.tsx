@@ -41,7 +41,7 @@ export default function ResultsPage() {
   const { result, wizardData, reset } = useCalculator();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [pendingOutputType, setPendingOutputType] = useState<OutputType>('calculation');
-  const [detailViewOpen, setDetailViewOpen] = useState(false);
+  const [purchased, setPurchased] = useState(false);
 
   // V – Fernwärme-Sonderfall: Erstanschluss ab 01.01.2023 → CO2KostAufG nicht anwendbar
   const isExcludedDistrictHeating =
