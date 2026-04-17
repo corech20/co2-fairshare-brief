@@ -57,11 +57,11 @@ export function DetailedCalculationView({ data, result }: Props) {
 
   const Row = ({ label, value, bold = false, indent = 0 }: { label: string; value: string; bold?: boolean; indent?: number }) => (
     <div
-      className="flex items-baseline justify-between gap-4 py-1 text-[13px]"
+      className="flex items-baseline gap-2 py-1 text-[13px]"
       style={{ paddingLeft: indent }}
     >
       <span className={bold ? 'font-semibold text-foreground' : 'text-foreground/80'}>{label}</span>
-      <span className={`tabular-nums text-right ${bold ? 'font-semibold text-foreground' : 'text-foreground/90'}`}>{value}</span>
+      <span className={`tabular-nums text-left ${bold ? 'font-semibold text-foreground' : 'text-foreground/90'}`}>{value}</span>
     </div>
   );
 
