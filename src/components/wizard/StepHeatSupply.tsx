@@ -1,6 +1,7 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import type { HeatSupplyType } from '@/lib/calculator/types';
-import { Flame, Thermometer, Heater } from 'lucide-react';
+import { Flame, Thermometer, Heater, AlertTriangle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const ALL_OPTIONS: { value: HeatSupplyType; label: string; desc: string; icon: typeof Flame; tenantOnly?: boolean }[] = [
   { value: 'zentral', label: 'Zentrale Heizungsanlage', desc: 'Gemeinsame Heizung für das gesamte Gebäude (z.\u00A0B. Zentralheizung im Keller)', icon: Flame },
@@ -21,6 +22,9 @@ export default function StepHeatSupply() {
     setWizardField('heatSupplyType', undefined as unknown as HeatSupplyType);
   }
 
+  const isFernwaerme = wizardData.heatSupplyType === 'fernwaerme';
+  const excluded = !!wizardData.districtHeatingConnectedAfter2023;
+
   return (
     <div className="space-y-5">
       <div>
@@ -33,9 +37,11 @@ export default function StepHeatSupply() {
             key={opt.value}
             onClick={() => {
               setWizardField('heatSupplyType', opt.value);
-              // Clear auto-set fuelType when switching away from Fernwärme
               if (opt.value !== 'fernwaerme' && wizardData.fuelType === 'fernwaerme') {
                 setWizardField('fuelType', undefined as any);
+              }
+              if (opt.value !== 'fernwaerme' && wizardData.districtHeatingConnectedAfter2023) {
+                setWizardField('districtHeatingConnectedAfter2023', false);
               }
             }}
             className={`rounded-xl border-2 p-5 text-left transition-all hover:shadow-md flex items-start gap-4 ${
@@ -52,6 +58,34 @@ export default function StepHeatSupply() {
           </button>
         ))}
       </div>
+
+      {isFernwaerme && (
+        <div className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <Checkbox
+              checked={excluded}
+              onCheckedChange={(v) => setWizardField('districtHeatingConnectedAfter2023', v === true)}
+              className="mt-0.5"
+            />
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-foreground">
+                Erstmaliger Anschluss ab dem 1. Januar 2023
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Bitte ankreuzen, wenn das Gebäude erstmalig am oder nach dem 01.01.2023 an das Fernwärme- bzw. Nahwärmenetz angeschlossen wurde.
+              </div>
+            </div>
+          </label>
+          {excluded && (
+            <div className="rounded-lg border border-border bg-muted/40 p-3 flex gap-2">
+              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                In diesem Fall ist das CO2KostAufG nicht anwendbar. Es wird keine Aufteilung berechnet und kein Dokument erzeugt.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
