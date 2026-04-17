@@ -59,7 +59,7 @@ export function DetailedCalculationView({ data, result }: Props) {
     const isCurrency = value.includes('€') || value.includes('EUR');
     return (
       <div
-        className="flex items-baseline gap-2 text-[13px] leading-[1.15]"
+        className="flex items-baseline gap-2 text-[13px] leading-[1.5]"
         style={{ paddingLeft: indent }}
       >
         <span className={bold ? 'font-semibold text-foreground' : 'text-foreground/80'}>{label}</span>
