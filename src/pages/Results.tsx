@@ -169,240 +169,10 @@ export default function ResultsPage() {
             )}
           </div>
 
-          {/* ═══════════ SECTION 1 — Brennstoff, Energiegehalt und CO2-Kosten ═══════════ */}
-          <section className="rounded-lg border border-border bg-card">
-            <header className="border-b border-border px-5 py-3">
-              <h2 className="text-sm font-semibold text-foreground">
-                1. Brennstoff, Energiegehalt und CO2-Kosten
-              </h2>
-            </header>
-            <div className="px-5 py-4 space-y-4">
-              {/* Group A — fuel & quantity */}
-              <dl className="space-y-1.5 text-sm">
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-muted-foreground shrink-0">{result.fuelResults.length > 1 ? 'Brennstoffe' : 'Brennstoff'}</dt>
-                  <dd className="text-foreground font-medium text-right tabular-nums">{fuelDisplay}</dd>
-                </div>
-                {!result.isCrossYear && result.fuelResults.length === 1 && (
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0">Menge</dt>
-                    <dd className="text-foreground font-medium text-right tabular-nums">
-                      {formatNumber(result.fuelResults[0].inputAmount, 0)} {(() => {
-                        const ft = result.fuelResults[0].fuelType;
-                        if (ft === 'erdgas' || ft === 'erdgas_kwk' || ft === 'fernwaerme') return 'kWh';
-                        if (ft === 'heizoel' || ft === 'heizoel_kwk') return 'Liter';
-                        return 'kg';
-                      })()}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-
-              {/* Group B — energy & emissions */}
-              <div className="border-t border-border/60 pt-3">
-                <dl className="space-y-1.5 text-sm">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0">Energiegehalt (Heizwert)</dt>
-                    <dd className="text-foreground font-medium text-right tabular-nums">{formatNumber(result.totalEnergyHeatingValueKwh, 2)}&nbsp;kWh</dd>
-                  </div>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0">{result.fuelResults.length > 1 ? 'Gewichteter Emissionsfaktor' : 'Emissionsfaktor'}</dt>
-                    <dd className="text-foreground font-medium text-right tabular-nums">
-                      {formatNumber(result.fuelResults.length > 1 ? result.weightedEmissionFactor : result.emissionFactor, 5)}&nbsp;kg&nbsp;CO2/kWh
-                    </dd>
-                  </div>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0">CO2-Emissionen</dt>
-                    <dd className="text-foreground font-medium text-right tabular-nums">{formatNumber(result.totalEmissionsKg, 1)}&nbsp;kg</dd>
-                  </div>
-                  {!result.isCrossYear && (
-                    <div className="flex items-baseline justify-between gap-4">
-                      <dt className="text-muted-foreground shrink-0">CO2-Preis</dt>
-                      <dd className="text-foreground font-medium text-right tabular-nums">{formatCurrency(result.co2PricePerTon)}&nbsp;/&nbsp;t&nbsp;({result.billingYear})</dd>
-                    </div>
-                  )}
-                </dl>
-              </div>
-
-              {/* Group C — cost breakdown */}
-              <div className="border-t border-border/60 pt-3">
-                <dl className="space-y-1.5 text-sm">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0">CO2-Kosten netto</dt>
-                    <dd className="text-foreground font-medium text-right tabular-nums">{formatCurrency(result.totalCO2CostNet)}</dd>
-                  </div>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0 leading-snug">
-                      {mixedVAT
-                        ? <>USt. anteilig 7&nbsp;% ({mixedVAT.reducedDays}&nbsp;T.) / 19&nbsp;% ({mixedVAT.standardDays}&nbsp;T.)</>
-                        : <>USt. ({result.vatPercent}&nbsp;%)</>}
-                    </dt>
-                    <dd className="text-foreground font-medium text-right tabular-nums">{formatCurrency(result.totalCO2Cost - result.totalCO2CostNet)}</dd>
-                  </div>
-                  <div className="flex items-baseline justify-between gap-4 border-t border-border/60 pt-2 mt-1">
-                    <dt className="text-foreground font-semibold shrink-0">CO2-Kosten brutto</dt>
-                    <dd className="text-foreground font-semibold text-right tabular-nums">{formatCurrency(result.totalCO2Cost)}</dd>
-                  </div>
-                  {result.usedDirectCost && (
-                    <p className="text-xs text-muted-foreground pt-1">CO2-Kosten ganz oder teilweise direkt aus Abrechnung übernommen.</p>
-                  )}
-                </dl>
-              </div>
-
-              {/* Cross-year sub-periods */}
-              {result.isCrossYear && result.segmentResults && result.segmentResults.length > 0 && (
-                <div className="border-t border-border/60 pt-3 space-y-2">
-                  <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
-                    <CalendarDays className="h-3.5 w-3.5" />Jahresabschnitte
-                  </p>
-                  {result.segmentResults.map((seg, i) => (
-                    <div key={i} className="rounded border border-border/60 bg-muted/20 px-3 py-2">
-                      <div className="flex items-baseline justify-between gap-4 text-xs">
-                        <span className="font-medium text-foreground">{seg.year} · {fmt.date(seg.periodStart)} – {fmt.date(seg.periodEnd)}</span>
-                        <span className="text-muted-foreground tabular-nums">CO2-Preis: {formatCurrency(seg.co2PricePerTon)}/t</span>
-                      </div>
-                      <div className="flex items-baseline justify-between gap-4 text-xs mt-1">
-                        <span className="text-muted-foreground">CO2-Emissionen: <span className="text-foreground tabular-nums">{formatNumber(seg.co2Kg, 1)} kg</span></span>
-                        <span className="text-foreground font-medium tabular-nums">{formatCurrency(seg.co2CostGross)} brutto</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Biomass note */}
-              {result.fuelResults.some(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel') && (
-                <p className="text-xs text-muted-foreground border-t border-border/60 pt-3">
-                  Hinweis: Holzpellets weisen einen Emissionsfaktor auf, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen 0,00&nbsp;EUR.
-                </p>
-              )}
-            </div>
-          </section>
-
-          {/* ═══════════ SECTION 2 — Aufteilung nach Stufenmodell ═══════════ */}
-          <section className="rounded-lg border border-border bg-card">
-            <header className="border-b border-border px-5 py-3">
-              <h2 className="text-sm font-semibold text-foreground">
-                {result.isResidential
-                  ? '2. CO2-Aufteilung nach dem gesetzlichen Stufenmodell für Wohngebäude'
-                  : '2. CO2-Aufteilung für Nichtwohngebäude'}
-              </h2>
-            </header>
-            <div className="px-5 py-4">
-              <dl className="space-y-1.5 text-sm">
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-muted-foreground shrink-0">Gebäudetyp</dt>
-                  <dd className="text-foreground font-medium text-right">{getBuildingTypeLabel(wizardData)}</dd>
-                </div>
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-muted-foreground shrink-0">Wärmeversorgung</dt>
-                  <dd className="text-foreground font-medium text-right">{getHeatSupplyLabel(wizardData)}</dd>
-                </div>
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-muted-foreground shrink-0">Bezugsfläche ({getAreaLabel(wizardData)})</dt>
-                  <dd className="text-foreground font-medium text-right tabular-nums">{formatNumber(result.relevantArea, 0)}&nbsp;m²</dd>
-                </div>
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-muted-foreground shrink-0">Spezifischer CO2-Ausstoß (Abrechnungszeitraum)</dt>
-                  <dd className="text-foreground font-medium text-right tabular-nums">{formatNumber(result.emissionsPerSqmYear)}&nbsp;kg&nbsp;CO2/m²</dd>
-                </div>
-                {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0 leading-snug">Hochgerechneter Jahreswert<br /><span className="text-xs">(nur für Einstufung)</span></dt>
-                    <dd className="text-foreground font-medium text-right tabular-nums">{formatNumber(result.emissionsPerSqmAnnualized)}&nbsp;kg&nbsp;CO2/m²/a</dd>
-                  </div>
-                )}
-                {result.isResidential && result.stufenmodellStep > 0 && (
-                  <>
-                    <div className="flex items-baseline justify-between gap-4 border-t border-border/60 pt-2 mt-1">
-                      <dt className="text-muted-foreground shrink-0">Einstufung</dt>
-                      <dd className="text-foreground font-medium text-right">Stufe&nbsp;{result.stufenmodellStep} von 10 ({getStufenmodellRangeText(result.stufenmodellStep)})</dd>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-4">
-                      <dt className="text-muted-foreground shrink-0">Basis-Aufteilung nach Stufenmodell</dt>
-                      <dd className="text-foreground font-semibold text-right">Mieter&nbsp;{result.baseTenantPercent}&nbsp;% / Vermieter&nbsp;{result.baseLandlordPercent}&nbsp;%</dd>
-                    </div>
-                  </>
-                )}
-                {!result.isResidential && (
-                  <div className="flex items-baseline justify-between gap-4 border-t border-border/60 pt-2 mt-1">
-                    <dt className="text-muted-foreground shrink-0">Aufteilung</dt>
-                    <dd className="text-foreground font-semibold text-right">
-                      {result.restrictionApplied === 'fall1und2'
-                        ? 'Mieter 100 % / Vermieter 0 %'
-                        : 'Hälftig (50 % / 50 %) gemäß § 8 CO2KostAufG'}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-          </section>
-
-          {/* ═══════════ SECTION 3 — Besonderheiten / Abweichungen ═══════════ */}
-          <section className="rounded-lg border border-border bg-card">
-            <header className="border-b border-border px-5 py-3">
-              <h2 className="text-sm font-semibold text-foreground">
-                3. Besonderheiten / Abweichungen vom Stufenmodell
-              </h2>
-            </header>
-            <div className="px-5 py-4 space-y-3 text-sm text-foreground leading-relaxed">
-              {(() => {
-                const r = result.restrictionApplied;
-                if (r === 'fall3') {
-                  return (
-                    <p className="text-muted-foreground">
-                      Es liegen keine öffentlich-rechtlichen Einschränkungen vor. Die Aufteilung
-                      bleibt unverändert nach {result.isResidential ? '§ 5 CO2KostAufG (Stufenmodell)' : '§ 8 CO2KostAufG (hälftig)'}.
-                    </p>
-                  );
-                }
-                if (r === 'fall1und2') {
-                  return (
-                    <p>
-                      Beide öffentlich-rechtlichen Einschränkungen liegen vor (Fall 1 + Fall 2).
-                      Gemäß § 9 CO2KostAufG findet keine Aufteilung statt – die CO2-Kosten trägt
-                      der Mieter vollständig.
-                    </p>
-                  );
-                }
-                if (r === 'fall1' || r === 'fall2') {
-                  return (
-                    <p>
-                      Eine öffentlich-rechtliche Einschränkung liegt vor ({r === 'fall1' ? 'Fall 1' : 'Fall 2'}).
-                      Der Vermieteranteil wird gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert
-                      (von {result.baseLandlordPercent}&nbsp;% auf {result.landlordPercent}&nbsp;%).
-                    </p>
-                  );
-                }
-                return null;
-              })()}
-              {result.reimbursementReductionApplied && (
-                <p className="text-muted-foreground">
-                  Zusätzliches Gasgerät ohne eigenen Zähler: Erstattungsanspruch wurde
-                  pauschal um {result.reimbursementReductionPercent}&nbsp;% gekürzt (§&nbsp;5&nbsp;Abs.&nbsp;5 CO2KostAufG).
-                  {result.landlordShareBeforeReduction != null && (
-                    <> Vor Kürzung: <span className="tabular-nums">{formatCurrency(result.landlordShareBeforeReduction)}</span>.</>
-                  )}
-                </p>
-              )}
-              {result.usedDirectCost && (
-                <p className="text-muted-foreground">
-                  Die CO2-Kosten wurden ganz oder teilweise direkt aus der Abrechnung des
-                  Wärmelieferanten übernommen.
-                </p>
-              )}
-              {result.restrictionNote && (
-                <p className="text-muted-foreground">{result.restrictionNote}</p>
-              )}
-            </div>
-          </section>
-
-          {/* ═══════════ SECTION 4 — Endgültige Aufteilung ═══════════ */}
+          {/* ═══════════ Compact result summary ═══════════ */}
           <section className="rounded-lg border-2 border-primary bg-primary/5">
             <header className="border-b border-primary/20 px-5 py-3">
-              <h2 className="text-sm font-semibold text-foreground">
-                4. Endgültige Aufteilung der CO2-Kosten
-              </h2>
+              <h2 className="text-sm font-semibold text-foreground">Ergebnis</h2>
             </header>
             <div className="px-5 py-5 space-y-4">
               <dl className="space-y-1.5 text-sm">
@@ -410,15 +180,13 @@ export default function ResultsPage() {
                   <dt className="text-muted-foreground shrink-0">Gesamte CO2-Kosten (brutto)</dt>
                   <dd className="text-foreground font-semibold text-right tabular-nums">{formatCurrency(result.totalCO2Cost)}</dd>
                 </div>
+                {allocationExplanation && (
+                  <div className="flex items-baseline justify-between gap-4">
+                    <dt className="text-muted-foreground shrink-0">Einstufung</dt>
+                    <dd className="text-foreground font-medium text-right">{allocationExplanation}</dd>
+                  </div>
+                )}
               </dl>
-
-              {result.isResidential && result.stufenmodellStep > 0 &&
-                (result.baseLandlordPercent !== result.landlordPercent || result.baseTenantPercent !== result.tenantPercent) && (
-                <p className="text-xs text-muted-foreground border-t border-primary/20 pt-3">
-                  Basis nach Stufenmodell: Mieter&nbsp;{result.baseTenantPercent}&nbsp;% / Vermieter&nbsp;{result.baseLandlordPercent}&nbsp;%
-                  &nbsp;→&nbsp; Endgültig nach Berücksichtigung der Besonderheiten:
-                </p>
-              )}
 
               <div className="grid gap-3 sm:grid-cols-2 pt-1">
                 <div className="rounded-md border border-primary/30 bg-background p-4">
@@ -427,7 +195,7 @@ export default function ResultsPage() {
                   <div className="text-xs text-primary font-medium mt-1 tabular-nums">{result.landlordPercent}&nbsp;%</div>
                 </div>
                 <div className="rounded-md border border-accent/30 bg-background p-4">
-                  <div className="text-xs text-muted-foreground mb-1">Anteil Mieter / Mietergemeinschaft</div>
+                  <div className="text-xs text-muted-foreground mb-1">Anteil Mieter</div>
                   <div className="text-2xl font-bold text-accent tabular-nums">{formatCurrency(result.tenantShare)}</div>
                   <div className="text-xs text-accent font-medium mt-1 tabular-nums">{result.tenantPercent}&nbsp;%</div>
                 </div>
