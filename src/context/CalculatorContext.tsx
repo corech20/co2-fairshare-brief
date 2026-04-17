@@ -34,22 +34,24 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
     setWizardData(prev => ({ ...prev, [key]: value }));
   }, []);
 
+  const hasMultiFuel = !!(wizardData.fuelEntries && wizardData.fuelEntries.length > 0);
+
   const goNext = useCallback(() => {
     let next = currentStep + 1;
-    // Skip fuel step when Fernwärme is already selected as heat supply type
-    if (next === 5 && wizardData.heatSupplyType === 'fernwaerme') {
+    // Skip fuel step ONLY for pure single-source Fernwärme (no multi-fuel combination active)
+    if (next === 5 && wizardData.heatSupplyType === 'fernwaerme' && !hasMultiFuel) {
       setWizardData(prev => ({ ...prev, fuelType: 'fernwaerme' as WizardData['fuelType'] }));
       next = 6;
     }
     if (next < totalSteps) setCurrentStep(next);
-  }, [currentStep, totalSteps, wizardData.heatSupplyType]);
+  }, [currentStep, totalSteps, wizardData.heatSupplyType, hasMultiFuel]);
 
   const goBack = useCallback(() => {
     let prev = currentStep - 1;
-    // Skip fuel step when Fernwärme is already selected as heat supply type
-    if (prev === 5 && wizardData.heatSupplyType === 'fernwaerme') prev = 4;
+    // Skip fuel step ONLY for pure single-source Fernwärme (no multi-fuel combination active)
+    if (prev === 5 && wizardData.heatSupplyType === 'fernwaerme' && !hasMultiFuel) prev = 4;
     if (prev >= 0) setCurrentStep(prev);
-  }, [currentStep, wizardData.heatSupplyType]);
+  }, [currentStep, wizardData.heatSupplyType, hasMultiFuel]);
 
   const goToStep = useCallback((step: number) => {
     if (step >= 0 && step < totalSteps) setCurrentStep(step);
