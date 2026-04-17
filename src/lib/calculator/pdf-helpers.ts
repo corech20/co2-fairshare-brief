@@ -204,13 +204,13 @@ export function getSpecialCircumstancesText(data: WizardData, result: Calculatio
     }
   } else if (restriction === 'fall1') {
     if (result.isResidential) {
-      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1, z. B. Denkmalschutz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 7 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1, z. B. Denkmalschutz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
       lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1). Bei Nichtwohngebäuden erfolgt im Rahmen einer konservativen Standardbehandlung weiterhin eine hälftige Aufteilung der CO2-Kosten. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
     }
   } else if (restriction === 'fall2') {
     if (result.isResidential) {
-      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 7 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
       lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2). Bei Nichtwohngebäuden erfolgt im Rahmen einer konservativen Standardbehandlung weiterhin eine hälftige Aufteilung der CO2-Kosten. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
     }
