@@ -85,11 +85,6 @@ export function DetailedCalculationView({ data, result }: Props) {
       <section>
         <SectionHeading>1. Brennstoff, Energiegehalt und CO2-Kosten</SectionHeading>
 
-        {result.fuelResults.length === 1 ? (
-          <Row label="Brennstoff:" value={result.fuelResults[0].fuelLabel} bold />
-        ) : (
-          <Row label="Brennstoffe:" value={result.fuelResults.map(fr => fr.fuelLabel).join(', ')} bold />
-        )}
 
         <div className="mt-3 space-y-3">
           {result.isCrossYear && result.segmentResults && result.segmentResults.length > 0 ? (
