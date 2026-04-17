@@ -182,42 +182,40 @@ export function DetailedCalculationView({ data, result }: Props) {
         </SectionHeading>
 
         <div className="mt-3 space-y-3">
-          <div className="space-y-0">
-            <Row label="Gebäudetyp:" value={getBuildingTypeLabel(data)} />
-            <Row label="Wärmeversorgung:" value={getHeatSupplyLabel(data)} />
+          <Row label="Gebäudetyp:" value={getBuildingTypeLabel(data)} />
+          <Row label="Wärmeversorgung:" value={getHeatSupplyLabel(data)} />
 
-            {isApartmentLevel ? (
-              <>
-                {data.buildingArea && <Row label="Gebäudewohnfläche:" value={`${fmt.number(data.buildingArea, 0)} m²`} />}
-                <Row label={`${areaLabel}:`} value={`${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`} />
-                <Row label="Bezugsfläche für Berechnung:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
-              </>
-            ) : (
-              <Row label={`${areaLabel}:`} value={`${fmt.number(result.relevantArea, 0)} m²`} />
-            )}
+          {isApartmentLevel ? (
+            <>
+              {data.buildingArea && <Row label="Gebäudewohnfläche:" value={`${fmt.number(data.buildingArea, 0)} m²`} />}
+              <Row label={`${areaLabel}:`} value={`${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`} />
+              <Row label="Bezugsfläche für Berechnung:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
+            </>
+          ) : (
+            <Row label={`${areaLabel}:`} value={`${fmt.number(result.relevantArea, 0)} m²`} />
+          )}
 
-            <Row
-              label="Spezifischer CO2-Ausstoß (Abrechnungszeitraum):"
-              value={`${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m²`}
-            />
+          <Row
+            label="Spezifischer CO2-Ausstoß (Abrechnungszeitraum):"
+            value={`${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m²`}
+          />
 
-            {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
-              <>
-                <Row
-                  label="Hochgerechneter Jahreswert (nur für Einstufung):"
-                  value={`${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`}
-                />
-                <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-                  Hochrechnung: {fmt.number(result.emissionsPerSqmYear, 2)} × {fmt.number(result.annualizationFactor, 4)} ={' '}
-                  {fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im
-                  Stufenmodell verwendet, nicht für die Kostenberechnung.
-                </p>
-              </>
-            )}
-          </div>
+          {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
+            <>
+              <Row
+                label="Hochgerechneter Jahreswert (nur für Einstufung):"
+                value={`${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`}
+              />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Hochrechnung: {fmt.number(result.emissionsPerSqmYear, 2)} × {fmt.number(result.annualizationFactor, 4)} ={' '}
+                {fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im
+                Stufenmodell verwendet, nicht für die Kostenberechnung.
+              </p>
+            </>
+          )}
 
           {result.isResidential && result.stufenmodellStep > 0 && (
-            <div className="space-y-0">
+            <>
               <p className="text-[13px] text-foreground/80 leading-relaxed">
                 Der spezifische CO2-Ausstoß von{' '}
                 {fmt.number(result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich
@@ -229,11 +227,11 @@ export function DetailedCalculationView({ data, result }: Props) {
                 value={`Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`}
                 bold
               />
-            </div>
+            </>
           )}
 
           {!result.isResidential && (
-            <div className="space-y-0">
+            <>
               {result.restrictionApplied === 'fall1und2' ? (
                 <>
                   <Row label="Aufteilung:" value="Mieter 100 % / Vermieter 0 %" bold />
@@ -250,7 +248,7 @@ export function DetailedCalculationView({ data, result }: Props) {
                   </p>
                 </>
               )}
-            </div>
+            </>
           )}
         </div>
       </section>
