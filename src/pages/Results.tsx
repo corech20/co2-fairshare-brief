@@ -41,6 +41,54 @@ export default function ResultsPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [pendingOutputType, setPendingOutputType] = useState<OutputType>('calculation');
 
+  // V – Fernwärme-Sonderfall: Erstanschluss ab 01.01.2023 → CO2KostAufG nicht anwendbar
+  const isExcludedDistrictHeating =
+    wizardData.heatSupplyType === 'fernwaerme' &&
+    !!wizardData.districtHeatingConnectedAfter2023;
+
+  if (isExcludedDistrictHeating) {
+    const isTenant = wizardData.userRole === 'mieter';
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="border-b border-border bg-background sticky top-0 z-50">
+          <div className="container-narrow flex h-14 items-center px-4">
+            <span className="text-sm font-semibold text-foreground">Hinweis zur Anwendbarkeit</span>
+          </div>
+        </header>
+        <main className="px-4 py-8 md:py-10">
+          <div className="container-narrow space-y-5 animate-fade-in">
+            <div className="rounded-lg border-2 border-border bg-muted/30 p-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-foreground">Keine Anwendbarkeit des CO2KostAufG</h2>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    Für diesen Fernwärmefall wird keine CO₂-Kostenaufteilung nach dem CO2KostAufG berechnet,
+                    da ein erstmaliger Anschluss an das Wärmenetz ab dem 1. Januar 2023 vorliegt.
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {isTenant
+                      ? 'Ein Erstattungsanspruch nach dem CO2KostAufG wird für diesen Fall nicht berechnet.'
+                      : 'Eine Aufteilung der CO₂-Kosten nach dem CO2KostAufG wird für diesen Fall nicht berechnet.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" size="lg" onClick={() => navigate('/rechner')}>
+                <ArrowLeft className="h-4 w-4" />Zurück zur Eingabe
+              </Button>
+              <div className="flex-1" />
+              <Button variant="outline" size="lg" onClick={() => { reset(); navigate('/rechner'); }}>
+                <RotateCcw className="h-4 w-4" />Neue Berechnung
+              </Button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (!result) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
