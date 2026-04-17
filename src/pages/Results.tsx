@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
-import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays, ChevronUp } from 'lucide-react';
+import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays, Download, CheckCircle2 } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
 import { PaymentDialog } from '@/components/PaymentDialog';
