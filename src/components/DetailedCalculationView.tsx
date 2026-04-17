@@ -181,74 +181,78 @@ export function DetailedCalculationView({ data, result }: Props) {
             : '2. CO2-Aufteilung zwischen Vermieter und Mieter'}
         </SectionHeading>
 
-        <Row label="Gebäudetyp:" value={getBuildingTypeLabel(data)} />
-        <Row label="Wärmeversorgung:" value={getHeatSupplyLabel(data)} />
+        <div className="mt-3 space-y-3">
+          <div>
+            <Row label="Gebäudetyp:" value={getBuildingTypeLabel(data)} />
+            <Row label="Wärmeversorgung:" value={getHeatSupplyLabel(data)} />
 
-        {isApartmentLevel ? (
-          <>
-            {data.buildingArea && <Row label="Gebäudewohnfläche:" value={`${fmt.number(data.buildingArea, 0)} m²`} />}
-            <Row label={`${areaLabel}:`} value={`${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`} />
-            <Row label="Bezugsfläche für Berechnung:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
-          </>
-        ) : (
-          <Row label={`${areaLabel}:`} value={`${fmt.number(result.relevantArea, 0)} m²`} />
-        )}
-
-        <Row
-          label="Spezifischer CO2-Ausstoß (Abrechnungszeitraum):"
-          value={`${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m²`}
-        />
-
-        {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
-          <>
-            <Row
-              label="Hochgerechneter Jahreswert (nur für Einstufung):"
-              value={`${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`}
-            />
-            <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-              Hochrechnung: {fmt.number(result.emissionsPerSqmYear, 2)} × {fmt.number(result.annualizationFactor, 4)} ={' '}
-              {fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im
-              Stufenmodell verwendet, nicht für die Kostenberechnung.
-            </p>
-          </>
-        )}
-
-        {result.isResidential && result.stufenmodellStep > 0 && (
-          <div className="mt-3 space-y-1">
-            <p className="text-[13px] text-foreground/80 leading-relaxed">
-              Der spezifische CO2-Ausstoß von{' '}
-              {fmt.number(result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich
-              von: {getStufenmodellRangeText(result.stufenmodellStep)}.
-            </p>
-            <Row label="Einstufung:" value={`Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`} bold />
-            <Row
-              label="Basis-Aufteilung nach Stufenmodell:"
-              value={`Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`}
-              bold
-            />
-          </div>
-        )}
-
-        {!result.isResidential && (
-          <div className="mt-3 space-y-1">
-            {result.restrictionApplied === 'fall1und2' ? (
+            {isApartmentLevel ? (
               <>
-                <Row label="Aufteilung:" value="Mieter 100 % / Vermieter 0 %" bold />
-                <p className="text-[13px] text-foreground/80 leading-relaxed">
-                  Da beide öffentlich-rechtlichen Einschränkungen (Fall 1 und Fall 2) vorliegen, trägt der Mieter die CO2-Kosten
-                  vollständig.
-                </p>
+                {data.buildingArea && <Row label="Gebäudewohnfläche:" value={`${fmt.number(data.buildingArea, 0)} m²`} />}
+                <Row label={`${areaLabel}:`} value={`${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`} />
+                <Row label="Bezugsfläche für Berechnung:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
               </>
             ) : (
+              <Row label={`${areaLabel}:`} value={`${fmt.number(result.relevantArea, 0)} m²`} />
+            )}
+
+            <Row
+              label="Spezifischer CO2-Ausstoß (Abrechnungszeitraum):"
+              value={`${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m²`}
+            />
+
+            {result.annualizationFactor && result.emissionsPerSqmAnnualized && (
               <>
-                <Row label="Aufteilung:" value="Hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG" bold />
-                <p className="text-[13px] text-foreground/80 leading-relaxed">
-                  Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Mieter und Vermieter.
+                <Row
+                  label="Hochgerechneter Jahreswert (nur für Einstufung):"
+                  value={`${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`}
+                />
+                <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
+                  Hochrechnung: {fmt.number(result.emissionsPerSqmYear, 2)} × {fmt.number(result.annualizationFactor, 4)} ={' '}
+                  {fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im
+                  Stufenmodell verwendet, nicht für die Kostenberechnung.
                 </p>
               </>
             )}
           </div>
-        )}
+
+          {result.isResidential && result.stufenmodellStep > 0 && (
+            <div>
+              <p className="text-[13px] text-foreground/80 leading-relaxed mb-1">
+                Der spezifische CO2-Ausstoß von{' '}
+                {fmt.number(result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich
+                von: {getStufenmodellRangeText(result.stufenmodellStep)}.
+              </p>
+              <Row label="Einstufung:" value={`Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`} bold />
+              <Row
+                label="Basis-Aufteilung nach Stufenmodell:"
+                value={`Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`}
+                bold
+              />
+            </div>
+          )}
+
+          {!result.isResidential && (
+            <div>
+              {result.restrictionApplied === 'fall1und2' ? (
+                <>
+                  <Row label="Aufteilung:" value="Mieter 100 % / Vermieter 0 %" bold />
+                  <p className="text-[13px] text-foreground/80 leading-relaxed mt-1">
+                    Da beide öffentlich-rechtlichen Einschränkungen (Fall 1 und Fall 2) vorliegen, trägt der Mieter die CO2-Kosten
+                    vollständig.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Row label="Aufteilung:" value="Hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG" bold />
+                  <p className="text-[13px] text-foreground/80 leading-relaxed mt-1">
+                    Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Mieter und Vermieter.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ═══ Section 3 ═══ — only when there is content */}
