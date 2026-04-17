@@ -88,8 +88,10 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
     doc.setTextColor(50, 50, 50);
     doc.text(label, mL + indent, y);
+    // Left-aligned value: place directly after label with a small gap
+    const labelWidth = doc.getTextWidth(label);
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    doc.text(value, pw - mR, y, { align: 'right' });
+    doc.text(value, mL + indent + labelWidth + 2, y);
     y += 4.5;
   };
 

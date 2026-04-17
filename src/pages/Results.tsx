@@ -185,14 +185,14 @@ export default function ResultsPage() {
             </header>
             <div className="px-5 py-5 space-y-4">
               <dl className="space-y-1.5 text-sm">
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-muted-foreground shrink-0">Gesamte CO2-Kosten (brutto)</dt>
-                  <dd className="text-foreground font-semibold text-right tabular-nums">{formatCurrency(result.totalCO2Cost)}</dd>
+                <div className="flex items-baseline gap-2">
+                  <dt className="text-muted-foreground shrink-0">Gesamte CO2-Kosten (brutto):</dt>
+                  <dd className="text-foreground font-semibold text-left tabular-nums">{formatCurrency(result.totalCO2Cost)}</dd>
                 </div>
                 {allocationExplanation && (
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-muted-foreground shrink-0">Einstufung</dt>
-                    <dd className="text-foreground font-medium text-right">{allocationExplanation}</dd>
+                  <div className="flex items-baseline gap-2">
+                    <dt className="text-muted-foreground shrink-0">Einstufung:</dt>
+                    <dd className="text-foreground font-medium text-left">{allocationExplanation}</dd>
                   </div>
                 )}
               </dl>
