@@ -187,7 +187,7 @@ export default function ResultsPage() {
               <dl className="space-y-1.5 text-sm">
                 <div className="flex items-baseline gap-2">
                   <dt className="text-muted-foreground shrink-0">Gesamte CO2-Kosten (brutto):</dt>
-                  <dd className="text-foreground font-semibold text-left tabular-nums">{formatCurrency(result.totalCO2Cost)}</dd>
+                  <dd className="ml-auto text-right text-foreground font-semibold tabular-nums">{formatCurrency(result.totalCO2Cost)}</dd>
                 </div>
                 {allocationExplanation && (
                   <div className="flex items-baseline gap-2">
@@ -213,9 +213,9 @@ export default function ResultsPage() {
               {isTenantClaim && (
                 <div className="rounded-md border border-primary/30 bg-primary/5 p-3 flex items-start gap-3">
                   <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <p className="text-xs text-foreground leading-relaxed">
-                    <span className="font-semibold">Möglicher Erstattungsanspruch gegenüber dem Vermieter:&nbsp;</span>
-                    <span className="text-primary tabular-nums font-semibold">{formatCurrency(result.landlordShare)}</span>
+                  <p className="text-xs text-foreground leading-relaxed flex-1 flex items-baseline gap-2">
+                    <span className="font-semibold">Möglicher Erstattungsanspruch gegenüber dem Vermieter:</span>
+                    <span className="ml-auto text-right text-primary tabular-nums font-semibold">{formatCurrency(result.landlordShare)}</span>
                   </p>
                 </div>
               )}

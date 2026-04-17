@@ -55,15 +55,22 @@ export function DetailedCalculationView({ data, result }: Props) {
   const specialText = getSpecialCircumstancesText(data, result);
   const specialParagraphs = specialText.split('\n\n').filter(p => p.trim());
 
-  const Row = ({ label, value, bold = false, indent = 0 }: { label: string; value: string; bold?: boolean; indent?: number }) => (
-    <div
-      className="flex items-baseline gap-2 py-1 text-[13px]"
-      style={{ paddingLeft: indent }}
-    >
-      <span className={bold ? 'font-semibold text-foreground' : 'text-foreground/80'}>{label}</span>
-      <span className={`tabular-nums text-left ${bold ? 'font-semibold text-foreground' : 'text-foreground/90'}`}>{value}</span>
-    </div>
-  );
+  const Row = ({ label, value, bold = false, indent = 0 }: { label: string; value: string; bold?: boolean; indent?: number }) => {
+    const isCurrency = value.includes('€') || value.includes('EUR');
+    return (
+      <div
+        className="flex items-baseline gap-2 py-1 text-[13px]"
+        style={{ paddingLeft: indent }}
+      >
+        <span className={bold ? 'font-semibold text-foreground' : 'text-foreground/80'}>{label}</span>
+        <span
+          className={`tabular-nums ${isCurrency ? 'ml-auto text-right' : 'text-left'} ${bold ? 'font-semibold text-foreground' : 'text-foreground/90'}`}
+        >
+          {value}
+        </span>
+      </div>
+    );
+  };
 
   const SectionHeading = ({ children }: { children: React.ReactNode }) => (
     <h3 className="text-[15px] font-bold text-primary border-b-2 border-primary pb-1.5 mb-3 mt-1">
@@ -292,7 +299,7 @@ export function DetailedCalculationView({ data, result }: Props) {
         {(docCase === 'C' || docCase === 'D') && result.landlordShare > 0 && (
           <div className="mt-3 border-t border-border pt-3 flex items-baseline gap-2">
             <span className="text-[13px] font-semibold text-foreground">Erstattungsanspruch:</span>
-            <span className="text-[13px] font-semibold text-foreground tabular-nums">
+            <span className="ml-auto text-right text-[13px] font-semibold text-foreground tabular-nums">
               {fmt.currency(result.landlordShare)}
             </span>
           </div>

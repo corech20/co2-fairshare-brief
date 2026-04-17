@@ -88,10 +88,16 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
     doc.setTextColor(50, 50, 50);
     doc.text(label, mL + indent, y);
-    // Left-aligned value: place directly after label with a small gap
-    const labelWidth = doc.getTextWidth(label);
-    doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    doc.text(value, mL + indent + labelWidth + 2, y);
+    // Currency values (containing €/EUR) are right-aligned to the page margin;
+    // all other values are placed left-aligned directly after the label.
+    const isCurrency = value.includes('€') || value.includes('EUR');
+    if (isCurrency) {
+      const valueWidth = doc.getTextWidth(value);
+      doc.text(value, pw - mR - valueWidth, y);
+    } else {
+      const labelWidth = doc.getTextWidth(label);
+      doc.text(value, mL + indent + labelWidth + 2, y);
+    }
     y += 4.5;
   };
 
