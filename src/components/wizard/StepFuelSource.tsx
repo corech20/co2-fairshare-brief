@@ -3,6 +3,7 @@ import type { FuelType, FuelEntry } from '@/lib/calculator/types';
 import { Flame, Droplets, Thermometer, Zap, Leaf, Trees, Factory, Plus, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { IntegerInput } from './IntegerInput';
 
 const STANDARD_FUELS: { value: FuelType; label: string; desc: string; icon: typeof Flame }[] = [
   { value: 'erdgas', label: 'Erdgas', desc: 'Eingabe in kWh (Brennwert/Hs) lt. Gasabrechnung', icon: Flame },
@@ -171,13 +172,12 @@ export default function StepFuelSource() {
             </select>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground">Menge</label>
-                <input
-                  type="number"
-                  value={entry.amount || ''}
-                  onChange={e => updateFuelEntry(index, { amount: parseFloat(e.target.value) || 0 })}
+                <label className="text-xs text-muted-foreground">Menge (nur ganze Zahlen)</label>
+                <IntegerInput
+                  value={entry.amount > 0 ? entry.amount : undefined}
+                  onChange={v => updateFuelEntry(index, { amount: v ?? 0 })}
                   placeholder="z.B. 45000"
-                  className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
+                  className="px-3 py-2 text-sm"
                 />
               </div>
               {entry.fuelType === 'fernwaerme' && (

@@ -3,6 +3,7 @@ import type { CostInputType, AddressData } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import { IntegerInput } from './IntegerInput';
 
 function InputField({ label, hint, value, onChange, type = 'number', placeholder, unit }: {
   label: string; hint?: string; value: string | number | undefined;
@@ -179,18 +180,25 @@ export default function StepInputValues() {
           />
         )}
 
-        {/* Fuel amount – only for same-year, single fuel */}
+        {/* Fuel amount – only for same-year, single fuel (integer-only) */}
         {!isMultiFuel && !crossYear && (
-          <InputField
-            label={fuelLabel}
-            hint={wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk'
-              ? 'Verbrauch in kWh lt. Abrechnung (Brennwert/Hs). Wird intern auf Heizwert umgerechnet.'
-              : `Verbrauch im Abrechnungszeitraum in ${fuelUnit}`}
-            value={wizardData.fuelAmount}
-            onChange={v => setWizardField('fuelAmount', v ? parseFloat(v) : undefined)}
-            placeholder={`z. B. ${wizardData.fuelType === 'heizoel' ? '3000' : '50000'}`}
-            unit={fuelUnit}
-          />
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">{fuelLabel}</label>
+            <div className="relative">
+              <IntegerInput
+                value={wizardData.fuelAmount}
+                onChange={v => setWizardField('fuelAmount', v)}
+                placeholder={`z. B. ${wizardData.fuelType === 'heizoel' ? '3000' : '50000'}`}
+                className="pr-16"
+              />
+              <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">{fuelUnit}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk'
+                ? 'Verbrauch in kWh lt. Abrechnung (Brennwert/Hs). Nur ganze Zahlen – wird intern auf Heizwert umgerechnet.'
+                : `Verbrauch im Abrechnungszeitraum in ${fuelUnit} (nur ganze Zahlen).`}
+            </p>
+          </div>
         )}
 
         {/* Cross-year notice */}

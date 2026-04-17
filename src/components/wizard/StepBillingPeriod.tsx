@@ -3,6 +3,7 @@ import { validateBillingPeriod, isCrossYearPeriod, getYearBoundaries, getCO2Pric
 import { AlertTriangle, Info, ChevronDown } from 'lucide-react';
 import type { YearlySegment } from '@/lib/calculator/types';
 import { useEffect, useState } from 'react';
+import { IntegerInput } from './IntegerInput';
 
 const AVAILABLE_YEARS = [2023, 2024, 2025];
 
@@ -203,13 +204,12 @@ export default function StepBillingPeriod() {
                         {new Date(seg.periodStart).toLocaleDateString('de-DE')} – {new Date(seg.periodEnd).toLocaleDateString('de-DE')}
                       </p>
                       <div className="space-y-1">
-                        <label className="text-xs text-muted-foreground">Verbrauchsmenge</label>
-                        <input
-                          type="number"
-                          value={segAmount || ''}
-                          onChange={e => updateSegmentAmount(i, parseFloat(e.target.value) || 0)}
+                        <label className="text-xs text-muted-foreground">Verbrauchsmenge (nur ganze Zahlen)</label>
+                        <IntegerInput
+                          value={segAmount > 0 ? segAmount : undefined}
+                          onChange={v => updateSegmentAmount(i, v ?? 0)}
                           placeholder="z. B. 25000"
-                          className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                          className="px-3 py-2 text-sm"
                         />
                       </div>
                     </div>
