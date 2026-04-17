@@ -362,7 +362,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     const biomassNote = doc.splitTextToSize(
-      'Hinweis: Holzpellets und Holzhackschnitzel weisen einen Emissionsfaktor auf, sind jedoch nicht dem Brennstoffemissionshandelsgesetz (BEHG) unterworfen. Die CO2-Kosten betragen daher 0,00 EUR.',
+      'Hinweis: Holzpellets weisen einen Emissionsfaktor auf, sind jedoch nicht dem Brennstoffemissionshandelsgesetz (BEHG) unterworfen. Die CO2-Kosten betragen daher 0,00 EUR.',
       cw - 4,
     );
     for (const line of biomassNote) {
