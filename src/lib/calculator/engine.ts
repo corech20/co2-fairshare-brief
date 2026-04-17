@@ -401,7 +401,10 @@ export function applyRestrictionModifier(
 
   // fall1 or fall2
   if (isResidential) {
-    const modifiedLandlord = Math.round(baseLandlordPercent / 2);
+    // BMWK-compliant: floor (NOT kaufmännisches Runden).
+    // Example: base landlord 95 % → floor(95/2) = 47 % (not 48 %).
+    // The tenant percentage is the complement so the two values always sum to 100 %.
+    const modifiedLandlord = Math.floor(baseLandlordPercent / 2);
     return { landlordPercent: modifiedLandlord, tenantPercent: 100 - modifiedLandlord };
   }
 
@@ -646,9 +649,11 @@ function buildResult(
     }
   }
 
-  // CO2 costs are always based on actual consumption (never annualized)
+  // CO2 costs are always based on actual consumption (never annualized).
+  // Cent-exact allocation: round only the landlord share, derive tenant as the
+  // remainder so landlord + tenant === totalCO2Cost on the cent.
   let landlordShare = Math.round((totalCO2Cost * landlordPercent) / 100 * 100) / 100;
-  let tenantShare = Math.round((totalCO2Cost * tenantPercent) / 100 * 100) / 100;
+  let tenantShare = Math.round((totalCO2Cost - landlordShare) * 100) / 100;
 
   // 5% reduction for tenant + apartment heating + extra gas device
   let reimbursementReductionApplied = false;

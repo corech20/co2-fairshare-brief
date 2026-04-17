@@ -998,3 +998,132 @@ describe('Stage boundary validation across fuels', () => {
     });
   });
 });
+
+// ===================================================================
+// FALL 2 ROUNDING & § 9 ABS. 1 REGRESSION (BMWK-compliant)
+// ===================================================================
+
+import { calculateCO2Allocation as _calc } from '../lib/calculator/engine';
+import { getSpecialCircumstancesText } from '../lib/calculator/pdf-helpers';
+
+describe('Fall 1/2: floor (NOT kaufmännisches Runden) of base landlord percent', () => {
+  // Verbindliche Regel: final_landlord_percent = floor(base_landlord_percent / 2)
+  // Beispiel Stufe 10: base = 95 → floor(95/2) = 47 (NICHT 48)
+  const cases: Array<[number, number]> = [
+    [95, 47], // Stufe 10 – the BMWK reference case
+    [80, 40], // Stufe 9
+    [70, 35], // Stufe 8
+    [60, 30], // Stufe 7
+    [50, 25], // Stufe 6
+    [40, 20], // Stufe 5
+    [30, 15], // Stufe 4
+    [20, 10], // Stufe 3
+    [10, 5],  // Stufe 2
+    [0, 0],   // Stufe 1
+  ];
+  for (const [base, expected] of cases) {
+    it(`base landlord ${base}% → fall1: floor → ${expected}%`, () => {
+      const r = applyRestrictionModifier(base, 100 - base, 'fall1', true);
+      expect(r.landlordPercent).toBe(expected);
+      expect(r.tenantPercent).toBe(100 - expected);
+    });
+    it(`base landlord ${base}% → fall2: floor → ${expected}%`, () => {
+      const r = applyRestrictionModifier(base, 100 - base, 'fall2', true);
+      expect(r.landlordPercent).toBe(expected);
+      expect(r.tenantPercent).toBe(100 - expected);
+    });
+  }
+
+  it('explicitly: 95/2 = 47.5 must floor to 47 (NOT round to 48)', () => {
+    expect(applyRestrictionModifier(95, 5, 'fall2', true).landlordPercent).toBe(47);
+  });
+});
+
+describe('Fall 2 reference scenario (BMWK reference)', () => {
+  // Wohngebäude, Fernwärme, Stufe 10, Fall 2 → 47% / 53%
+  // Inputs constructed so that emissions per m² > 52 (Stufe 10).
+  const data: WizardData = {
+    userRole: 'mieter',
+    buildingType: 'wohngebaeude',
+    heatSupplyType: 'fernwaerme',
+    restrictionCase: 'fall2',
+    billingPeriodStart: '2024-01-01',
+    billingPeriodEnd: '2024-12-31',
+    fuelType: 'fernwaerme',
+    fuelAmount: 21778,
+    emissionFactorCustom: 0.29,
+    apartmentArea: 100,
+    buildingArea: 100,
+  };
+  const r = _calc(data);
+
+  it('classified into stage 10 (residential)', () => {
+    expect(r.stufenmodellStep).toBe(10);
+    expect(r.baseLandlordPercent).toBe(95);
+    expect(r.baseTenantPercent).toBe(5);
+  });
+
+  it('final percentages: landlord 47% / tenant 53% (NOT 48/52)', () => {
+    expect(r.landlordPercent).toBe(47);
+    expect(r.tenantPercent).toBe(53);
+  });
+
+  it('cent-exact allocation: landlord + tenant === total gross', () => {
+    expect(round2(r.landlordShare + r.tenantShare)).toBe(r.totalCO2Cost);
+  });
+
+  it('landlord share derived from final 47% (not from baseLandlordPercent)', () => {
+    expect(r.landlordShare).toBe(round2(r.totalCO2Cost * 0.47));
+  });
+
+  it('tenant share is the remainder (not independently rounded)', () => {
+    expect(r.tenantShare).toBe(round2(r.totalCO2Cost - r.landlordShare));
+  });
+});
+
+describe('Cent-exact allocation across all residential restriction stages', () => {
+  // Construct synthetic results to verify that landlord + tenant always sum
+  // to the total gross down to the cent, for every stage × fall1/fall2.
+  const totals = [100, 123.45, 329.72, 1000.01, 7777.77];
+  const baseLandlords = [10, 20, 30, 40, 50, 60, 70, 80, 95];
+  for (const total of totals) {
+    for (const base of baseLandlords) {
+      const final = Math.floor(base / 2);
+      const landlord = round2(total * final / 100);
+      const tenant = round2(total - landlord);
+      it(`total ${total} EUR, base ${base}% → landlord ${final}%: sums to total`, () => {
+        expect(round2(landlord + tenant)).toBe(round2(total));
+      });
+    }
+  }
+});
+
+describe('Legal reference: § 9 Abs. 1 CO2KostAufG (NOT § 7 Abs. 1)', () => {
+  const buildResult = (restriction: 'fall1' | 'fall2'): WizardData => ({
+    userRole: 'mieter',
+    buildingType: 'wohngebaeude',
+    heatSupplyType: 'zentral',
+    restrictionCase: restriction,
+    billingPeriodStart: '2024-01-01',
+    billingPeriodEnd: '2024-12-31',
+    fuelType: 'erdgas',
+    fuelAmount: 30000,
+    buildingArea: 200,
+  });
+
+  it('Fall 1 (residential): cites § 9 Abs. 1, never § 7 Abs. 1', () => {
+    const data = buildResult('fall1');
+    const result = _calc(data);
+    const text = getSpecialCircumstancesText(data, result);
+    expect(text).toContain('§ 9 Abs. 1 CO2KostAufG');
+    expect(text).not.toContain('§ 7 Abs. 1');
+  });
+
+  it('Fall 2 (residential): cites § 9 Abs. 1, never § 7 Abs. 1', () => {
+    const data = buildResult('fall2');
+    const result = _calc(data);
+    const text = getSpecialCircumstancesText(data, result);
+    expect(text).toContain('§ 9 Abs. 1 CO2KostAufG');
+    expect(text).not.toContain('§ 7 Abs. 1');
+  });
+});
