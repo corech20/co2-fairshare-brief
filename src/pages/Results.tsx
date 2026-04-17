@@ -106,18 +106,17 @@ export default function ResultsPage() {
 
   const handleRequestDocument = (outputType: OutputType) => {
     setPendingOutputType(outputType);
-    setDetailViewOpen(true);
-    // Smooth scroll happens after render via setTimeout
-    setTimeout(() => {
-      document.getElementById('detailed-calculation')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 60);
-  };
-
-  const handleBuyPdf = () => {
     setPaymentOpen(true);
   };
 
   const handlePaymentComplete = () => {
+    setPurchased(true);
+    setTimeout(() => {
+      document.getElementById('detailed-calculation')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  };
+
+  const handleDownloadPdf = () => {
     generatePDF(wizardData, result, pendingOutputType);
   };
 
