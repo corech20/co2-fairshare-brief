@@ -447,45 +447,36 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // PART IV — SPECIAL CIRCUMSTANCES
   // ═══════════════════════════════════════════════════════════════════════
 
-  // Use case-sensitive heading
-  const section3Title = isNonResidential
-    ? '3. Besonderheiten zur Aufteilung der CO2-Kosten'
-    : '3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell';
-  sectionHeading(section3Title);
-
+  // Section 3 — only when there is content (mirrors website)
   const specialText = getSpecialCircumstancesText(data, result);
-  const specialParagraphs = specialText.split('\n\n');
-  for (const para of specialParagraphs) {
-    if (para.trim()) {
-      bodyText(para.trim(), 2);
+  const specialParagraphs = specialText.split('\n\n').filter(p => p.trim());
+
+  if (specialParagraphs.length > 0) {
+    const section3Title = isNonResidential
+      ? '3. Besonderheiten zur Aufteilung der CO2-Kosten'
+      : '3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell';
+    sectionHeading(section3Title);
+
+    for (const para of specialParagraphs) {
+      bodyText(para, 2);
       y += 2;
     }
+    y += 4;
   }
 
-  y += 4;
-
   // ═══════════════════════════════════════════════════════════════════════
-  // PART V — FINAL RESULT
+  // PART V — FINAL RESULT (same typography as sections 1–3, no alien box)
   // ═══════════════════════════════════════════════════════════════════════
 
   sectionHeading('4. Aufteilung der CO2-Kosten unter Berücksichtigung der vorgenannten Besonderheiten');
 
-  // Ensure generous space for entire result box
-  const estimatedBoxH = (docCase === 'C' || docCase === 'D') ? 60 : 40;
-  ensureSpace(estimatedBoxH + 10);
-
-  const boxStartY = y;
-
-  // Add padding inside the box
-  y += 4;
-
-  detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 6, true);
+  detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
 
   y += 2;
-  doc.setDrawColor(180, 180, 180);
+  doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.2);
-  doc.line(mL + 6, y, pw - mR - 6, y);
-  y += 5;
+  doc.line(mL + 2, y, pw - mR, y);
+  y += 4;
 
   // Show base vs final reference if they differ (residential only)
   const baseDiffersFromFinal = result.isResidential
@@ -498,51 +489,41 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setTextColor(110, 110, 110);
     doc.text(
       `Basis-Aufteilung nach Stufenmodell: Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`,
-      mL + 6, y,
+      mL + 2, y,
     );
     y += 4;
-    doc.text('Endgültige Aufteilung nach Anwendung der vorgenannten Besonderheiten:', mL + 6, y);
+    doc.text('Endgültige Aufteilung nach Anwendung der vorgenannten Besonderheiten:', mL + 2, y);
     y += 5;
   }
 
-  detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 6, true);
-  detailRow(`Anteil Mieter / Mietergemeinschaft (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 6, true);
+  detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 2, true);
+  detailRow(`Anteil Mieter (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 2, true);
 
   if (result.reimbursementReductionApplied && result.landlordShareBeforeReduction != null) {
     y += 2;
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120, 90, 20);
+    doc.setTextColor(100, 100, 100);
     const reductionNote = `Vermieteranteil vor ${result.reimbursementReductionPercent} %-Kürzung: ${fmt.currency(result.landlordShareBeforeReduction)}`;
-    doc.text(reductionNote, mL + 6, y);
+    doc.text(reductionNote, mL + 2, y);
     y += 5;
   }
 
-  // Tenant reimbursement highlight – only when meaningful
+  // Erstattungsanspruch — same typography as the rest, no colored box
   if ((docCase === 'C' || docCase === 'D') && result.landlordShare > 0) {
     y += 3;
-    ensureSpace(14);
-    doc.setFillColor(240, 245, 252);
-    doc.roundedRect(mL + 4, y - 3, cw - 8, 12, 2, 2, 'F');
-    doc.setDrawColor(60, 100, 160);
+    ensureSpace(8);
+    doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.2);
-    doc.roundedRect(mL + 4, y - 3, cw - 8, 12, 2, 2, 'S');
+    doc.line(mL + 2, y, pw - mR, y);
+    y += 5;
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(30, 50, 90);
-    doc.text('Erstattungsanspruch:', mL + 8, y + 3);
-    doc.text(fmt.currency(result.landlordShare), pw - mR - 8, y + 3, { align: 'right' });
-    y += 14;
+    doc.setTextColor(50, 50, 50);
+    doc.text('Erstattungsanspruch:', mL + 2, y);
+    doc.text(fmt.currency(result.landlordShare), pw - mR, y, { align: 'right' });
+    y += 5;
   }
-
-  // Add bottom padding
-  y += 4;
-
-  // Draw result box border
-  const boxH = y - boxStartY;
-  doc.setDrawColor(30, 55, 90);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(mL, boxStartY, cw, boxH, 2, 2, 'S');
 
   y += 8;
 
