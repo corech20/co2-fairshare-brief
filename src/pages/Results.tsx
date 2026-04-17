@@ -509,12 +509,6 @@ export default function ResultsPage() {
             </Button>
           </div>
 
-          {/* Biomass note */}
-          {result.fuelResults.some(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel') && (
-            <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
-              <strong className="text-foreground">Biomasse:</strong> Holzpellets und Holzhackschnitzel haben einen Emissionsfaktor, sind jedoch nicht BEHG-pflichtig. Die CO2-Kosten betragen 0,00 EUR.
-            </div>
-          )}
 
           {/* Technical details */}
           <details className="rounded-lg border border-border bg-card">
