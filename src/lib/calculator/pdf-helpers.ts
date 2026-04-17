@@ -253,7 +253,6 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
   if (fr.usedDirectCost) {
     steps.push(`CO2-Kosten (direkt übernommen): ${fmt.currency(fr.co2CostGross)} brutto`);
   } else {
-    steps.push(`CO2-Kosten netto: ${fmt.currency(fr.co2CostNet)}`);
     steps.push(`CO2-Kosten brutto (inkl. USt.): ${fmt.currency(fr.co2CostGross)}`);
   }
   return steps;
