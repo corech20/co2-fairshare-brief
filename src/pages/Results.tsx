@@ -6,7 +6,7 @@ import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, 
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
 import { PaymentDialog } from '@/components/PaymentDialog';
-import { DetailedCalculationView } from '@/components/DetailedCalculationView';
+
 import type { OutputType } from '@/lib/calculator/types';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
@@ -267,23 +267,19 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* ═══ Detailed document view (sections 1–4) — only AFTER purchase ═══ */}
+          {/* Purchase success — compact, no inline document preview */}
           {purchased && (
-            <div id="detailed-calculation" className="space-y-4 animate-fade-in">
-              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div className="flex-1 space-y-0.5">
-                  <p className="text-sm font-semibold text-foreground">Kauf abgeschlossen</p>
-                  <p className="text-xs text-muted-foreground">
-                    Die vollständige Berechnungsgrundlage steht Ihnen jetzt zur Verfügung. Das PDF entspricht exakt der untenstehenden Ansicht.
-                  </p>
-                </div>
-                <Button variant="cta" size="sm" onClick={handleDownloadPdf}>
-                  <Download className="h-4 w-4" />PDF herunterladen
-                </Button>
+            <div id="detailed-calculation" className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-start gap-3 animate-fade-in">
+              <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-0.5">
+                <p className="text-sm font-semibold text-foreground">Kauf abgeschlossen</p>
+                <p className="text-xs text-muted-foreground">
+                  Ihre PDF-Berechnungsgrundlage steht jetzt zum Download bereit.
+                </p>
               </div>
-
-              <DetailedCalculationView data={wizardData} result={result} />
+              <Button variant="cta" size="sm" onClick={handleDownloadPdf}>
+                <Download className="h-4 w-4" />PDF herunterladen
+              </Button>
             </div>
           )}
 
