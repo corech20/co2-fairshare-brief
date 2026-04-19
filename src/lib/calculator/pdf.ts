@@ -426,15 +426,11 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     }
   }
 
-  // Stufenmodell display with emission range
+  // Stufenmodell display
   if (result.isResidential && result.stufenmodellStep > 0) {
     y += 2;
-    const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
-    const classificationValue = result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear;
-    bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(classificationValue, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
-    y += 1;
-    detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2, true);
-    detailRow('Basis-Aufteilung nach Stufenmodell:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2, true);
+    detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2);
+    detailRow('Basis-Aufteilung nach Stufenmodell:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2);
   }
 
   if (!result.isResidential) {

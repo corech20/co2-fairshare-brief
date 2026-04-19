@@ -216,16 +216,10 @@ export function DetailedCalculationView({ data, result }: Props) {
 
           {result.isResidential && result.stufenmodellStep > 0 && (
             <>
-              <p className="text-[13px] text-foreground/80 leading-relaxed">
-                Der spezifische CO2-Ausstoß von{' '}
-                {fmt.number(result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich
-                von: {getStufenmodellRangeText(result.stufenmodellStep)}.
-              </p>
-              <Row label="Einstufung:" value={`Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`} bold />
+              <Row label="Einstufung:" value={`Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`} />
               <Row
                 label="Basis-Aufteilung nach Stufenmodell:"
                 value={`Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`}
-                bold
               />
             </>
           )}
