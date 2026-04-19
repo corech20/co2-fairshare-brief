@@ -6,7 +6,7 @@ import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, 
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
 import { PaymentDialog } from '@/components/PaymentDialog';
-import { DetailedCalculationView } from '@/components/DetailedCalculationView';
+
 import type { OutputType } from '@/lib/calculator/types';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
