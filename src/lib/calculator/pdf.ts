@@ -281,7 +281,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       doc.setFont('helvetica', 'normal');
       detailRow('Menge:', fmt.number(seg.amount, 0), 4);
       detailRow('CO2-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
-      detailRow(`${getEnergyHeatingValueLabel(seg.fuelType ?? (data.fuelType ?? ''))}:`, `${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`, 4);
+      detailRow(`${getEnergyHeatingValueLabel(data.fuelType ?? result.fuelResults[0]?.fuelType ?? '')}:`, `${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`, 4);
       detailRow('CO2-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
       detailRow('CO2-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
       detailRow('CO2-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
