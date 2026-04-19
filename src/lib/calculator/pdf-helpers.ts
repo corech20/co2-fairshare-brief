@@ -242,12 +242,23 @@ export function getFuelUnitLabel(fuelType: string): string {
   }
 }
 
+// ── KWK fuel detection ────────────────────────────────────────────────────
+const KWK_FUELS = new Set(['erdgas_kwk', 'fluessiggas_kwk', 'heizoel_kwk']);
+export function isKwkFuel(fuelType: string): boolean {
+  return KWK_FUELS.has(fuelType);
+}
+export function getEnergyHeatingValueLabel(fuelType: string): string {
+  return isKwkFuel(fuelType)
+    ? 'Energiegehalt (Heizwert, bezogen auf den Wärmeanteil bei KWK)'
+    : 'Energiegehalt (Heizwert)';
+}
+
 // ── Fuel calculation step text ────────────────────────────────────────────
 export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
   const steps: string[] = [];
   steps.push(`Brennstoff: ${fr.fuelLabel}`);
   steps.push(`Menge: ${fmt.number(fr.inputAmount, 0)} ${getFuelUnitLabel(fr.fuelType)}`);
-  steps.push(`Energiegehalt (Heizwert): ${fmt.number(fr.energyHeatingValueKwh, 2)} kWh`);
+  steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(fr.energyHeatingValueKwh, 2)} kWh`);
   steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
   steps.push(`CO2-Emissionen: ${fmt.number(fr.co2Kg, 1)} kg`);
   if (fr.usedDirectCost) {

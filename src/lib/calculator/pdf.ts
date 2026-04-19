@@ -20,6 +20,7 @@ import {
   getFuelCalculationSteps,
   getStufenmodellRangeText,
   getAreaLabelForPDF,
+  getEnergyHeatingValueLabel,
 } from './pdf-helpers';
 
 export function generatePDF(data: WizardData, result: CalculationResult, outputType: string = 'calculation') {
@@ -280,7 +281,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       doc.setFont('helvetica', 'normal');
       detailRow('Menge:', fmt.number(seg.amount, 0), 4);
       detailRow('CO2-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
-      detailRow('Energie (Heizwert):', `${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`, 4);
+      detailRow(`${getEnergyHeatingValueLabel(data.fuelType ?? result.fuelResults[0]?.fuelType ?? '')}:`, `${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`, 4);
       detailRow('CO2-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
       detailRow('CO2-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
       detailRow('CO2-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
@@ -426,15 +427,11 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     }
   }
 
-  // Stufenmodell display with emission range
+  // Stufenmodell display
   if (result.isResidential && result.stufenmodellStep > 0) {
     y += 2;
-    const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
-    const classificationValue = result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear;
-    bodyText(`Der spezifische CO2-Ausstoß von ${fmt.number(classificationValue, 2)} kg CO2 / m² / a liegt im Bereich von: ${rangeText}.`, 2);
-    y += 1;
-    detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2, true);
-    detailRow('Basis-Aufteilung nach Stufenmodell:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2, true);
+    detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2);
+    detailRow('Basis-Aufteilung nach Stufenmodell:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2);
   }
 
   if (!result.isResidential) {

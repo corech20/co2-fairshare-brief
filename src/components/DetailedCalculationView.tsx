@@ -5,9 +5,9 @@ import {
   getHeatSupplyLabel,
   getBuildingTypeLabel,
   getAreaLabelForPDF,
-  getStufenmodellRangeText,
   getSpecialCircumstancesText,
   getFuelCalculationSteps,
+  getEnergyHeatingValueLabel,
 } from '@/lib/calculator/pdf-helpers';
 
 interface Props {
@@ -103,7 +103,7 @@ export function DetailedCalculationView({ data, result }: Props) {
                   </p>
                   <Row label="Menge:" value={fmt.number(seg.amount, 0)} indent={8} />
                   <Row label="CO2-Preis:" value={`${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`} indent={8} />
-                  <Row label="Energie (Heizwert):" value={`${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`} indent={8} />
+                  <Row label={`${getEnergyHeatingValueLabel(primaryFuel ?? '')}:`} value={`${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`} indent={8} />
                   <Row label="CO2-Emissionen:" value={`${fmt.number(seg.co2Kg, 1)} kg`} indent={8} />
                   <Row label="CO2-Kosten netto:" value={fmt.currency(seg.co2CostNet)} indent={8} />
                   <Row label="CO2-Kosten brutto:" value={fmt.currency(seg.co2CostGross)} indent={8} />
@@ -216,16 +216,10 @@ export function DetailedCalculationView({ data, result }: Props) {
 
           {result.isResidential && result.stufenmodellStep > 0 && (
             <>
-              <p className="text-[13px] text-foreground/80 leading-relaxed">
-                Der spezifische CO2-Ausstoß von{' '}
-                {fmt.number(result.emissionsPerSqmAnnualized ?? result.emissionsPerSqmYear, 2)} kg CO2 / m² / a liegt im Bereich
-                von: {getStufenmodellRangeText(result.stufenmodellStep)}.
-              </p>
-              <Row label="Einstufung:" value={`Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`} bold />
+              <Row label="Einstufung:" value={`Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`} />
               <Row
                 label="Basis-Aufteilung nach Stufenmodell:"
                 value={`Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`}
-                bold
               />
             </>
           )}
