@@ -261,13 +261,11 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // Show fuel type(s) explicitly at the top of the calculation section
   sectionHeading('1. Brennstoff, Energiegehalt und CO2-Kosten');
 
-  // Fuel summary line
-  if (result.fuelResults.length === 1) {
-    detailRow('Brennstoff:', result.fuelResults[0].fuelLabel, 2, true);
-  } else {
+  // Multi-fuel summary line (single fuel is already shown inside the detail block)
+  if (result.fuelResults.length > 1) {
     detailRow('Brennstoffe:', result.fuelResults.map(fr => fr.fuelLabel).join(', '), 2, true);
+    y += 2;
   }
-  y += 2;
 
   // Cross-year segment display
   if (result.isCrossYear && result.segmentResults && result.segmentResults.length > 0) {
