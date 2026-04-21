@@ -76,10 +76,35 @@ export function getRecipientAddressLines(data: WizardData): string[] {
 // ── Case detection ────────────────────────────────────────────────────────
 export type DocumentCase = 'A' | 'B' | 'C' | 'D' | 'E';
 
+/**
+ * Single source of truth: Ist der Erstattungs-/Brief-Flow zulässig?
+ *
+ * Whitelist:
+ *  - Rolle = Mieter
+ *  - UND der Mieter ist selbst Vertragspartner des Lieferanten (eigene Rechnung):
+ *      • Etagenheizung / wohnungseigene Heizungsanlage     → implizit ja
+ *      • Fernwärme mit direkter Abrechnung an den Mieter   → tenantIsDirectContractParty === true
+ *      • Nichtwohngebäude mit eigenem Liefervertrag        → tenantIsDirectContractParty === true
+ *
+ * In allen anderen Fällen (zentrale Heizung, Versorgung über Vermieter,
+ * Nebenkostenabrechnung, Vermieter-Rolle) → false.
+ */
+export function isReimbursementEligible(data: WizardData): boolean {
+  if (data.userRole !== 'mieter') return false;
+  // Etagenheizung: eigene Wohnungsheizung → eigener Liefervertrag implizit
+  if (data.heatSupplyType === 'etage') return true;
+  // Fernwärme oder Nichtwohngebäude: nur bei expliziter Direktbelieferung
+  if (data.heatSupplyType === 'fernwaerme' || data.buildingType === 'nichtwohngebaeude') {
+    return data.tenantIsDirectContractParty === true;
+  }
+  // Zentrale Heizungsanlage im Wohngebäude → nie Erstattungsfall
+  return false;
+}
+
 export function getDocumentCase(data: WizardData): DocumentCase {
   const isResident = data.buildingType !== 'nichtwohngebaeude';
   if (!isResident) return 'E';
-  if (data.userRole === 'mieter') {
+  if (data.userRole === 'mieter' && isReimbursementEligible(data)) {
     return data.heatSupplyType === 'fernwaerme' ? 'D' : 'C';
   }
   return data.heatSupplyType === 'fernwaerme' ? 'B' : 'A';

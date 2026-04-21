@@ -4,7 +4,7 @@ import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
 import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays, Download, CheckCircle2 } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
-import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText } from '@/lib/calculator/pdf-helpers';
+import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText, isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
 import { PaymentDialog } from '@/components/PaymentDialog';
 
 import type { OutputType } from '@/lib/calculator/types';
@@ -124,7 +124,8 @@ export default function ResultsPage() {
   const formatNumber = (n: number, decimals = 2) => fmt.number(n, decimals);
 
   const docCase = getDocumentCase(wizardData);
-  const isTenantClaim = (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
+  const reimbursementEligible = isReimbursementEligible(wizardData);
+  const isTenantClaim = reimbursementEligible && (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
   const isTenant = wizardData.userRole === 'mieter';
   const isLandlord = wizardData.userRole === 'vermieter';
   const mixedVAT = getMixedVATInfo(wizardData, result.isCrossYear);
@@ -216,6 +217,16 @@ export default function ResultsPage() {
                   <p className="text-xs text-foreground leading-relaxed flex-1 flex items-baseline gap-2">
                     <span className="font-semibold">Möglicher Erstattungsanspruch gegenüber dem Vermieter:</span>
                     <span className="ml-auto text-right text-primary tabular-nums font-semibold">{formatCurrency(result.landlordShare)}</span>
+                  </p>
+                </div>
+              )}
+
+              {isTenant && !reimbursementEligible && (
+                <div className="rounded-md border border-border bg-muted/30 p-3 flex items-start gap-3">
+                  <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Die CO2-Kostenaufteilung wird in diesem Fall über die Heizkosten-/Betriebskostenabrechnung
+                    berücksichtigt. Es ist kein separates Erstattungsschreiben erforderlich.
                   </p>
                 </div>
               )}
