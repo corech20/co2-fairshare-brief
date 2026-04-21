@@ -26,15 +26,11 @@ export default function StepHeatSupply() {
   const isFernwaerme = wizardData.heatSupplyType === 'fernwaerme';
   const excluded = !!wizardData.districtHeatingConnectedAfter2023;
   const isTenant = wizardData.userRole === 'mieter';
-  const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
   // Vertragspartner-Frage für Mieter bei Fernwärme (außer Sonderausschluss) – Direktbelieferung vs. Vermieter-Abrechnung
   const showFernwaermeContractQuestion = isTenant && isFernwaerme && !excluded;
-  // Reset Vertragspartner-Flag, wenn Etage gewählt (implizit true, kein Formularfeld nötig)
-  if (wizardData.heatSupplyType === 'etage' && wizardData.tenantIsDirectContractParty !== undefined) {
-    setWizardField('tenantIsDirectContractParty', undefined);
-  }
-  // Reset Vertragspartner-Flag, wenn keine Mieter-Rolle oder Heizungsart ohne Frage
-  if (!isTenant && wizardData.tenantIsDirectContractParty !== undefined) {
+  // Reset Vertragspartner-Flag, wenn die Frage nicht (mehr) relevant ist
+  // (nur Mieter + Fernwärme ohne Sonderausschluss soll diesen Wert tragen)
+  if (!showFernwaermeContractQuestion && wizardData.tenantIsDirectContractParty !== undefined) {
     setWizardField('tenantIsDirectContractParty', undefined);
   }
 
@@ -147,52 +143,6 @@ export default function StepHeatSupply() {
         </div>
       )}
 
-      {/* Vertragspartner-Frage für Mieter im Nichtwohngebäude bei Zentralversorgung */}
-      {isTenant && isNonResidential && wizardData.heatSupplyType === 'zentral' && (
-        <div className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
-          <div className="flex items-start gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-foreground">
-                Wer ist Vertragspartner des Energie-/Wärmelieferanten?
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Bei Nichtwohngebäuden kann der Mieter direkt vom Lieferanten beliefert werden.
-              </div>
-            </div>
-          </div>
-          <RadioGroup
-            value={
-              wizardData.tenantIsDirectContractParty === true
-                ? 'tenant'
-                : wizardData.tenantIsDirectContractParty === false
-                  ? 'landlord'
-                  : ''
-            }
-            onValueChange={(v) => setWizardField('tenantIsDirectContractParty', v === 'tenant')}
-            className="grid gap-2"
-          >
-            <label className="flex items-start gap-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:border-primary/40">
-              <RadioGroupItem value="tenant" className="mt-0.5" />
-              <div className="text-sm text-foreground">
-                <div className="font-medium">Mieter hat eigenen Liefervertrag und erhält eigene Rechnung</div>
-                <div className="text-xs text-muted-foreground mt-0.5">
-                  Erstattungsanspruch gegenüber dem Vermieter möglich.
-                </div>
-              </div>
-            </label>
-            <label className="flex items-start gap-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:border-primary/40">
-              <RadioGroupItem value="landlord" className="mt-0.5" />
-              <div className="text-sm text-foreground">
-                <div className="font-medium">Versorgung läuft über Vermieter / Betriebskosten</div>
-                <div className="text-xs text-muted-foreground mt-0.5">
-                  Kein separates Erstattungsschreiben – Aufteilung erfolgt über die Betriebskostenabrechnung.
-                </div>
-              </div>
-            </label>
-          </RadioGroup>
-        </div>
-      )}
     </div>
   );
 }
