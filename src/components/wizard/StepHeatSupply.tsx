@@ -26,15 +26,11 @@ export default function StepHeatSupply() {
   const isFernwaerme = wizardData.heatSupplyType === 'fernwaerme';
   const excluded = !!wizardData.districtHeatingConnectedAfter2023;
   const isTenant = wizardData.userRole === 'mieter';
-  const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
   // Vertragspartner-Frage für Mieter bei Fernwärme (außer Sonderausschluss) – Direktbelieferung vs. Vermieter-Abrechnung
   const showFernwaermeContractQuestion = isTenant && isFernwaerme && !excluded;
-  // Reset Vertragspartner-Flag, wenn Etage gewählt (implizit true, kein Formularfeld nötig)
-  if (wizardData.heatSupplyType === 'etage' && wizardData.tenantIsDirectContractParty !== undefined) {
-    setWizardField('tenantIsDirectContractParty', undefined);
-  }
-  // Reset Vertragspartner-Flag, wenn keine Mieter-Rolle oder Heizungsart ohne Frage
-  if (!isTenant && wizardData.tenantIsDirectContractParty !== undefined) {
+  // Reset Vertragspartner-Flag, wenn die Frage nicht (mehr) relevant ist
+  // (nur Mieter + Fernwärme ohne Sonderausschluss soll diesen Wert tragen)
+  if (!showFernwaermeContractQuestion && wizardData.tenantIsDirectContractParty !== undefined) {
     setWizardField('tenantIsDirectContractParty', undefined);
   }
 
