@@ -27,15 +27,8 @@ export default function StepHeatSupply() {
   const excluded = !!wizardData.districtHeatingConnectedAfter2023;
   const isTenant = wizardData.userRole === 'mieter';
   const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
-  // Vertragspartner-Frage relevant nur für Mieter bei Fernwärme oder Nichtwohngebäude (nicht-zentral wäre etage → schon klar).
-  // Für Mieter + Zentralheizung im Wohngebäude: keine Frage, immer Vermieter-Abrechnung.
-  const showContractPartnerQuestion =
-    isTenant &&
-    !!wizardData.heatSupplyType &&
-    wizardData.heatSupplyType !== 'etage' &&
-    (isFernwaerme || (isNonResidential && wizardData.heatSupplyType === 'zentral')
-      ? false // central in non-residential is rare-tenant-direct → still ask only for fernwärme to keep it simple
-      : false) || (isTenant && isFernwaerme && !excluded);
+  // Vertragspartner-Frage für Mieter bei Fernwärme (außer Sonderausschluss) – Direktbelieferung vs. Vermieter-Abrechnung
+  const showFernwaermeContractQuestion = isTenant && isFernwaerme && !excluded;
   // Reset Vertragspartner-Flag, wenn Etage gewählt (implizit true, kein Formularfeld nötig)
   if (wizardData.heatSupplyType === 'etage' && wizardData.tenantIsDirectContractParty !== undefined) {
     setWizardField('tenantIsDirectContractParty', undefined);
@@ -107,7 +100,7 @@ export default function StepHeatSupply() {
         </div>
       )}
 
-      {showContractPartnerQuestion && (
+      {showFernwaermeContractQuestion && (
         <div className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
           <div className="flex items-start gap-2">
             <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
