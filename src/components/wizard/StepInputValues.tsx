@@ -1,6 +1,7 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
+import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { IntegerInput } from './IntegerInput';
@@ -95,6 +96,10 @@ export default function StepInputValues() {
     (wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk');
   const isTenant = wizardData.userRole === 'mieter';
   const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
+  // Adressdaten-Sektion: bei Mietern nur, wenn ein echter Erstattungsfall vorliegt.
+  // Bei Vermietern: weiterhin optional für personalisierte Dokumente.
+  const reimbursementEligible = isReimbursementEligible(wizardData);
+  const showAddressSection = isTenant ? reimbursementEligible : true;
 
   // Cross-year: fuel amount is entered per segment on billing period step
   const crossYear = wizardData.billingPeriodStart && wizardData.billingPeriodEnd
@@ -299,6 +304,7 @@ export default function StepInputValues() {
         )}
 
         {/* ── PDF Address section (collapsible) ─────────────────────────── */}
+        {showAddressSection && (
         <div className="border-t border-border pt-5 mt-6 space-y-4">
           <button
             onClick={() => setShowPdfSection(!showPdfSection)}
@@ -337,6 +343,7 @@ export default function StepInputValues() {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );
