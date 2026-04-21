@@ -62,6 +62,7 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'userRole': return !!wizardData.userRole;
       case 'buildingType': return !!wizardData.buildingType;
       case 'heatSupply': return !!wizardData.heatSupplyType;
+      // Note: contract-partner question is enforced inline below where applicable
       case 'restriction': return !!wizardData.restrictionCase;
       case 'billingPeriod': {
         if (!wizardData.billingPeriodStart || !wizardData.billingPeriodEnd) return false;
