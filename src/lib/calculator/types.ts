@@ -97,6 +97,15 @@ export interface WizardData {
   yearlySegments?: YearlySegment[];
   /** Fernwärme-Sonderfall: Erstmaliger Anschluss ab dem 1. Januar 2023 → CO2KostAufG nicht anwendbar */
   districtHeatingConnectedAfter2023?: boolean;
+  /**
+   * Whitelist-Trigger für den Erstattungs-/Brief-Flow:
+   * true  = Mieter ist selbst Vertragspartner des Brennstoff-/Wärmelieferanten
+   *         und erhält eine eigene Rechnung (Selbstversorgung / Direktbelieferung).
+   * false = Versorgung läuft über Vermieter / Nebenkostenabrechnung.
+   * Bei Etagenheizung (eigene Wohnungsheizung) implizit true.
+   * Bei Vermieter-Rolle immer false.
+   */
+  tenantIsDirectContractParty?: boolean;
 }
 
 export interface FuelCalculationResult {
