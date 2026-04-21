@@ -61,8 +61,19 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
     switch (currentStepKey) {
       case 'userRole': return !!wizardData.userRole;
       case 'buildingType': return !!wizardData.buildingType;
-      case 'heatSupply': return !!wizardData.heatSupplyType;
-      // Note: contract-partner question is enforced inline below where applicable
+      case 'heatSupply': {
+        if (!wizardData.heatSupplyType) return false;
+        // Mieter + Fernwärme (außer Sonderausschluss): Vertragspartner-Frage muss beantwortet sein
+        if (
+          wizardData.userRole === 'mieter' &&
+          wizardData.heatSupplyType === 'fernwaerme' &&
+          !wizardData.districtHeatingConnectedAfter2023 &&
+          wizardData.tenantIsDirectContractParty === undefined
+        ) {
+          return false;
+        }
+        return true;
+      }
       case 'restriction': return !!wizardData.restrictionCase;
       case 'billingPeriod': {
         if (!wizardData.billingPeriodStart || !wizardData.billingPeriodEnd) return false;
