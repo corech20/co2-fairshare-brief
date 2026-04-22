@@ -265,15 +265,15 @@ export default function ResultsPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">Berechnungsblatt</p>
-                    <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
-                  </div>
-                  <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                    <FileText className="h-4 w-4" />Berechnungsblatt erstellen
-                  </Button>
-                </div>
+                 <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                   <div className="space-y-0.5">
+                     <p className="text-sm font-medium text-foreground">Berechnungsnachweis</p>
+                     <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
+                   </div>
+                   <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                     <FileText className="h-4 w-4" />Berechnungsnachweis erstellen
+                   </Button>
+                 </div>
               )}
             </div>
           )}

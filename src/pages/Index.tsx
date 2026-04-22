@@ -80,8 +80,8 @@ export default function Index() {
               },
               {
                 icon: FileText,
-                title: 'Berechnungsgrundlage als PDF',
-                desc: 'Erstellen Sie ein strukturiertes Berechnungsblatt als PDF – zur Dokumentation, Weitergabe oder als Anlage zur Abrechnung.',
+                 title: 'Berechnungsgrundlage als PDF',
+                 desc: 'Erstellen Sie einen strukturierten Berechnungsnachweis als PDF – zur Dokumentation, Weitergabe oder als Anlage zur Abrechnung.',
               },
             ].map((item, i) => (
               <div key={i} className="rounded-lg border border-border bg-card p-6 shadow-sm">
