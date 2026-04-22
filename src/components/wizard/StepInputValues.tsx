@@ -316,9 +316,9 @@ export default function StepInputValues() {
                 {isTenant ? 'Adressdaten für ein Erstattungsschreiben (optional)' : 'Adressdaten für ein personalisiertes Dokument (optional)'}
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {isTenant
-                  ? 'Nur erforderlich, wenn Sie ein Erstattungsschreiben an den Vermieter erstellen möchten. Für das reine Berechnungsblatt sind keine Adressdaten nötig.'
-                  : 'Nur erforderlich, wenn ein personalisiertes Dokument gewünscht ist. Für das Berechnungsblatt sind keine Adressdaten nötig.'}
+                 {isTenant
+                   ? 'Nur erforderlich, wenn Sie ein Erstattungsschreiben an den Vermieter erstellen möchten. Für den reinen Berechnungsnachweis sind keine Adressdaten nötig.'
+                   : 'Nur erforderlich, wenn ein personalisiertes Dokument gewünscht ist. Für den Berechnungsnachweis sind keine Adressdaten nötig.'}
               </p>
             </div>
           </button>
