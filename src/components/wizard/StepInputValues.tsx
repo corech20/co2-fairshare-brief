@@ -3,7 +3,7 @@ import type { CostInputType, AddressData } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
 import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
 function InputField({ label, hint, value, onChange, type = 'number', placeholder, unit }: {
@@ -91,6 +91,24 @@ export default function StepInputValues() {
   const needsApartmentArea = wizardData.heatSupplyType === 'etage' ||
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
+  // Whitelist: hide the optional "Gebäudewohnfläche" field only in these two self-supply / direct-supply cases:
+  //   1) tenant + apartment-owned heating (etage)
+  //   2) tenant + district heating + tenant receives own invoice from heat supplier
+  const hideOptionalBuildingArea =
+    wizardData.userRole === 'mieter' && (
+      wizardData.heatSupplyType === 'etage' ||
+      (wizardData.heatSupplyType === 'fernwaerme' && wizardData.tenantIsDirectContractParty === true)
+    );
+  const showOptionalBuildingArea = needsApartmentArea && !hideOptionalBuildingArea;
+
+  // Clear stale value when the optional field becomes irrelevant, so it cannot block the flow
+  // or feed into calculations. Only clears in the two whitelist cases above.
+  useEffect(() => {
+    if (hideOptionalBuildingArea && wizardData.buildingArea != null) {
+      setWizardField('buildingArea', undefined);
+    }
+  }, [hideOptionalBuildingArea, wizardData.buildingArea, setWizardField]);
+
   const isTenantApartmentHeating = wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'etage';
   const showGasDeviceQuestion = isTenantApartmentHeating &&
     (wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk');
@@ -174,7 +192,7 @@ export default function StepInputValues() {
           />
         )}
 
-        {needsApartmentArea && (
+        {showOptionalBuildingArea && (
           <InputField
             label="Gebäudewohnfläche (optional)"
             hint="Gesamte Wohnfläche des Gebäudes, falls bekannt"
@@ -316,9 +334,9 @@ export default function StepInputValues() {
                 {isTenant ? 'Adressdaten für ein Erstattungsschreiben (optional)' : 'Adressdaten für ein personalisiertes Dokument (optional)'}
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {isTenant
-                  ? 'Nur erforderlich, wenn Sie ein Erstattungsschreiben an den Vermieter erstellen möchten. Für das reine Berechnungsblatt sind keine Adressdaten nötig.'
-                  : 'Nur erforderlich, wenn ein personalisiertes Dokument gewünscht ist. Für das Berechnungsblatt sind keine Adressdaten nötig.'}
+                 {isTenant
+                   ? 'Nur erforderlich, wenn Sie ein Erstattungsschreiben an den Vermieter erstellen möchten. Für den reinen Berechnungsnachweis sind keine Adressdaten nötig.'
+                   : 'Nur erforderlich, wenn ein personalisiertes Dokument gewünscht ist. Für den Berechnungsnachweis sind keine Adressdaten nötig.'}
               </p>
             </div>
           </button>

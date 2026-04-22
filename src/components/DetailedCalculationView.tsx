@@ -81,7 +81,7 @@ export function DetailedCalculationView({ data, result }: Props) {
   return (
     <article className="rounded-lg border border-border bg-card font-sans px-6 py-6 space-y-7">
       <header className="border-b border-border pb-3">
-        <h2 className="text-base font-bold text-foreground">CO2-Kostenaufteilung – Berechnungsblatt</h2>
+        <h2 className="text-base font-bold text-foreground">CO2-Kostenaufteilung – Berechnungsnachweis</h2>
         <p className="text-xs text-muted-foreground mt-1">
           Abrechnungszeitraum: {fmt.date(data.billingPeriodStart)} – {fmt.date(data.billingPeriodEnd)}
           {result.isCrossYear && ' (jahresübergreifend)'}

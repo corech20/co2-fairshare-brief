@@ -229,7 +229,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(20, 40, 70);
-    doc.text('CO2-Kostenaufteilung – Berechnungsblatt', mL, y);
+    doc.text('CO2-Kostenaufteilung – Berechnungsnachweis', mL, y);
     y += 3;
     doc.setDrawColor(20, 40, 70);
     doc.setLineWidth(0.5);
