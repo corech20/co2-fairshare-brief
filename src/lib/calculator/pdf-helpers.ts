@@ -103,10 +103,13 @@ export function isReimbursementEligible(data: WizardData): boolean {
 
 export function getDocumentCase(data: WizardData): DocumentCase {
   const isResident = data.buildingType !== 'nichtwohngebaeude';
-  if (!isResident) return 'E';
+  // Eligible tenant reimbursement cases use C/D regardless of building type.
+  // (Non-residential tenants with own supplier contract → C, with direct district
+  //  heating supply → D. Same letter logic as residential.)
   if (data.userRole === 'mieter' && isReimbursementEligible(data)) {
     return data.heatSupplyType === 'fernwaerme' ? 'D' : 'C';
   }
+  if (!isResident) return 'E';
   return data.heatSupplyType === 'fernwaerme' ? 'B' : 'A';
 }
 
