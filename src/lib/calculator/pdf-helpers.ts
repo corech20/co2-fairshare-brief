@@ -225,20 +225,25 @@ export function getSpecialCircumstancesText(data: WizardData, result: Calculatio
     if (result.isResidential) {
       lines.push('Basierend auf den Anwenderangaben liegen sowohl eine Einschränkung bei der energetischen Verbesserung des Gebäudes (Fall 1, z. B. Denkmalschutz) als auch eine Einschränkung bei der Wärmeversorgung (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz) vor. Gemäß § 7 Abs. 2 CO2KostAufG entfallen die CO2-Kosten in diesem Fall vollständig auf den Mieter (Mieter 100 % / Vermieter 0 %).');
     } else {
-      lines.push('Basierend auf den Anwenderangaben liegen sowohl Einschränkungen bei der energetischen Verbesserung des Gebäudes (Fall 1) als auch bei der Wärmeversorgung (Fall 2) vor. Die CO2-Kosten entfallen daher vollständig auf den Mieter (Mieter 100 % / Vermieter 0 %).');
+      lines.push('Auf Grundlage der ausgewählten rechtlichen Beschränkungen nach § 9 CO2KostAufG erfolgt keine Aufteilung der CO2-Kosten; der Vermieteranteil entfällt vollständig (Mieter 100 % / Vermieter 0 %).');
     }
   } else if (restriction === 'fall1') {
     if (result.isResidential) {
       lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1, z. B. Denkmalschutz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
-      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1). Bei Nichtwohngebäuden erfolgt im Rahmen einer konservativen Standardbehandlung weiterhin eine hälftige Aufteilung der CO2-Kosten. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
+      lines.push('Auf Grundlage der ausgewählten rechtlichen Beschränkung nach § 9 CO2KostAufG reduziert sich der Vermieteranteil bei Nichtwohngebäuden von 50 % auf 25 % (Mieter 75 % / Vermieter 25 %).');
     }
   } else if (restriction === 'fall2') {
     if (result.isResidential) {
       lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
-      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2). Bei Nichtwohngebäuden erfolgt im Rahmen einer konservativen Standardbehandlung weiterhin eine hälftige Aufteilung der CO2-Kosten. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.');
+      lines.push('Auf Grundlage der ausgewählten rechtlichen Beschränkung nach § 9 CO2KostAufG reduziert sich der Vermieteranteil bei Nichtwohngebäuden von 50 % auf 25 % (Mieter 75 % / Vermieter 25 %).');
     }
+  }
+
+  // Hinweis bei Nichtwohngebäuden mit Einschränkung
+  if (!result.isResidential && (restriction === 'fall1' || restriction === 'fall2' || restriction === 'fall1und2')) {
+    lines.push('Die Berücksichtigung rechtlicher Beschränkungen erfolgt auf Grundlage der Nutzereingaben und ersetzt keine rechtliche Prüfung oder den gesetzlich erforderlichen Nachweis im Einzelfall.');
   }
 
   if (result.reimbursementReductionApplied) {
