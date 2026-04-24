@@ -128,7 +128,10 @@ export default function ResultsPage() {
 
   const docCase = getDocumentCase(wizardData);
   const reimbursementEligible = isReimbursementEligible(wizardData);
-  const isTenantClaim = reimbursementEligible && (docCase === 'C' || docCase === 'D') && result.landlordShare > 0;
+  // Reimbursement-letter flow is unlocked solely by the central eligibility flag
+  // (works the same for Wohngebäude and Nichtwohngebäude). The previous
+  // building-type-based suppression via docCase has been removed.
+  const isTenantClaim = reimbursementEligible && result.landlordShare > 0;
   const isTenant = wizardData.userRole === 'mieter';
   const isLandlord = wizardData.userRole === 'vermieter';
   const mixedVAT = getMixedVATInfo(wizardData, result.isCrossYear);
