@@ -325,11 +325,15 @@ export function getClosingText(data: WizardData): string {
 
 // ── Dynamic area label for PDF ────────────────────────────────────────────
 export function getAreaLabelForPDF(data: WizardData): string {
-  if (data.buildingType === 'nichtwohngebaeude') return 'Bezugsfläche';
+  const isTenant = data.userRole === 'mieter';
+  if (data.buildingType === 'nichtwohngebaeude') {
+    return isTenant ? 'Mietfläche' : 'Gesamtnutzfläche des Gebäudes';
+  }
+  // Wohngebäude
   const isApartment = data.heatSupplyType === 'etage' ||
-    (data.userRole === 'mieter' && data.heatSupplyType === 'fernwaerme');
-  if (isApartment) return 'Wohnungswohnfläche';
-  return 'Gebäudewohnfläche';
+    (isTenant && data.heatSupplyType === 'fernwaerme');
+  if (isApartment) return 'Wohnfläche der Wohnung';
+  return isTenant ? 'Wohnfläche der Wohnung' : 'Gesamtwohnfläche des Gebäudes';
 }
 
 // Keep old getSummaryText export for Results.tsx compatibility
