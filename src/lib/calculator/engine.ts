@@ -408,10 +408,9 @@ export function applyRestrictionModifier(
     return { landlordPercent: modifiedLandlord, tenantPercent: 100 - modifiedLandlord };
   }
 
-  return {
-    landlordPercent: 50, tenantPercent: 50,
-    restrictionNote: 'Bei Nichtwohngebäuden mit einzelnen öffentlich-rechtlichen Einschränkungen erfolgt hier eine konservative Standardbehandlung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.',
-  };
+  // Nichtwohngebäude mit genau einer Einschränkung (Fall 1 ODER Fall 2):
+  // Vermieteranteil von 50 % wird halbiert → 25 % / 75 %.
+  return { landlordPercent: 25, tenantPercent: 75 };
 }
 
 // ---------------------------------------------------------------------------
