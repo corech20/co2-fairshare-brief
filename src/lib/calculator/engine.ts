@@ -432,7 +432,7 @@ export function determineRelevantArea(data: WizardData): { area: number; source:
     if (data.apartmentArea && data.apartmentArea > 0) {
       return { area: data.apartmentArea, source: 'apartment' };
     }
-    throw new Error('Gebäudewohnfläche ist erforderlich für die Berechnung.');
+    throw new Error('Die Flächenangabe ist erforderlich für die Berechnung.');
   }
   return { area: data.buildingArea, source: 'building' };
 }
