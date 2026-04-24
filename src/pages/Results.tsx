@@ -139,9 +139,13 @@ export default function ResultsPage() {
       return `Stufe ${result.stufenmodellStep} – ${rangeText}`;
     }
     if (!result.isResidential) {
-      return result.restrictionApplied === 'fall1und2'
-        ? 'Beide öffentlich-rechtlichen Einschränkungen liegen vor – der Mieter trägt die CO2-Kosten vollständig.'
-        : 'Hälftige Aufteilung (50/50) gemäß § 8 CO2KostAufG für Nichtwohngebäude';
+      if (result.restrictionApplied === 'fall1und2') {
+        return 'Beide öffentlich-rechtlichen Einschränkungen liegen vor – der Mieter trägt die CO2-Kosten vollständig (0/100).';
+      }
+      if (result.restrictionApplied === 'fall1' || result.restrictionApplied === 'fall2') {
+        return 'Eine rechtliche Beschränkung nach § 9 CO2KostAufG: Vermieteranteil reduziert auf 25 % (25/75).';
+      }
+      return 'Hälftige Aufteilung (50/50) gemäß § 8 CO2KostAufG für Nichtwohngebäude';
     }
     return '';
   })();
