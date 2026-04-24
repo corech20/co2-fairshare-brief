@@ -234,6 +234,18 @@ export function DetailedCalculationView({ data, result }: Props) {
                     vollständig.
                   </p>
                 </>
+              ) : (result.restrictionApplied === 'fall1' || result.restrictionApplied === 'fall2') ? (
+                <>
+                  <Row
+                    label="Aufteilung:"
+                    value={`Mieter ${result.tenantPercent} % / Vermieter ${result.landlordPercent} %`}
+                    bold
+                  />
+                  <p className="text-[13px] text-foreground/80 leading-relaxed">
+                    Auf Grundlage der ausgewählten rechtlichen Beschränkung nach § 9 CO2KostAufG reduziert sich der
+                    Vermieteranteil bei Nichtwohngebäuden von 50 % auf 25 %.
+                  </p>
+                </>
               ) : (
                 <>
                   <Row label="Aufteilung:" value="Hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG" bold />
