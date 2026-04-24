@@ -187,9 +187,14 @@ export function DetailedCalculationView({ data, result }: Props) {
 
           {isApartmentLevel ? (
             <>
-              {data.buildingArea && <Row label="Gebäudewohnfläche:" value={`${fmt.number(data.buildingArea, 0)} m²`} />}
+              {data.buildingArea && (
+                <Row
+                  label={`${data.buildingType === 'nichtwohngebaeude' ? 'Gesamtnutzfläche des Gebäudes' : 'Gesamtwohnfläche des Gebäudes'}:`}
+                  value={`${fmt.number(data.buildingArea, 0)} m²`}
+                />
+              )}
               <Row label={`${areaLabel}:`} value={`${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`} />
-              <Row label="Bezugsfläche für Berechnung:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
+              <Row label="Berechnungsgrundlage:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
             </>
           ) : (
             <Row label={`${areaLabel}:`} value={`${fmt.number(result.relevantArea, 0)} m²`} />
