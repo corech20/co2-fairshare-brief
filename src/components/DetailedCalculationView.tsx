@@ -187,9 +187,14 @@ export function DetailedCalculationView({ data, result }: Props) {
 
           {isApartmentLevel ? (
             <>
-              {data.buildingArea && <Row label="Gebäudewohnfläche:" value={`${fmt.number(data.buildingArea, 0)} m²`} />}
+              {data.buildingArea && (
+                <Row
+                  label={`${data.buildingType === 'nichtwohngebaeude' ? 'Gesamtnutzfläche des Gebäudes' : 'Gesamtwohnfläche des Gebäudes'}:`}
+                  value={`${fmt.number(data.buildingArea, 0)} m²`}
+                />
+              )}
               <Row label={`${areaLabel}:`} value={`${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`} />
-              <Row label="Bezugsfläche für Berechnung:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
+              <Row label="Berechnungsgrundlage:" value={`${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`} />
             </>
           ) : (
             <Row label={`${areaLabel}:`} value={`${fmt.number(result.relevantArea, 0)} m²`} />
@@ -232,6 +237,18 @@ export function DetailedCalculationView({ data, result }: Props) {
                   <p className="text-[13px] text-foreground/80 leading-relaxed">
                     Da beide öffentlich-rechtlichen Einschränkungen (Fall 1 und Fall 2) vorliegen, trägt der Mieter die CO2-Kosten
                     vollständig.
+                  </p>
+                </>
+              ) : (result.restrictionApplied === 'fall1' || result.restrictionApplied === 'fall2') ? (
+                <>
+                  <Row
+                    label="Aufteilung:"
+                    value={`Mieter ${result.tenantPercent} % / Vermieter ${result.landlordPercent} %`}
+                    bold
+                  />
+                  <p className="text-[13px] text-foreground/80 leading-relaxed">
+                    Auf Grundlage der ausgewählten rechtlichen Beschränkung nach § 9 CO2KostAufG reduziert sich der
+                    Vermieteranteil bei Nichtwohngebäuden von 50 % auf 25 %.
                   </p>
                 </>
               ) : (

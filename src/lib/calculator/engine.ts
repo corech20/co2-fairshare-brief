@@ -408,10 +408,9 @@ export function applyRestrictionModifier(
     return { landlordPercent: modifiedLandlord, tenantPercent: 100 - modifiedLandlord };
   }
 
-  return {
-    landlordPercent: 50, tenantPercent: 50,
-    restrictionNote: 'Bei Nichtwohngebäuden mit einzelnen öffentlich-rechtlichen Einschränkungen erfolgt hier eine konservative Standardbehandlung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.',
-  };
+  // Nichtwohngebäude mit genau einer Einschränkung (Fall 1 ODER Fall 2):
+  // Vermieteranteil von 50 % wird halbiert → 25 % / 75 %.
+  return { landlordPercent: 25, tenantPercent: 75 };
 }
 
 // ---------------------------------------------------------------------------
@@ -433,7 +432,7 @@ export function determineRelevantArea(data: WizardData): { area: number; source:
     if (data.apartmentArea && data.apartmentArea > 0) {
       return { area: data.apartmentArea, source: 'apartment' };
     }
-    throw new Error('Gebäudewohnfläche ist erforderlich für die Berechnung.');
+    throw new Error('Die Flächenangabe ist erforderlich für die Berechnung.');
   }
   return { area: data.buildingArea, source: 'building' };
 }
@@ -643,9 +642,9 @@ function buildResult(
       landlordPercent = 0;
       tenantPercent = 100;
     } else {
-      landlordPercent = 50;
-      tenantPercent = 50;
-      restrictionNote = 'Bei Nichtwohngebäuden mit einzelnen öffentlich-rechtlichen Einschränkungen erfolgt hier eine konservative Standardbehandlung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.';
+      // Genau eine Einschränkung (Fall 1 oder Fall 2): Vermieteranteil halbiert
+      landlordPercent = 25;
+      tenantPercent = 75;
     }
   }
 

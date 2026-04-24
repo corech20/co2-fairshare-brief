@@ -204,11 +204,16 @@ describe('Restriction modifiers', () => {
     expect(r.tenantPercent).toBe(100);
   });
 
-  it('non-residential fall1 stays 50/50 with note', () => {
+  it('non-residential fall1 reduces landlord share to 25 % (§ 9 CO2KostAufG)', () => {
     const r = applyRestrictionModifier(50, 50, 'fall1', false);
-    expect(r.landlordPercent).toBe(50);
-    expect(r.tenantPercent).toBe(50);
-    expect(r.restrictionNote).toBeDefined();
+    expect(r.landlordPercent).toBe(25);
+    expect(r.tenantPercent).toBe(75);
+  });
+
+  it('non-residential fall2 reduces landlord share to 25 % (§ 9 CO2KostAufG)', () => {
+    const r = applyRestrictionModifier(50, 50, 'fall2', false);
+    expect(r.landlordPercent).toBe(25);
+    expect(r.tenantPercent).toBe(75);
   });
 });
 
@@ -244,7 +249,7 @@ describe('Non-residential building logic', () => {
     expect(r.tenantPercent).toBe(100);
   });
 
-  it('single restriction stays 50/50 with note', () => {
+  it('single restriction reduces landlord share from 50 % to 25 %', () => {
     const r = calculateCO2Allocation({
       buildingType: 'nichtwohngebaeude',
       restrictionCase: 'fall2',
@@ -253,8 +258,8 @@ describe('Non-residential building logic', () => {
       fuelAmount: 45000,
       buildingArea: 290,
     });
-    expect(r.landlordPercent).toBe(50);
-    expect(r.restrictionNote).toBeDefined();
+    expect(r.landlordPercent).toBe(25);
+    expect(r.tenantPercent).toBe(75);
   });
 });
 

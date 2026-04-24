@@ -10,11 +10,14 @@ import { PaymentDialog } from '@/components/PaymentDialog';
 import type { OutputType } from '@/lib/calculator/types';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
-  if (wizardData.buildingType === 'nichtwohngebaeude') return 'Bezugsfläche';
+  const isTenant = wizardData.userRole === 'mieter';
+  if (wizardData.buildingType === 'nichtwohngebaeude') {
+    return isTenant ? 'Mietfläche' : 'Gesamtnutzfläche des Gebäudes';
+  }
   const isApartment = wizardData.heatSupplyType === 'etage' ||
-    (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
-  if (isApartment) return 'Wohnungswohnfläche';
-  return 'Gebäudewohnfläche';
+    (isTenant && wizardData.heatSupplyType === 'fernwaerme');
+  if (isApartment) return 'Wohnfläche der Wohnung';
+  return isTenant ? 'Wohnfläche der Wohnung' : 'Gesamtwohnfläche des Gebäudes';
 }
 
 const FUEL_LABELS: Record<string, string> = {
@@ -139,9 +142,13 @@ export default function ResultsPage() {
       return `Stufe ${result.stufenmodellStep} – ${rangeText}`;
     }
     if (!result.isResidential) {
-      return result.restrictionApplied === 'fall1und2'
-        ? 'Beide öffentlich-rechtlichen Einschränkungen liegen vor – der Mieter trägt die CO2-Kosten vollständig.'
-        : 'Hälftige Aufteilung (50/50) gemäß § 8 CO2KostAufG für Nichtwohngebäude';
+      if (result.restrictionApplied === 'fall1und2') {
+        return 'Beide öffentlich-rechtlichen Einschränkungen liegen vor – der Mieter trägt die CO2-Kosten vollständig (0/100).';
+      }
+      if (result.restrictionApplied === 'fall1' || result.restrictionApplied === 'fall2') {
+        return 'Eine rechtliche Beschränkung nach § 9 CO2KostAufG: Vermieteranteil reduziert auf 25 % (25/75).';
+      }
+      return 'Hälftige Aufteilung (50/50) gemäß § 8 CO2KostAufG für Nichtwohngebäude';
     }
     return '';
   })();
