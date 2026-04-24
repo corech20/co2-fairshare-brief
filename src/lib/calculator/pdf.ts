@@ -438,10 +438,14 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       detailRow('Aufteilung:', 'Mieter 100 % / Vermieter 0 %', 2, true);
       y += 1;
       bodyText('Da beide öffentlich-rechtlichen Einschränkungen (Fall 1 und Fall 2) vorliegen, trägt der Mieter die CO2-Kosten vollständig.', 2);
+    } else if (result.restrictionApplied === 'fall1' || result.restrictionApplied === 'fall2') {
+      detailRow('Aufteilung:', `Mieter ${result.tenantPercent} % / Vermieter ${result.landlordPercent} %`, 2, true);
+      y += 1;
+      bodyText('Auf Grundlage der ausgewählten rechtlichen Beschränkung nach § 9 CO2KostAufG reduziert sich der Vermieteranteil bei Nichtwohngebäuden von 50 % auf 25 %.', 2);
     } else {
       detailRow('Aufteilung:', 'Hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG', 2, true);
       y += 1;
-      bodyText('Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Mieter und Vermieter.', 2);
+      bodyText('Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Vermieter und Mieter.', 2);
     }
   }
   y += 6;
