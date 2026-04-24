@@ -398,10 +398,13 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   const areaLabel = getAreaLabelForPDF(data);
   if (isApartmentLevel) {
     if (data.buildingArea) {
-      detailRow('Gebäudewohnfläche:', `${fmt.number(data.buildingArea, 0)} m²`, 2);
+      const totalLabel = data.buildingType === 'nichtwohngebaeude'
+        ? 'Gesamtnutzfläche des Gebäudes:'
+        : 'Gesamtwohnfläche des Gebäudes:';
+      detailRow(totalLabel, `${fmt.number(data.buildingArea, 0)} m²`, 2);
     }
     detailRow(`${areaLabel}:`, `${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`, 2);
-    detailRow('Bezugsfläche für Berechnung:', `${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`, 2);
+    detailRow('Berechnungsgrundlage:', `${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`, 2);
   } else {
     detailRow(`${areaLabel}:`, `${fmt.number(result.relevantArea, 0)} m²`, 2);
   }
