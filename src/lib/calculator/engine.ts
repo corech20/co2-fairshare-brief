@@ -642,9 +642,9 @@ function buildResult(
       landlordPercent = 0;
       tenantPercent = 100;
     } else {
-      landlordPercent = 50;
-      tenantPercent = 50;
-      restrictionNote = 'Bei Nichtwohngebäuden mit einzelnen öffentlich-rechtlichen Einschränkungen erfolgt hier eine konservative Standardbehandlung. Im Einzelfall kann eine gesonderte rechtliche Prüfung sinnvoll sein.';
+      // Genau eine Einschränkung (Fall 1 oder Fall 2): Vermieteranteil halbiert
+      landlordPercent = 25;
+      tenantPercent = 75;
     }
   }
 
