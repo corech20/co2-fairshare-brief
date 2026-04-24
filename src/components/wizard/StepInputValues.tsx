@@ -148,15 +148,20 @@ export default function StepInputValues() {
 
   // Dynamic area label
   const getAreaLabel = () => {
-    if (isNonResidential) return 'Bezugsfläche';
-    if (needsApartmentArea) return 'Wohnungswohnfläche';
-    return 'Gebäudewohnfläche';
+    if (isNonResidential) {
+      return isTenant ? 'Mietfläche' : 'Gesamtnutzfläche des Gebäudes';
+    }
+    // Wohngebäude
+    if (needsApartmentArea) return 'Wohnfläche der Wohnung';
+    return isTenant ? 'Wohnfläche der Wohnung' : 'Gesamtwohnfläche des Gebäudes';
   };
 
   const getAreaHint = () => {
-    if (isNonResidential) return 'Maßgebliche Fläche des Nichtwohngebäudes';
+    if (isNonResidential) {
+      return isTenant ? 'Mietfläche Ihrer Einheit' : 'Gesamte Nutzfläche des Gebäudes';
+    }
     if (needsApartmentArea) return 'Wohnfläche Ihrer Wohnung';
-    return 'Gesamte Wohnfläche des Gebäudes';
+    return isTenant ? 'Wohnfläche Ihrer Wohnung' : 'Gesamte Wohnfläche des Gebäudes';
   };
 
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
@@ -194,8 +199,8 @@ export default function StepInputValues() {
 
         {showOptionalBuildingArea && (
           <InputField
-            label="Gebäudewohnfläche (optional)"
-            hint="Gesamte Wohnfläche des Gebäudes, falls bekannt"
+            label="Gesamtwohnfläche des Gebäudes (optional)"
+            hint="Gesamtwohnfläche des Gebäudes, falls bekannt"
             value={wizardData.buildingArea}
             onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
             placeholder="z. B. 500"
