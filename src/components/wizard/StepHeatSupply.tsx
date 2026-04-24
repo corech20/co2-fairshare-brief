@@ -3,36 +3,75 @@ import type { HeatSupplyType } from '@/lib/calculator/types';
 import { Flame, Thermometer, Heater, AlertTriangle, FileText } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useEffect, useMemo } from 'react';
 
-const ALL_OPTIONS: { value: HeatSupplyType; label: string; desc: string; icon: typeof Flame; tenantOnly?: boolean }[] = [
-  { value: 'zentral', label: 'Zentrale Heizungsanlage', desc: 'Gemeinsame Heizung für das gesamte Gebäude (z.\u00A0B. Zentralheizung im Keller)', icon: Flame },
-  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'Wärmeversorgung über ein Fernwärme- oder Nahwärmenetz', icon: Thermometer },
-  { value: 'etage', label: 'Wohnungseigene Heizung', desc: 'Eigene Heizungsanlage in der Wohnung (z.\u00A0B. Gastherme, Gasetagenheizung)', icon: Heater, tenantOnly: true },
-];
+type HeatOption = { value: HeatSupplyType; label: string; desc: string; icon: typeof Flame };
+
+const OPT_ZENTRAL: HeatOption = {
+  value: 'zentral',
+  label: 'Zentrale Heizungsanlage',
+  desc: 'Gemeinsame Heizung für das gesamte Gebäude (z.\u00A0B. Zentralheizung im Keller)',
+  icon: Flame,
+};
+const OPT_FERNWAERME: HeatOption = {
+  value: 'fernwaerme',
+  label: 'Fernwärme / Nahwärme',
+  desc: 'Wärmeversorgung über ein Fernwärme- oder Nahwärmenetz',
+  icon: Thermometer,
+};
+const OPT_ETAGE_WOHN: HeatOption = {
+  value: 'etage',
+  label: 'Wohnungseigene Heizung',
+  desc: 'Eigene Heizungsanlage in der Wohnung (z.\u00A0B. Gastherme, Gasetagenheizung)',
+  icon: Heater,
+};
+const OPT_ETAGE_NWG: HeatOption = {
+  value: 'etage',
+  label: 'Eigene Heizungsanlage der Mietfläche',
+  desc: 'Eigene Heizungsanlage für die gemietete Einheit (z.\u00A0B. Gastherme der Mietfläche)',
+  icon: Heater,
+};
 
 export default function StepHeatSupply() {
   const { wizardData, setWizardField } = useCalculator();
 
   const isLandlord = wizardData.userRole === 'vermieter';
-  const options = isLandlord
-    ? ALL_OPTIONS.filter(opt => !opt.tenantOnly)
-    : ALL_OPTIONS;
+  const isTenant = wizardData.userRole === 'mieter';
+  const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
 
-  // If landlord had Etagenheizung selected from before, clear it
-  if (isLandlord && wizardData.heatSupplyType === 'etage') {
-    setWizardField('heatSupplyType', undefined as unknown as HeatSupplyType);
-  }
+  // Option list per role / building type.
+  // - Landlord:  unchanged → Zentral + Fernwärme  (Etagenheizung wird ausgeschlossen)
+  // - Tenant Wohngebäude:        Fernwärme + Wohnungseigene Heizung
+  // - Tenant Nichtwohngebäude:   Fernwärme + Eigene Heizungsanlage der Mietfläche
+  const options: HeatOption[] = useMemo(() => {
+    if (isLandlord) return [OPT_ZENTRAL, OPT_FERNWAERME];
+    return [OPT_FERNWAERME, isNonResidential ? OPT_ETAGE_NWG : OPT_ETAGE_WOHN];
+  }, [isLandlord, isNonResidential]);
+
+  // Clean up stale heat supply values whenever the role/building combination
+  // makes the previously stored value invalid:
+  //  - landlord must never carry "etage"
+  //  - tenant must never carry "zentral"
+  useEffect(() => {
+    if (isLandlord && wizardData.heatSupplyType === 'etage') {
+      setWizardField('heatSupplyType', undefined as unknown as HeatSupplyType);
+    }
+    if (isTenant && wizardData.heatSupplyType === 'zentral') {
+      setWizardField('heatSupplyType', undefined as unknown as HeatSupplyType);
+    }
+  }, [isLandlord, isTenant, wizardData.heatSupplyType, setWizardField]);
 
   const isFernwaerme = wizardData.heatSupplyType === 'fernwaerme';
   const excluded = !!wizardData.districtHeatingConnectedAfter2023;
-  const isTenant = wizardData.userRole === 'mieter';
   // Vertragspartner-Frage für Mieter bei Fernwärme (außer Sonderausschluss) – Direktbelieferung vs. Vermieter-Abrechnung
   const showFernwaermeContractQuestion = isTenant && isFernwaerme && !excluded;
   // Reset Vertragspartner-Flag, wenn die Frage nicht (mehr) relevant ist
   // (nur Mieter + Fernwärme ohne Sonderausschluss soll diesen Wert tragen)
-  if (!showFernwaermeContractQuestion && wizardData.tenantIsDirectContractParty !== undefined) {
-    setWizardField('tenantIsDirectContractParty', undefined);
-  }
+  useEffect(() => {
+    if (!showFernwaermeContractQuestion && wizardData.tenantIsDirectContractParty !== undefined) {
+      setWizardField('tenantIsDirectContractParty', undefined);
+    }
+  }, [showFernwaermeContractQuestion, wizardData.tenantIsDirectContractParty, setWizardField]);
 
   return (
     <div className="space-y-5">
