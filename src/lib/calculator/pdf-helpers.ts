@@ -83,21 +83,20 @@ export type DocumentCase = 'A' | 'B' | 'C' | 'D' | 'E';
  *  - Rolle = Mieter
  *  - UND der Mieter ist selbst Vertragspartner des Lieferanten (eigene Rechnung):
  *      • Etagenheizung / wohnungseigene Heizungsanlage     → implizit ja
- *      • Fernwärme mit direkter Abrechnung an den Mieter   → tenantIsDirectContractParty === true
- *      • Nichtwohngebäude mit eigenem Liefervertrag        → tenantIsDirectContractParty === true
+ *      • Fernwärme/Nahwärme (Wohn- oder Nichtwohngebäude)  → verbindlich Direktlieferung,
+ *        sofern nicht Sonderausschluss „Erstanschluss ab 01.01.2023"
  *
- * In allen anderen Fällen (zentrale Heizung, Versorgung über Vermieter,
- * Nebenkostenabrechnung, Vermieter-Rolle) → false.
+ * In allen anderen Fällen (Sonderausschluss Fernwärme, Vermieter-Rolle) → false.
  */
 export function isReimbursementEligible(data: WizardData): boolean {
   if (data.userRole !== 'mieter') return false;
   // Etagenheizung: eigene Wohnungsheizung → eigener Liefervertrag implizit
   if (data.heatSupplyType === 'etage') return true;
-  // Fernwärme oder Nichtwohngebäude: nur bei expliziter Direktbelieferung
-  if (data.heatSupplyType === 'fernwaerme' || data.buildingType === 'nichtwohngebaeude') {
-    return data.tenantIsDirectContractParty === true;
+  // Fernwärme/Nahwärme: Mieter gilt verbindlich als Direktlieferungsfall,
+  // außer beim Sonderausschluss „Erstanschluss ab 01.01.2023" (kein CO2KostAufG).
+  if (data.heatSupplyType === 'fernwaerme') {
+    return !data.districtHeatingConnectedAfter2023;
   }
-  // Zentrale Heizungsanlage im Wohngebäude → nie Erstattungsfall
   return false;
 }
 
