@@ -61,7 +61,9 @@ export default function StepFuelSource() {
   const isMultiFuel = fuelEntries.length > 0;
 
   const current = fromFuelType(wizardData.fuelType);
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(current.kwk);
+  // Helper: detect if any current entry is a KWK fuel (multi-fuel mode)
+  const hasKwkInEntries = fuelEntries.some(e => fromFuelType(e.fuelType).kwk);
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(current.kwk || hasKwkInEntries);
 
   // Filter out Fernwärme if already selected as heat supply type in step 3
   const visibleBaseFuels = wizardData.heatSupplyType === 'fernwaerme'
@@ -69,13 +71,70 @@ export default function StepFuelSource() {
     : BASE_FUELS;
 
   const selectBaseFuel = (base: BaseFuel) => {
+    if (isMultiFuel) {
+      // Replace the first non-KWK entry's base fuel; keep KWK entries intact.
+      const updated = [...fuelEntries];
+      const idx = updated.findIndex(e => !fromFuelType(e.fuelType).kwk);
+      if (idx >= 0) {
+        updated[idx] = { ...updated[idx], fuelType: toFuelType(base, false) };
+      } else {
+        updated.unshift({ fuelType: toFuelType(base, false), amount: 0 });
+      }
+      setWizardField('fuelEntries', updated);
+      return;
+    }
     setWizardField('fuelType', toFuelType(base, false));
-    if (fuelEntries.length > 0) setWizardField('fuelEntries', undefined);
   };
 
+  /**
+   * KWK is a SEPARATE calculation path from the regular heating fuel.
+   * Selecting a KWK option therefore creates an additional fuelEntry
+   * alongside the regular heating fuel, with its own fuel amount input.
+   * The engine processes each entry independently with its own CHP heat share.
+   */
   const selectKwk = (fuel: BaseFuel) => {
-    setWizardField('fuelType', toFuelType(fuel, true));
-    if (fuelEntries.length > 0) setWizardField('fuelEntries', undefined);
+    const kwkType = toFuelType(fuel, true);
+
+    if (isMultiFuel) {
+      // Toggle: if this exact KWK type already present → remove; else replace existing KWK entry or add.
+      const existingKwkIdx = fuelEntries.findIndex(e => fromFuelType(e.fuelType).kwk);
+      const updated = [...fuelEntries];
+      if (existingKwkIdx >= 0 && updated[existingKwkIdx].fuelType === kwkType) {
+        // Same KWK already selected → deselect (remove)
+        updated.splice(existingKwkIdx, 1);
+      } else if (existingKwkIdx >= 0) {
+        updated[existingKwkIdx] = { ...updated[existingKwkIdx], fuelType: kwkType };
+      } else {
+        updated.push({ fuelType: kwkType, amount: 0 });
+      }
+      // If no entries left, fall back gracefully
+      if (updated.length === 0) {
+        setWizardField('fuelEntries', undefined);
+      } else if (updated.length === 1 && !fromFuelType(updated[0].fuelType).kwk) {
+        // Only the regular heating remains → exit multi-fuel mode
+        setWizardField('fuelType', updated[0].fuelType);
+        setWizardField('fuelAmount', updated[0].amount);
+        setWizardField('fuelEntries', undefined);
+      } else {
+        setWizardField('fuelEntries', updated);
+      }
+      return;
+    }
+
+    // Single-fuel mode: convert into multi-fuel with [regular heating, KWK]
+    const regularBase = current.base ?? 'erdgas';
+    const regularType = toFuelType(regularBase, false);
+    const regularEntry: FuelEntry = {
+      fuelType: regularType,
+      amount: wizardData.fuelAmount ?? 0,
+      emissionFactorCustom: wizardData.emissionFactorCustom,
+      co2CostDirect: wizardData.co2CostDirect,
+      co2CostDirectType: wizardData.co2CostDirectType,
+    };
+    const kwkEntry: FuelEntry = { fuelType: kwkType, amount: 0 };
+    setWizardField('fuelEntries', [regularEntry, kwkEntry]);
+    setWizardField('fuelType', undefined);
+    setWizardField('fuelAmount', undefined);
   };
 
   const addFuelEntry = () => {
@@ -122,7 +181,9 @@ export default function StepFuelSource() {
   // Single fuel mode
   if (!isMultiFuel) {
     const selectedBase = current.base;
-    const selectedKwk = current.kwk;
+    // In single-fuel mode the regular heating list never reflects KWK
+    // (KWK lives in the advanced section and switches to multi-fuel on selection).
+    const selectedKwkFuel: BaseFuel | undefined = undefined;
     return (
       <div className="space-y-6">
         <div>
@@ -132,7 +193,7 @@ export default function StepFuelSource() {
 
         <div className="grid gap-3">
           {visibleBaseFuels.map(opt => {
-            const active = selectedBase === opt.value && !selectedKwk;
+            const active = selectedBase === opt.value;
             return (
               <button
                 key={opt.value}
@@ -162,8 +223,11 @@ export default function StepFuelSource() {
           </button>
           {showAdvanced && (
             <div className="mt-3 pl-6 space-y-2">
+              <p className="text-xs text-muted-foreground mb-1">
+                Eine KWK-Auswahl wird als zusätzliche Wärmequelle <strong>neben</strong> der normalen Heizungsart erfasst. Sie können die KWK-Brennstoffmenge separat eingeben.
+              </p>
               {KWK_OPTIONS.map(opt => {
-                const active = selectedKwk && selectedBase === opt.fuel;
+                const active = selectedKwkFuel === opt.fuel;
                 return (
                   <button
                     key={opt.fuel}
@@ -206,7 +270,9 @@ export default function StepFuelSource() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Brennstoffe / Wärmequellen</h2>
-          <p className="text-muted-foreground mt-2">Mehrere Brennstoffe für eine Berechnung.</p>
+          <p className="text-muted-foreground mt-2">
+            Normale Heizung und KWK werden als getrennte Wärmequellen mit eigener Brennstoffmenge berechnet. Die finnische Methode wird auf KWK-Einträge automatisch angewendet.
+          </p>
         </div>
         <Button variant="ghost" size="sm" onClick={exitMultiFuel}>
           Zurück zur Einzelauswahl
@@ -223,7 +289,9 @@ export default function StepFuelSource() {
           return (
             <div key={index} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">Brennstoff {index + 1}</span>
+                <span className="text-sm font-semibold text-foreground">
+                  {kwk ? `KWK-Brennstoff ${index + 1}` : `Brennstoff ${index + 1}`}
+                </span>
                 {fuelEntries.length > 1 && (
                   <button onClick={() => removeFuelEntry(index)} className="text-muted-foreground hover:text-destructive transition-colors">
                     <X className="h-4 w-4" />
@@ -250,7 +318,9 @@ export default function StepFuelSource() {
               )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-muted-foreground">Menge (nur ganze Zahlen)</label>
+                  <label className="text-xs text-muted-foreground">
+                    {kwk ? 'KWK-Brennstoffmenge (nur ganze Zahlen)' : 'Menge (nur ganze Zahlen)'}
+                  </label>
                   <IntegerInput
                     value={entry.amount > 0 ? entry.amount : undefined}
                     onChange={v => updateFuelEntry(index, { amount: v ?? 0 })}
@@ -272,6 +342,11 @@ export default function StepFuelSource() {
                   </div>
                 )}
               </div>
+              {kwk && (
+                <p className="text-xs text-muted-foreground">
+                  Aus dieser KWK-Brennstoffmenge wird nach finnischer Methode automatisch nur der Wärmeanteil in die CO2-Kosten übernommen. Der Stromanteil bleibt außen vor.
+                </p>
+              )}
             </div>
           );
         })}
