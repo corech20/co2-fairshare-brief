@@ -3,7 +3,7 @@ import type { FuelType, FuelEntry } from '@/lib/calculator/types';
 import { Flame, Droplets, Thermometer, Zap, Leaf, Factory, Plus, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
 /** UI-level base fuel/heat source – KWK is a separate technique flag. */
@@ -45,12 +45,6 @@ function fromFuelType(ft: FuelType | undefined): { base: BaseFuel | undefined; k
     default:
       return { base: undefined, kwk: false };
   }
-}
-
-function fuelLabel(ft: FuelType): string {
-  const { base, kwk } = fromFuelType(ft);
-  const baseLabel = BASE_FUELS.find(f => f.value === base)?.label ?? ft;
-  return kwk ? `${baseLabel} (KWK)` : baseLabel;
 }
 
 export default function StepFuelSource() {
