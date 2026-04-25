@@ -1,10 +1,52 @@
 import { useCalculator } from '@/context/CalculatorContext';
-import type { CostInputType, AddressData } from '@/lib/calculator/types';
+import type { CostInputType, AddressData, FuelType, FuelEntry } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
+
+/** Per-entry label/unit/hint helpers for multi-fuel input blocks. */
+function getEntryLabel(ft: FuelType): string {
+  switch (ft) {
+    case 'erdgas': return 'Erdgas';
+    case 'heizoel': return 'Heizöl';
+    case 'fernwaerme': return 'Fernwärme / Nahwärme';
+    case 'fluessiggas': return 'Flüssiggas (LPG)';
+    case 'pellets': return 'Holzpellets';
+    case 'braunkohle': return 'Kohle';
+    case 'hackschnitzel': return 'Hackschnitzel';
+    case 'erdgas_kwk': return 'KWK (Erdgas)';
+    case 'heizoel_kwk': return 'KWK (Heizöl)';
+    case 'fluessiggas_kwk': return 'KWK (Flüssiggas)';
+    default: return ft;
+  }
+}
+function getEntryUnit(ft: FuelType): string {
+  switch (ft) {
+    case 'heizoel': case 'heizoel_kwk': return 'Liter';
+    case 'fluessiggas': case 'fluessiggas_kwk': case 'pellets': case 'hackschnitzel': case 'braunkohle': return 'kg';
+    default: return 'kWh';
+  }
+}
+function getEntryHint(ft: FuelType): string {
+  switch (ft) {
+    case 'erdgas': case 'erdgas_kwk':
+      return 'Verbrauch in kWh (Brennwert/Hs) lt. Gasabrechnung. Nur ganze Zahlen.';
+    case 'heizoel': case 'heizoel_kwk':
+      return 'Verbrauch in Litern (nur ganze Zahlen).';
+    case 'fluessiggas': case 'fluessiggas_kwk':
+      return 'Verbrauch in kg (nur ganze Zahlen).';
+    case 'pellets':
+      return 'Holzpellets sind nicht BEHG-pflichtig; daher werden keine aufzuteilenden CO2-Kosten angesetzt.';
+    case 'braunkohle':
+      return 'Verbrauch in kg (Braunkohlebriketts, nur ganze Zahlen).';
+    case 'fernwaerme':
+      return 'Verbrauch in kWh (nur ganze Zahlen).';
+    default:
+      return 'Nur ganze Zahlen.';
+  }
+}
 
 function InputField({ label, hint, value, onChange, type = 'number', placeholder, unit }: {
   label: string; hint?: string; value: string | number | undefined;
