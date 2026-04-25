@@ -3,9 +3,8 @@ import type { FuelType, FuelEntry } from '@/lib/calculator/types';
 import { Flame, Droplets, Thermometer, Zap, Leaf, Factory, Plus, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { IntegerInput } from './IntegerInput';
 
-/** UI-level base fuel/heat source – KWK is a separate technique flag. */
+/** UI-level base fuel/heat source – KWK is a separate technique. */
 type BaseFuel = 'erdgas' | 'heizoel' | 'fernwaerme' | 'fluessiggas' | 'pellets' | 'kohle';
 
 const BASE_FUELS: { value: BaseFuel; label: string; desc: string; icon: typeof Flame }[] = [
@@ -17,353 +16,316 @@ const BASE_FUELS: { value: BaseFuel; label: string; desc: string; icon: typeof F
   { value: 'kohle', label: 'Kohle', desc: 'Eingabe in kg (Braunkohlebriketts)', icon: Factory },
 ];
 
-/** Fuels that have a KWK variant in the engine. */
-const KWK_CAPABLE: BaseFuel[] = ['erdgas', 'heizoel', 'fluessiggas'];
-
-/** KWK options shown as concrete fuel-bound choices in the advanced section. */
-const KWK_OPTIONS: { fuel: BaseFuel; label: string }[] = [
-  { fuel: 'erdgas', label: 'KWK (Erdgas)' },
-  { fuel: 'heizoel', label: 'KWK (Heizöl)' },
-  { fuel: 'fluessiggas', label: 'KWK (Flüssiggas)' },
+/** KWK options shown in the "Besondere Anlagentechnik" collapsible. */
+const KWK_OPTIONS: { fuel: BaseFuel; label: string; type: FuelType }[] = [
+  { fuel: 'erdgas', label: 'KWK (Erdgas)', type: 'erdgas_kwk' },
+  { fuel: 'heizoel', label: 'KWK (Heizöl)', type: 'heizoel_kwk' },
+  { fuel: 'fluessiggas', label: 'KWK (Flüssiggas)', type: 'fluessiggas_kwk' },
 ];
 
-/** Map (baseFuel, kwk) → internal engine FuelType. */
-function toFuelType(base: BaseFuel, kwk: boolean): FuelType {
+/** Map UI base fuel → internal engine FuelType (non-KWK). */
+function baseToFuelType(base: BaseFuel): FuelType {
   if (base === 'kohle') return 'braunkohle';
-  if (kwk && KWK_CAPABLE.includes(base)) {
-    if (base === 'erdgas') return 'erdgas_kwk';
-    if (base === 'heizoel') return 'heizoel_kwk';
-    if (base === 'fluessiggas') return 'fluessiggas_kwk';
-  }
   return base as FuelType;
 }
 
-/** Inverse: internal FuelType → (baseFuel, kwk). */
-function fromFuelType(ft: FuelType | undefined): { base: BaseFuel | undefined; kwk: boolean } {
-  if (!ft) return { base: undefined, kwk: false };
+/** Inverse: internal FuelType → UI base fuel (ignoring KWK distinction). */
+function fuelTypeToBase(ft: FuelType): BaseFuel | undefined {
   switch (ft) {
-    case 'erdgas_kwk': return { base: 'erdgas', kwk: true };
-    case 'heizoel_kwk': return { base: 'heizoel', kwk: true };
-    case 'fluessiggas_kwk': return { base: 'fluessiggas', kwk: true };
-    case 'braunkohle': return { base: 'kohle', kwk: false };
-    case 'erdgas': case 'heizoel': case 'fernwaerme': case 'fluessiggas': case 'pellets':
-      return { base: ft as BaseFuel, kwk: false };
-    default:
-      return { base: undefined, kwk: false };
+    case 'erdgas': case 'erdgas_kwk': return 'erdgas';
+    case 'heizoel': case 'heizoel_kwk': return 'heizoel';
+    case 'fluessiggas': case 'fluessiggas_kwk': return 'fluessiggas';
+    case 'fernwaerme': return 'fernwaerme';
+    case 'pellets': return 'pellets';
+    case 'braunkohle': return 'kohle';
+    default: return undefined;
   }
+}
+
+function isKwkType(ft: FuelType): boolean {
+  return ft === 'erdgas_kwk' || ft === 'heizoel_kwk' || ft === 'fluessiggas_kwk';
+}
+
+/** Sort order index for input blocks (regular fuels first, then KWK in fixed order). */
+const SORT_ORDER: Record<FuelType, number> = {
+  erdgas: 1,
+  heizoel: 2,
+  fernwaerme: 3,
+  fluessiggas: 4,
+  pellets: 5,
+  braunkohle: 6,
+  hackschnitzel: 7,
+  abfallholz: 8,
+  erdgas_kwk: 11,
+  heizoel_kwk: 12,
+  fluessiggas_kwk: 13,
+};
+
+function sortEntries(entries: FuelEntry[]): FuelEntry[] {
+  return [...entries].sort((a, b) => (SORT_ORDER[a.fuelType] ?? 99) - (SORT_ORDER[b.fuelType] ?? 99));
 }
 
 export default function StepFuelSource() {
   const { wizardData, setWizardField } = useCalculator();
 
   const fuelEntries = wizardData.fuelEntries ?? [];
-  const isMultiFuel = fuelEntries.length > 0;
+  const isMulti = fuelEntries.length > 0;
 
-  const current = fromFuelType(wizardData.fuelType);
-  // Helper: detect if any current entry is a KWK fuel (multi-fuel mode)
-  const hasKwkInEntries = fuelEntries.some(e => fromFuelType(e.fuelType).kwk);
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(current.kwk || hasKwkInEntries);
+  // Effective primary fuel and selected KWK types for UI state
+  const primaryFuelType: FuelType | undefined = isMulti
+    ? fuelEntries.find(e => !isKwkType(e.fuelType))?.fuelType
+    : wizardData.fuelType;
+  const primaryBase = primaryFuelType ? fuelTypeToBase(primaryFuelType) : undefined;
 
-  // Filter out Fernwärme if already selected as heat supply type in step 3
+  const selectedKwkTypes = new Set<FuelType>(
+    fuelEntries.filter(e => isKwkType(e.fuelType)).map(e => e.fuelType)
+  );
+
+  // Additional regular fuels beyond the primary
+  const additionalEntries = isMulti
+    ? fuelEntries.filter(e => !isKwkType(e.fuelType)).slice(1)
+    : [];
+
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(selectedKwkTypes.size > 0);
+
+  // Filter Fernwärme out if already chosen as heat supply type
   const visibleBaseFuels = wizardData.heatSupplyType === 'fernwaerme'
     ? BASE_FUELS.filter(f => f.value !== 'fernwaerme')
     : BASE_FUELS;
 
-  const selectBaseFuel = (base: BaseFuel) => {
-    if (isMultiFuel) {
-      // Replace the first non-KWK entry's base fuel; keep KWK entries intact.
-      const updated = [...fuelEntries];
-      const idx = updated.findIndex(e => !fromFuelType(e.fuelType).kwk);
-      if (idx >= 0) {
-        updated[idx] = { ...updated[idx], fuelType: toFuelType(base, false) };
-      } else {
-        updated.unshift({ fuelType: toFuelType(base, false), amount: 0 });
-      }
-      setWizardField('fuelEntries', updated);
+  /** Build a fresh fuelEntries list and persist (also resorting). */
+  const persistEntries = (entries: FuelEntry[]) => {
+    if (entries.length === 0) {
+      setWizardField('fuelEntries', undefined);
       return;
     }
-    setWizardField('fuelType', toFuelType(base, false));
-  };
-
-  /**
-   * KWK is a SEPARATE calculation path from the regular heating fuel.
-   * Selecting a KWK option therefore creates an additional fuelEntry
-   * alongside the regular heating fuel, with its own fuel amount input.
-   * The engine processes each entry independently with its own CHP heat share.
-   */
-  const selectKwk = (fuel: BaseFuel) => {
-    const kwkType = toFuelType(fuel, true);
-
-    if (isMultiFuel) {
-      // Toggle: if this exact KWK type already present → remove; else replace existing KWK entry or add.
-      const existingKwkIdx = fuelEntries.findIndex(e => fromFuelType(e.fuelType).kwk);
-      const updated = [...fuelEntries];
-      if (existingKwkIdx >= 0 && updated[existingKwkIdx].fuelType === kwkType) {
-        // Same KWK already selected → deselect (remove)
-        updated.splice(existingKwkIdx, 1);
-      } else if (existingKwkIdx >= 0) {
-        updated[existingKwkIdx] = { ...updated[existingKwkIdx], fuelType: kwkType };
-      } else {
-        updated.push({ fuelType: kwkType, amount: 0 });
-      }
-      // If no entries left, fall back gracefully
-      if (updated.length === 0) {
-        setWizardField('fuelEntries', undefined);
-      } else if (updated.length === 1 && !fromFuelType(updated[0].fuelType).kwk) {
-        // Only the regular heating remains → exit multi-fuel mode
-        setWizardField('fuelType', updated[0].fuelType);
-        setWizardField('fuelAmount', updated[0].amount);
-        setWizardField('fuelEntries', undefined);
-      } else {
-        setWizardField('fuelEntries', updated);
-      }
-      return;
-    }
-
-    // Single-fuel mode: convert into multi-fuel with [regular heating, KWK]
-    const regularBase = current.base ?? 'erdgas';
-    const regularType = toFuelType(regularBase, false);
-    const regularEntry: FuelEntry = {
-      fuelType: regularType,
-      amount: wizardData.fuelAmount ?? 0,
-      emissionFactorCustom: wizardData.emissionFactorCustom,
-      co2CostDirect: wizardData.co2CostDirect,
-      co2CostDirectType: wizardData.co2CostDirectType,
-    };
-    const kwkEntry: FuelEntry = { fuelType: kwkType, amount: 0 };
-    setWizardField('fuelEntries', [regularEntry, kwkEntry]);
+    setWizardField('fuelEntries', sortEntries(entries));
+    // When multi-fuel mode is active, single-fuel fields are cleared to avoid double-counting.
     setWizardField('fuelType', undefined);
     setWizardField('fuelAmount', undefined);
   };
 
-  const addFuelEntry = () => {
-    const existing: FuelEntry[] = fuelEntries.length > 0
-      ? [...fuelEntries]
-      : wizardData.fuelType
-        ? [{ fuelType: wizardData.fuelType, amount: wizardData.fuelAmount ?? 0 }]
-        : [];
-    existing.push({ fuelType: 'erdgas', amount: 0 });
-    setWizardField('fuelEntries', existing);
-    setWizardField('fuelType', undefined);
+  /** Convert current single-fuel state to a fuelEntries array (for adding KWK or extra fuels). */
+  const ensureMultiFuel = (): FuelEntry[] => {
+    if (isMulti) return [...fuelEntries];
+    if (!wizardData.fuelType) return [];
+    return [{
+      fuelType: wizardData.fuelType,
+      amount: wizardData.fuelAmount ?? 0,
+      emissionFactorCustom: wizardData.emissionFactorCustom,
+      co2CostDirect: wizardData.co2CostDirect,
+      co2CostDirectType: wizardData.co2CostDirectType,
+    }];
   };
 
-  const updateFuelEntry = (index: number, updates: Partial<FuelEntry>) => {
+  /** Click on a base fuel card – sets/replaces the primary regular fuel. */
+  const selectPrimaryBase = (base: BaseFuel) => {
+    const newType = baseToFuelType(base);
+    if (!isMulti) {
+      setWizardField('fuelType', newType);
+      // Reset amount/emission factor when switching fuel kind
+      setWizardField('fuelAmount', undefined);
+      setWizardField('emissionFactorCustom', undefined);
+      return;
+    }
+    // Multi mode: replace the first non-KWK entry's fuel type
     const updated = [...fuelEntries];
-    updated[index] = { ...updated[index], ...updates };
-    setWizardField('fuelEntries', updated);
-  };
-
-  const updateEntryBase = (index: number, base: BaseFuel) => {
-    const entry = fuelEntries[index];
-    const wasKwk = fromFuelType(entry.fuelType).kwk;
-    // If currently KWK but new base isn't KWK-capable, fall back to non-KWK
-    const keepKwk = wasKwk && KWK_CAPABLE.includes(base);
-    updateFuelEntry(index, { fuelType: toFuelType(base, keepKwk) });
-  };
-
-  const updateEntryKind = (index: number, kind: 'heizung' | 'kwk') => {
-    const entry = fuelEntries[index];
-    const { base } = fromFuelType(entry.fuelType);
-    if (kind === 'kwk') {
-      // Pick a KWK-capable base; default to current if possible, else erdgas
-      const target: BaseFuel = base && KWK_CAPABLE.includes(base) ? base : 'erdgas';
-      updateFuelEntry(index, { fuelType: toFuelType(target, true) });
+    const idx = updated.findIndex(e => !isKwkType(e.fuelType));
+    if (idx >= 0) {
+      updated[idx] = { ...updated[idx], fuelType: newType, amount: 0, emissionFactorCustom: undefined };
     } else {
-      const target: BaseFuel = base ?? 'erdgas';
-      updateFuelEntry(index, { fuelType: toFuelType(target, false) });
+      updated.unshift({ fuelType: newType, amount: 0 });
     }
+    persistEntries(updated);
   };
 
-  const removeFuelEntry = (index: number) => {
-    const updated = fuelEntries.filter((_, i) => i !== index);
-    if (updated.length <= 1 && updated.length > 0) {
-      setWizardField('fuelType', updated[0].fuelType);
-      setWizardField('fuelAmount', updated[0].amount);
+  /** Toggle a KWK option (add/remove an independent entry). */
+  const toggleKwk = (type: FuelType) => {
+    const base = ensureMultiFuel();
+    const idx = base.findIndex(e => e.fuelType === type);
+    if (idx >= 0) {
+      base.splice(idx, 1);
+    } else {
+      base.push({ fuelType: type, amount: 0 });
+    }
+    // If after toggle there's only one regular entry left and no KWK, fall back to single-fuel mode
+    if (base.length === 1 && !isKwkType(base[0].fuelType)) {
+      setWizardField('fuelType', base[0].fuelType);
+      setWizardField('fuelAmount', base[0].amount > 0 ? base[0].amount : undefined);
+      setWizardField('emissionFactorCustom', base[0].emissionFactorCustom);
       setWizardField('fuelEntries', undefined);
-    } else {
-      setWizardField('fuelEntries', updated);
+      return;
     }
+    persistEntries(base);
   };
 
-  // Single fuel mode
-  if (!isMultiFuel) {
-    const selectedBase = current.base;
-    // In single-fuel mode the regular heating list never reflects KWK
-    // (KWK lives in the advanced section and switches to multi-fuel on selection).
-    const selectedKwkFuel: BaseFuel | undefined = undefined;
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Heizungsart</h2>
-          <p className="text-muted-foreground mt-2">Welcher Brennstoff wird für die Wärmeversorgung verwendet?</p>
-        </div>
+  /** Add an additional regular fuel block. */
+  const addAdditionalFuel = () => {
+    const base = ensureMultiFuel();
+    // Default new fuel to first available not yet selected as primary; fallback Erdgas
+    const usedRegularTypes = new Set(base.filter(e => !isKwkType(e.fuelType)).map(e => e.fuelType));
+    const candidate = visibleBaseFuels
+      .map(f => baseToFuelType(f.value))
+      .find(t => !usedRegularTypes.has(t)) ?? 'erdgas';
+    base.push({ fuelType: candidate, amount: 0 });
+    persistEntries(base);
+  };
 
-        <div className="grid gap-3">
-          {visibleBaseFuels.map(opt => {
-            const active = selectedBase === opt.value;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => selectBaseFuel(opt.value)}
-                className={`rounded-xl border-2 p-4 text-left transition-all hover:shadow-md flex items-start gap-4 ${
-                  active ? 'border-accent bg-accent/5 shadow-sm' : 'border-border bg-card hover:border-primary/30'
-                }`}
-              >
-                <opt.icon className={`h-5 w-5 mt-0.5 shrink-0 ${active ? 'text-accent' : 'text-muted-foreground'}`} />
-                <div>
-                  <div className="font-semibold text-foreground text-sm">{opt.label}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{opt.desc}</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="rounded-xl border border-border bg-muted/30 p-4">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-accent transition-colors w-full"
-          >
-            <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-            <span>Besondere Anlagentechnik</span>
-            <span className="text-xs text-muted-foreground font-normal ml-1">optional – nur auswählen, wenn bekannt</span>
-          </button>
-          {showAdvanced && (
-            <div className="mt-3 pl-6 space-y-2">
-              {KWK_OPTIONS.map(opt => {
-                const active = selectedKwkFuel === opt.fuel;
-                return (
-                  <button
-                    key={opt.fuel}
-                    onClick={() => selectKwk(opt.fuel)}
-                    className={`w-full rounded-lg border-2 px-3 py-2.5 text-left text-sm font-medium transition-all ${
-                      active
-                        ? 'border-accent bg-accent/5 text-foreground shadow-sm'
-                        : 'border-border bg-card text-foreground hover:border-primary/30'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <Button variant="outline" size="sm" onClick={addFuelEntry} className="mt-2">
-          <Plus className="h-4 w-4 mr-1" />
-          Mehrere Brennstoffe kombinieren
-        </Button>
-      </div>
-    );
-  }
-
-  // Multi-fuel mode
-  const exitMultiFuel = () => {
-    const first = fuelEntries[0];
-    setWizardField('fuelEntries', undefined);
-    if (first) {
-      setWizardField('fuelType', first.fuelType);
-      setWizardField('fuelAmount', first.amount);
+  const removeAdditional = (fuelType: FuelType) => {
+    const base = fuelEntries.filter(e => e.fuelType !== fuelType || isKwkType(e.fuelType));
+    // Need to remove only ONE matching entry (not all duplicates) – but additionals are unique-by-type via add logic.
+    // Recompute by mapping: remove first occurrence in additional list.
+    const withoutOne: FuelEntry[] = [];
+    let removed = false;
+    for (const e of fuelEntries) {
+      if (!removed && !isKwkType(e.fuelType) && e.fuelType === fuelType) {
+        // Skip the primary occurrence first? We want to remove an ADDITIONAL entry.
+        // Find primary index first
+        const primaryIdx = fuelEntries.findIndex(x => !isKwkType(x.fuelType));
+        if (fuelEntries.indexOf(e) !== primaryIdx) {
+          removed = true;
+          continue;
+        }
+      }
+      withoutOne.push(e);
     }
+    // Fallback: if nothing removed, drop first non-primary regular with that type
+    const finalList = removed ? withoutOne : base;
+    if (finalList.length === 1 && !isKwkType(finalList[0].fuelType)) {
+      setWizardField('fuelType', finalList[0].fuelType);
+      setWizardField('fuelAmount', finalList[0].amount > 0 ? finalList[0].amount : undefined);
+      setWizardField('emissionFactorCustom', finalList[0].emissionFactorCustom);
+      setWizardField('fuelEntries', undefined);
+      return;
+    }
+    persistEntries(finalList);
+  };
+
+  const changeAdditionalType = (oldType: FuelType, newBase: BaseFuel) => {
+    const newType = baseToFuelType(newBase);
+    if (newType === oldType) return;
+    const updated = [...fuelEntries];
+    // Find the additional entry: a non-KWK entry that is NOT the first non-KWK
+    const primaryIdx = updated.findIndex(e => !isKwkType(e.fuelType));
+    let targetIdx = -1;
+    for (let i = 0; i < updated.length; i++) {
+      if (i === primaryIdx) continue;
+      if (!isKwkType(updated[i].fuelType) && updated[i].fuelType === oldType) { targetIdx = i; break; }
+    }
+    if (targetIdx === -1) return;
+    updated[targetIdx] = { ...updated[targetIdx], fuelType: newType, emissionFactorCustom: undefined };
+    persistEntries(updated);
+  };
+
+  const fuelLabel = (ft: FuelType): string => {
+    const base = fuelTypeToBase(ft);
+    const baseEntry = BASE_FUELS.find(b => b.value === base);
+    return baseEntry?.label ?? ft;
   };
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <div>
-          <Button variant="ghost" size="sm" onClick={exitMultiFuel} className="-ml-2 h-auto px-2 py-1">
-            ← Zurück zur Einzelauswahl
-          </Button>
-        </div>
-        <h2 className="text-2xl font-bold text-foreground">Wärmequellen</h2>
-        <p className="text-muted-foreground text-sm">
-          Fügen Sie bei Bedarf mehrere Wärmequellen hinzu.
-        </p>
+      <div>
+        <h2 className="text-2xl font-bold text-foreground">Heizungsart</h2>
+        <p className="text-muted-foreground mt-2">Welcher Brennstoff wird für die Wärmeversorgung verwendet?</p>
       </div>
 
-      <div className="space-y-4">
-        {fuelEntries.map((entry, index) => {
-          const { base, kwk } = fromFuelType(entry.fuelType);
-          const baseOptions = wizardData.heatSupplyType === 'fernwaerme'
-            ? BASE_FUELS.filter(f => f.value !== 'fernwaerme')
-            : BASE_FUELS;
-          // For KWK kind, only show KWK-capable fuels
-          const fuelOptionsForCard = kwk
-            ? baseOptions.filter(f => KWK_CAPABLE.includes(f.value))
-            : baseOptions;
+      {/* 1. Base fuel cards (single-select primary) */}
+      <div className="grid gap-3">
+        {visibleBaseFuels.map(opt => {
+          const active = primaryBase === opt.value;
           return (
-            <div key={index} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">
-                  Wärmequelle {index + 1}
-                </span>
-                {fuelEntries.length > 1 && (
-                  <button onClick={() => removeFuelEntry(index)} className="text-muted-foreground hover:text-destructive transition-colors">
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
+            <button
+              key={opt.value}
+              onClick={() => selectPrimaryBase(opt.value)}
+              className={`rounded-xl border-2 p-4 text-left transition-all hover:shadow-md flex items-start gap-4 ${
+                active ? 'border-accent bg-accent/5 shadow-sm' : 'border-border bg-card hover:border-primary/30'
+              }`}
+            >
+              <opt.icon className={`h-5 w-5 mt-0.5 shrink-0 ${active ? 'text-accent' : 'text-muted-foreground'}`} />
               <div>
-                <label className="text-xs text-muted-foreground">Art der Wärmequelle</label>
-                <select
-                  value={kwk ? 'kwk' : 'heizung'}
-                  onChange={e => updateEntryKind(index, e.target.value as 'heizung' | 'kwk')}
-                  className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
-                >
-                  <option value="heizung">Heizung</option>
-                  <option value="kwk">KWK-Anlage</option>
-                </select>
+                <div className="font-semibold text-foreground text-sm">{opt.label}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{opt.desc}</div>
               </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Brennstoff</label>
-                <select
-                  value={base ?? ''}
-                  onChange={e => updateEntryBase(index, e.target.value as BaseFuel)}
-                  className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
-                >
-                  {fuelOptionsForCard.map(f => (
-                    <option key={f.value} value={f.value}>{f.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-muted-foreground">
-                    Menge
-                  </label>
-                  <IntegerInput
-                    value={entry.amount > 0 ? entry.amount : undefined}
-                    onChange={v => updateFuelEntry(index, { amount: v ?? 0 })}
-                    placeholder="z.B. 45000"
-                    className="px-3 py-2 text-sm"
-                  />
-                </div>
-                {entry.fuelType === 'fernwaerme' && (
-                  <div>
-                    <label className="text-xs text-muted-foreground">Emissionsfaktor (kg CO2/kWh)</label>
-                    <input
-                      type="number"
-                      step="0.0001"
-                      value={entry.emissionFactorCustom ?? ''}
-                      onChange={e => updateFuelEntry(index, { emissionFactorCustom: parseFloat(e.target.value) || undefined })}
-                      placeholder="z.B. 0.18"
-                      className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            </button>
           );
         })}
       </div>
 
-      {fuelEntries.length < 3 ? (
-        <Button variant="outline" size="sm" onClick={addFuelEntry}>
+      {/* 2. Additional fuels section */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-foreground">Gibt es einen weiteren Brennstoff?</h3>
+
+        {additionalEntries.length > 0 && (
+          <div className="space-y-2">
+            {additionalEntries.map((entry) => (
+              <div
+                key={`add-${entry.fuelType}`}
+                className="flex items-center gap-2 rounded-lg border-2 border-border bg-card px-3 py-2"
+              >
+                <select
+                  value={fuelTypeToBase(entry.fuelType) ?? ''}
+                  onChange={e => changeAdditionalType(entry.fuelType, e.target.value as BaseFuel)}
+                  className="flex-1 bg-transparent text-sm text-foreground focus:outline-none"
+                >
+                  {visibleBaseFuels.map(f => (
+                    <option key={f.value} value={f.value}>{f.label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => removeAdditional(entry.fuelType)}
+                  className="text-muted-foreground hover:text-destructive transition-colors"
+                  aria-label="Entfernen"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={addAdditionalFuel}
+          disabled={!primaryFuelType}
+        >
           <Plus className="h-4 w-4 mr-1" />
-          Weitere Wärmequelle hinzufügen
+          Weiteren Brennstoff hinzufügen
         </Button>
-      ) : null}
+      </div>
+
+      {/* 3. Besondere Anlagentechnik (collapsible, KWK options) */}
+      <div className="rounded-xl border border-border bg-muted/30 p-4">
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-accent transition-colors w-full"
+        >
+          <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+          <span>Besondere Anlagentechnik</span>
+          <span className="text-xs text-muted-foreground font-normal ml-1">optional – nur auswählen, wenn bekannt</span>
+        </button>
+        {showAdvanced && (
+          <div className="mt-3 pl-6 space-y-2">
+            {KWK_OPTIONS.map(opt => {
+              const active = selectedKwkTypes.has(opt.type);
+              return (
+                <button
+                  key={opt.type}
+                  onClick={() => toggleKwk(opt.type)}
+                  className={`w-full rounded-lg border-2 px-3 py-2.5 text-left text-sm font-medium transition-all ${
+                    active
+                      ? 'border-accent bg-accent/5 text-foreground shadow-sm'
+                      : 'border-border bg-card text-foreground hover:border-primary/30'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
