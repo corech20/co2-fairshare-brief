@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCalculator } from '@/context/CalculatorContext';
 import { Button } from '@/components/ui/button';
-import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays, Download, CheckCircle2 } from 'lucide-react';
+import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays, Download, CheckCircle2, History } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText, isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
 import { PaymentDialog } from '@/components/PaymentDialog';
+import { useEffect } from 'react';
 
 import type { OutputType } from '@/lib/calculator/types';
 
@@ -41,10 +42,20 @@ function getMixedVATInfo(data: { fuelType?: string; billingPeriodStart?: string;
 
 export default function ResultsPage() {
   const navigate = useNavigate();
-  const { result, wizardData, reset } = useCalculator();
+  const [searchParams] = useSearchParams();
+  const { result, wizardData, reset, calcId, loadFromHistory } = useCalculator();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [pendingOutputType, setPendingOutputType] = useState<OutputType>('calculation');
   const [purchased, setPurchased] = useState(false);
+
+  // Restore from URL param (?id=...) when arriving from history page or refresh
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (id && id !== calcId) {
+      loadFromHistory(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // V – Fernwärme-Sonderfall: Erstanschluss ab 01.01.2023 → CO2KostAufG nicht anwendbar
   const isExcludedDistrictHeating =
@@ -120,7 +131,7 @@ export default function ResultsPage() {
   };
 
   const handleDownloadPdf = () => {
-    generatePDF(wizardData, result, pendingOutputType);
+    generatePDF(wizardData, result!, pendingOutputType, calcId ?? undefined);
   };
 
   const formatCurrency = (n: number) => fmt.currency(n);
@@ -166,6 +177,17 @@ export default function ResultsPage() {
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="container-narrow flex h-14 items-center px-4">
           <span className="text-sm font-semibold text-foreground">Ergebnis der CO2-Kostenaufteilung</span>
+          <div className="ml-auto flex items-center gap-3">
+            {calcId && (
+              <span className="hidden sm:inline text-xs text-muted-foreground tabular-nums">
+                ID: {calcId}
+              </span>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => navigate('/verlauf')}>
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">Verlauf</span>
+            </Button>
+          </div>
         </div>
       </header>
 

@@ -35,6 +35,12 @@ export default function Index() {
             <Scale className="h-5 w-5 text-primary" />
            <span className="text-base font-semibold text-foreground tracking-tight">CO2-Kostenaufteilung</span>
           </div>
+          <button
+            onClick={() => navigate('/verlauf')}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Verlauf
+          </button>
         </div>
       </header>
 

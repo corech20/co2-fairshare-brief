@@ -7,6 +7,7 @@ import { CalculatorProvider } from "@/context/CalculatorContext";
 import Index from "./pages/Index.tsx";
 import CalculatorPage from "./pages/Calculator.tsx";
 import ResultsPage from "./pages/Results.tsx";
+import HistoryPage from "./pages/History.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/rechner" element={<CalculatorPage />} />
             <Route path="/ergebnis" element={<ResultsPage />} />
+            <Route path="/verlauf" element={<HistoryPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </CalculatorProvider>
