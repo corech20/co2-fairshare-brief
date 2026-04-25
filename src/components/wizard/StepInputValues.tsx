@@ -1,10 +1,52 @@
 import { useCalculator } from '@/context/CalculatorContext';
-import type { CostInputType, AddressData } from '@/lib/calculator/types';
+import type { CostInputType, AddressData, FuelType, FuelEntry } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
+
+/** Per-entry label/unit/hint helpers for multi-fuel input blocks. */
+function getEntryLabel(ft: FuelType): string {
+  switch (ft) {
+    case 'erdgas': return 'Erdgas';
+    case 'heizoel': return 'Heizöl';
+    case 'fernwaerme': return 'Fernwärme / Nahwärme';
+    case 'fluessiggas': return 'Flüssiggas (LPG)';
+    case 'pellets': return 'Holzpellets';
+    case 'braunkohle': return 'Kohle';
+    case 'hackschnitzel': return 'Hackschnitzel';
+    case 'erdgas_kwk': return 'KWK (Erdgas)';
+    case 'heizoel_kwk': return 'KWK (Heizöl)';
+    case 'fluessiggas_kwk': return 'KWK (Flüssiggas)';
+    default: return ft;
+  }
+}
+function getEntryUnit(ft: FuelType): string {
+  switch (ft) {
+    case 'heizoel': case 'heizoel_kwk': return 'Liter';
+    case 'fluessiggas': case 'fluessiggas_kwk': case 'pellets': case 'hackschnitzel': case 'braunkohle': return 'kg';
+    default: return 'kWh';
+  }
+}
+function getEntryHint(ft: FuelType): string {
+  switch (ft) {
+    case 'erdgas': case 'erdgas_kwk':
+      return 'Verbrauch in kWh (Brennwert/Hs) lt. Gasabrechnung. Nur ganze Zahlen.';
+    case 'heizoel': case 'heizoel_kwk':
+      return 'Verbrauch in Litern (nur ganze Zahlen).';
+    case 'fluessiggas': case 'fluessiggas_kwk':
+      return 'Verbrauch in kg (nur ganze Zahlen).';
+    case 'pellets':
+      return 'Holzpellets sind nicht BEHG-pflichtig; daher werden keine aufzuteilenden CO2-Kosten angesetzt.';
+    case 'braunkohle':
+      return 'Verbrauch in kg (Braunkohlebriketts, nur ganze Zahlen).';
+    case 'fernwaerme':
+      return 'Verbrauch in kWh (nur ganze Zahlen).';
+    default:
+      return 'Nur ganze Zahlen.';
+  }
+}
 
 function InputField({ label, hint, value, onChange, type = 'number', placeholder, unit }: {
   label: string; hint?: string; value: string | number | undefined;
@@ -206,6 +248,51 @@ export default function StepInputValues() {
             placeholder="z. B. 500"
             unit="m²"
           />
+        )}
+
+        {/* Multi-fuel: one input block per selected position */}
+        {isMultiFuel && !crossYear && (
+          <div className="space-y-4">
+            {wizardData.fuelEntries!.map((entry: FuelEntry, idx: number) => (
+              <div key={`${entry.fuelType}-${idx}`} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
+                <div className="text-sm font-semibold text-foreground">{getEntryLabel(entry.fuelType)}</div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Menge</label>
+                  <div className="relative">
+                    <IntegerInput
+                      value={entry.amount > 0 ? entry.amount : undefined}
+                      onChange={v => {
+                        const updated = [...wizardData.fuelEntries!];
+                        updated[idx] = { ...updated[idx], amount: v ?? 0 };
+                        setWizardField('fuelEntries', updated);
+                      }}
+                      placeholder="z. B. 45000"
+                      className="pr-16"
+                    />
+                    <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">{getEntryUnit(entry.fuelType)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{getEntryHint(entry.fuelType)}</p>
+                </div>
+                {entry.fuelType === 'fernwaerme' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Emissionsfaktor (kg CO2/kWh)</label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={entry.emissionFactorCustom ?? ''}
+                      onChange={e => {
+                        const updated = [...wizardData.fuelEntries!];
+                        updated[idx] = { ...updated[idx], emissionFactorCustom: parseFloat(e.target.value) || undefined };
+                        setWizardField('fuelEntries', updated);
+                      }}
+                      placeholder="z. B. 0.18"
+                      className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Fuel amount – only for same-year, single fuel (integer-only) */}

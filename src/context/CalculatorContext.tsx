@@ -86,7 +86,8 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       }
       case 'fuelSource': {
         if (wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
-          return wizardData.fuelEntries.every(e => !!e.fuelType && e.amount > 0);
+          // Amounts are entered on the next step (inputValues)
+          return wizardData.fuelEntries.every(e => !!e.fuelType);
         }
         return !!wizardData.fuelType;
       }
