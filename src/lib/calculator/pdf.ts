@@ -23,7 +23,12 @@ import {
   getEnergyHeatingValueLabel,
 } from './pdf-helpers';
 
-export function generatePDF(data: WizardData, result: CalculationResult, outputType: string = 'calculation') {
+export function generatePDF(
+  data: WizardData,
+  result: CalculationResult,
+  outputType: string = 'calculation',
+  externalCalcId?: string,
+) {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pw = doc.internal.pageSize.getWidth();
   const ph = doc.internal.pageSize.getHeight();
@@ -32,7 +37,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   const cw = pw - mL - mR;
   let y = 20;
 
-  const calcId = `CO2-${Date.now().toString(36).toUpperCase()}`;
+  const calcId = externalCalcId ?? `CO2-${Date.now().toString(36).toUpperCase()}`;
   const today = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const docCase = getDocumentCase(data);
   const period = getPeriodString(data);
