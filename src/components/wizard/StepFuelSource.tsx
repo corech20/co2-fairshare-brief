@@ -2,7 +2,6 @@ import { useCalculator } from '@/context/CalculatorContext';
 import type { FuelType, FuelEntry } from '@/lib/calculator/types';
 import { Flame, Droplets, Thermometer, Zap, Leaf, Factory, Plus, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
@@ -157,14 +156,22 @@ export default function StepFuelSource() {
   const updateEntryBase = (index: number, base: BaseFuel) => {
     const entry = fuelEntries[index];
     const wasKwk = fromFuelType(entry.fuelType).kwk;
-    updateFuelEntry(index, { fuelType: toFuelType(base, wasKwk && KWK_CAPABLE.includes(base)) });
+    // If currently KWK but new base isn't KWK-capable, fall back to non-KWK
+    const keepKwk = wasKwk && KWK_CAPABLE.includes(base);
+    updateFuelEntry(index, { fuelType: toFuelType(base, keepKwk) });
   };
 
-  const toggleEntryKwk = (index: number, checked: boolean) => {
+  const updateEntryKind = (index: number, kind: 'heizung' | 'kwk') => {
     const entry = fuelEntries[index];
     const { base } = fromFuelType(entry.fuelType);
-    if (!base) return;
-    updateFuelEntry(index, { fuelType: toFuelType(base, checked && KWK_CAPABLE.includes(base)) });
+    if (kind === 'kwk') {
+      // Pick a KWK-capable base; default to current if possible, else erdgas
+      const target: BaseFuel = base && KWK_CAPABLE.includes(base) ? base : 'erdgas';
+      updateFuelEntry(index, { fuelType: toFuelType(target, true) });
+    } else {
+      const target: BaseFuel = base ?? 'erdgas';
+      updateFuelEntry(index, { fuelType: toFuelType(target, false) });
+    }
   };
 
   const removeFuelEntry = (index: number) => {
@@ -269,9 +276,9 @@ export default function StepFuelSource() {
             ← Zurück zur Einzelauswahl
           </Button>
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Brennstoffe / Wärmequellen</h2>
+        <h2 className="text-2xl font-bold text-foreground">Wärmequellen</h2>
         <p className="text-muted-foreground text-sm">
-          Fügen Sie bei Bedarf mehrere Brennstoffe oder KWK-Anlagen hinzu.
+          Fügen Sie bei Bedarf mehrere Wärmequellen hinzu.
         </p>
       </div>
 
@@ -281,12 +288,15 @@ export default function StepFuelSource() {
           const baseOptions = wizardData.heatSupplyType === 'fernwaerme'
             ? BASE_FUELS.filter(f => f.value !== 'fernwaerme')
             : BASE_FUELS;
-          const kwkApplicable = base ? KWK_CAPABLE.includes(base) : false;
+          // For KWK kind, only show KWK-capable fuels
+          const fuelOptionsForCard = kwk
+            ? baseOptions.filter(f => KWK_CAPABLE.includes(f.value))
+            : baseOptions;
           return (
             <div key={index} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-foreground">
-                  {kwk ? `KWK-Brennstoff ${index + 1}` : `Brennstoff ${index + 1}`}
+                  Wärmequelle {index + 1}
                 </span>
                 {fuelEntries.length > 1 && (
                   <button onClick={() => removeFuelEntry(index)} className="text-muted-foreground hover:text-destructive transition-colors">
@@ -294,24 +304,29 @@ export default function StepFuelSource() {
                   </button>
                 )}
               </div>
-              <select
-                value={base ?? ''}
-                onChange={e => updateEntryBase(index, e.target.value as BaseFuel)}
-                className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
-              >
-                {baseOptions.map(f => (
-                  <option key={f.value} value={f.value}>{f.label}</option>
-                ))}
-              </select>
-              {kwkApplicable && (
-                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-                  <Checkbox
-                    checked={kwk}
-                    onCheckedChange={(v) => toggleEntryKwk(index, v === true)}
-                  />
-                  <span>KWK-Anlage</span>
-                </label>
-              )}
+              <div>
+                <label className="text-xs text-muted-foreground">Art der Wärmequelle</label>
+                <select
+                  value={kwk ? 'kwk' : 'heizung'}
+                  onChange={e => updateEntryKind(index, e.target.value as 'heizung' | 'kwk')}
+                  className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
+                >
+                  <option value="heizung">Heizung</option>
+                  <option value="kwk">KWK-Anlage</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Brennstoff</label>
+                <select
+                  value={base ?? ''}
+                  onChange={e => updateEntryBase(index, e.target.value as BaseFuel)}
+                  className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground"
+                >
+                  {fuelOptionsForCard.map(f => (
+                    <option key={f.value} value={f.value}>{f.label}</option>
+                  ))}
+                </select>
+              </div>
               <div className="space-y-3">
                 <div>
                   <label className="text-xs text-muted-foreground">
@@ -346,7 +361,7 @@ export default function StepFuelSource() {
       {fuelEntries.length < 3 ? (
         <Button variant="outline" size="sm" onClick={addFuelEntry}>
           <Plus className="h-4 w-4 mr-1" />
-          Weiteren Brennstoff hinzufügen
+          Weitere Wärmequelle hinzufügen
         </Button>
       ) : null}
     </div>
