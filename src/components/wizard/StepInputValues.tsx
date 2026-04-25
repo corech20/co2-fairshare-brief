@@ -2,7 +2,7 @@ import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData, FuelType, FuelEntry } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
@@ -255,7 +255,22 @@ export default function StepInputValues() {
           <div className="space-y-4">
             {wizardData.fuelEntries!.map((entry: FuelEntry, idx: number) => (
               <div key={`${entry.fuelType}-${idx}`} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
-                <div className="text-sm font-semibold text-foreground">{getEntryLabel(entry.fuelType)}</div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="text-sm font-semibold text-foreground">{getEntryLabel(entry.fuelType)}</div>
+                  {wizardData.fuelEntries!.length > 1 && (
+                    <button
+                      type="button"
+                      aria-label="Eingabeblock entfernen"
+                      onClick={() => {
+                        const updated = wizardData.fuelEntries!.filter((_, i) => i !== idx);
+                        setWizardField('fuelEntries', updated);
+                      }}
+                      className="text-muted-foreground hover:text-destructive transition-colors -mr-1 -mt-1 p-1"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
                 <div className="space-y-1.5">
                   <label className="text-xs text-muted-foreground">Menge</label>
                   <div className="relative">
