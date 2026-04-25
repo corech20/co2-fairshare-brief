@@ -52,7 +52,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFontSize(7);
     doc.setTextColor(150, 150, 150);
     doc.text(
-      `CO2-Kostenaufteilungsrechner · ${calcId} · Erstellt am ${today} · Alle Angaben ohne Gewähr`,
+      `CO₂-Kostenaufteilungsrechner · ${calcId} · Erstellt am ${today} · Alle Angaben ohne Gewähr`,
       pw / 2, ph - 8, { align: 'center' },
     );
   };
@@ -158,7 +158,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       y += 4;
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
+      doc.text('(jahresübergreifend – Berechnung mit getrennten CO₂-Preisen pro Kalenderjahr)', mL, y);
     }
     y += 8;
 
@@ -189,7 +189,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
 
     // ═══ COMPACT RESULT SUMMARY on letter page ═══
     ensureSpace(30);
-    detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+    detailRow('Gesamte CO₂-Kosten (brutto):', fmt.currency(result.totalCO₂Cost), 2, true);
     detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 2, true);
     detailRow(`Anteil Mieter (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 2, true);
     y += 4;
@@ -229,7 +229,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(20, 40, 70);
-    doc.text('CO2-Kostenaufteilung – Berechnungsnachweis', mL, y);
+    doc.text('CO₂-Kostenaufteilung – Berechnungsnachweis', mL, y);
     y += 3;
     doc.setDrawColor(20, 40, 70);
     doc.setLineWidth(0.5);
@@ -249,7 +249,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       y += 4;
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
+      doc.text('(jahresübergreifend – Berechnung mit getrennten CO₂-Preisen pro Kalenderjahr)', mL, y);
     }
     y += 8;
   }
@@ -259,7 +259,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // ═══════════════════════════════════════════════════════════════════════
 
   // Show fuel type(s) explicitly at the top of the calculation section
-  sectionHeading('1. Brennstoff, Energiegehalt und CO2-Kosten');
+  sectionHeading('1. Brennstoff, Energiegehalt und CO₂-Kosten');
 
   // Multi-fuel summary line (single fuel is already shown inside the detail block)
   if (result.fuelResults.length > 1) {
@@ -278,11 +278,11 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       y += 5;
       doc.setFont('helvetica', 'normal');
       detailRow('Menge:', fmt.number(seg.amount, 0), 4);
-      detailRow('CO2-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
+      detailRow('CO₂-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
       detailRow(`${getEnergyHeatingValueLabel(data.fuelType ?? result.fuelResults[0]?.fuelType ?? '')}:`, `${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`, 4);
-      detailRow('CO2-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
-      detailRow('CO2-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
-      detailRow('CO2-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
+      detailRow('CO₂-Emissionen:', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
+      detailRow('CO₂-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
+      detailRow('CO₂-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
       y += 3;
     }
     ensureSpace(12);
@@ -290,9 +290,9 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setLineWidth(0.3);
     doc.line(mL + 2, y, pw - mR, y);
     y += 5;
-    detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
-    detailRow('Gesamte CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
-    detailRow('Gesamte CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
+    detailRow('Gesamte CO₂-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
+    detailRow('Gesamte CO₂-Kosten netto:', fmt.currency(result.totalCO₂CostNet), 2);
+    detailRow('Gesamte CO₂-Kosten brutto:', fmt.currency(result.totalCO₂Cost), 2, true);
   } else {
     // Standard per-fuel details
     for (let i = 0; i < result.fuelResults.length; i++) {
@@ -322,8 +322,8 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       doc.line(mL + 2, y, pw - mR, y);
       y += 5;
       detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 2)} kWh`, 2, true);
-      detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
-      detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`, 2);
+      detailRow('Gesamte CO₂-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
+      detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO₂/kWh`, 2);
     }
 
     // Net / Gross / VAT breakdown
@@ -339,7 +339,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     const pdfMixedVAT = pdfPrimaryFuel && gasFuelsSet.has(pdfPrimaryFuel) &&
       pdfPStart && pdfPEnd && pdfPStart < pdfVatBoundary && pdfPEnd >= pdfVatBoundary;
 
-    detailRow('CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
+    detailRow('CO₂-Kosten netto:', fmt.currency(result.totalCO₂CostNet), 2);
     
     if (pdfMixedVAT) {
       const dayMs = 1000 * 60 * 60 * 24;
@@ -348,19 +348,19 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
       const pdfStandardDays = pdfTotalDays - pdfReducedDays;
       detailRow(
         `USt. anteilig 7 % (${pdfReducedDays} Tage) / 19 % (${pdfStandardDays} Tage):`,
-        fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2,
+        fmt.currency(result.totalCO₂Cost - result.totalCO₂CostNet), 2,
       );
     } else {
-      detailRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2);
+      detailRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO₂Cost - result.totalCO₂CostNet), 2);
     }
     
-    detailRow('CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
+    detailRow('CO₂-Kosten brutto:', fmt.currency(result.totalCO₂Cost), 2, true);
 
-    // CO2 price note
+    // CO₂ price note
     y += 2;
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
-    doc.text(`CO2-Preis: ${fmt.currency(result.co2PricePerTon)} pro Tonne (${result.billingYear})`, mL + 2, y);
+    doc.text(`CO₂-Preis: ${fmt.currency(result.co2PricePerTon)} pro Tonne (${result.billingYear})`, mL + 2, y);
   }
 
   // Pellets / biomass note
@@ -369,7 +369,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     const biomassNote = doc.splitTextToSize(
-      'Hinweis: Holzpellets weisen einen Emissionsfaktor auf, sind jedoch nicht dem Brennstoffemissionshandelsgesetz (BEHG) unterworfen. Die CO2-Kosten betragen daher 0,00 EUR.',
+      'Hinweis: Holzpellets weisen einen Emissionsfaktor auf, sind jedoch nicht dem Brennstoffemissionshandelsgesetz (BEHG) unterworfen. Die CO₂-Kosten betragen daher 0,00 EUR.',
       cw - 4,
     );
     for (const line of biomassNote) {
@@ -386,9 +386,9 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // ═══════════════════════════════════════════════════════════════════════
 
   if (result.isResidential) {
-    sectionHeading('2. CO2-Aufteilung nach dem Stufenmodell für Wohngebäude');
+    sectionHeading('2. CO₂-Aufteilung nach dem Stufenmodell für Wohngebäude');
   } else {
-    sectionHeading('2. CO2-Aufteilung zwischen Vermieter und Mieter');
+    sectionHeading('2. CO₂-Aufteilung zwischen Vermieter und Mieter');
   }
 
   detailRow('Gebäudetyp:', getBuildingTypeLabel(data), 2);
@@ -409,16 +409,16 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     detailRow(`${areaLabel}:`, `${fmt.number(result.relevantArea, 0)} m²`, 2);
   }
 
-  detailRow('Spezifischer CO2-Ausstoß (Abrechnungszeitraum):', `${fmt.number(result.emissionsPerSqmYear, 2)} kg CO2 / m²`, 2);
+  detailRow('Spezifischer CO₂-Ausstoß (Abrechnungszeitraum):', `${fmt.number(result.emissionsPerSqmYear, 2)} kg CO₂ / m²`, 2);
 
   // Annualized value – clearly labeled as classification-only
   if (result.annualizationFactor && result.emissionsPerSqmAnnualized) {
-    detailRow('Hochgerechneter Jahreswert (nur für Einstufung):', `${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`, 2);
+    detailRow('Hochgerechneter Jahreswert (nur für Einstufung):', `${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO₂ / m² / a`, 2);
     y += 1;
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     const annNote = doc.splitTextToSize(
-      `Hochrechnung: ${fmt.number(result.emissionsPerSqmYear, 2)} × ${fmt.number(result.annualizationFactor, 4)} = ${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im Stufenmodell verwendet, nicht für die Kostenberechnung.`,
+      `Hochrechnung: ${fmt.number(result.emissionsPerSqmYear, 2)} × ${fmt.number(result.annualizationFactor, 4)} = ${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO₂/m²/a. Dieser Wert wird ausschließlich für die Einstufung im Stufenmodell verwendet, nicht für die Kostenberechnung.`,
       cw - 6,
     );
     for (const line of annNote) {
@@ -440,7 +440,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     if (result.restrictionApplied === 'fall1und2') {
       detailRow('Aufteilung:', 'Mieter 100 % / Vermieter 0 %', 2, true);
       y += 1;
-      bodyText('Da beide öffentlich-rechtlichen Einschränkungen (Fall 1 und Fall 2) vorliegen, trägt der Mieter die CO2-Kosten vollständig.', 2);
+      bodyText('Da beide öffentlich-rechtlichen Einschränkungen (Fall 1 und Fall 2) vorliegen, trägt der Mieter die CO₂-Kosten vollständig.', 2);
     } else if (result.restrictionApplied === 'fall1' || result.restrictionApplied === 'fall2') {
       detailRow('Aufteilung:', `Mieter ${result.tenantPercent} % / Vermieter ${result.landlordPercent} %`, 2, true);
       y += 1;
@@ -448,7 +448,7 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
     } else {
       detailRow('Aufteilung:', 'Hälftige Aufteilung (50 % / 50 %) gemäß § 8 CO2KostAufG', 2, true);
       y += 1;
-      bodyText('Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Vermieter und Mieter.', 2);
+      bodyText('Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO₂-Kosten zwischen Vermieter und Mieter.', 2);
     }
   }
   y += 6;
@@ -463,8 +463,8 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
 
   if (specialParagraphs.length > 0) {
     const section3Title = isNonResidential
-      ? '3. Besonderheiten zur Aufteilung der CO2-Kosten'
-      : '3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell';
+      ? '3. Besonderheiten zur Aufteilung der CO₂-Kosten'
+      : '3. Besonderheiten zur Aufteilung der CO₂-Kosten / Abweichungen vom Stufenmodell';
     sectionHeading(section3Title);
 
     for (const para of specialParagraphs) {
@@ -478,9 +478,9 @@ export function generatePDF(data: WizardData, result: CalculationResult, outputT
   // PART V — FINAL RESULT (same typography as sections 1–3, no alien box)
   // ═══════════════════════════════════════════════════════════════════════
 
-  sectionHeading('4. Aufteilung der CO2-Kosten unter Berücksichtigung der vorgenannten Besonderheiten');
+  sectionHeading('4. Aufteilung der CO₂-Kosten unter Berücksichtigung der vorgenannten Besonderheiten');
 
-  detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+  detailRow('Gesamte CO₂-Kosten (brutto):', fmt.currency(result.totalCO₂Cost), 2, true);
 
   y += 2;
   doc.setDrawColor(200, 200, 200);
