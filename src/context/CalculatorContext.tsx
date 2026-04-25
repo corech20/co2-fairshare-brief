@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { WizardData, CalculationResult, WizardStep } from '@/lib/calculator/types';
 import { WIZARD_STEPS } from '@/lib/calculator/types';
 import { calculateCO2Allocation, validateBillingPeriod, isCrossYearPeriod } from '@/lib/calculator/engine';
+import { generateCalcId, saveHistoryEntry, getHistoryEntry } from '@/lib/calculator/historyStore';
 
 interface CalculatorContextType {
   wizardData: WizardData;
@@ -15,7 +16,9 @@ interface CalculatorContextType {
   canGoNext: boolean;
   isLastStep: boolean;
   result: CalculationResult | null;
+  calcId: string | null;
   calculate: () => CalculationResult;
+  loadFromHistory: (calcId: string) => boolean;
   reset: () => void;
 }
 
@@ -25,6 +28,7 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
   const [wizardData, setWizardData] = useState<WizardData>({});
   const [currentStep, setCurrentStep] = useState(0);
   const [result, setResult] = useState<CalculationResult | null>(null);
+  const [calcId, setCalcId] = useState<string | null>(null);
 
   const totalSteps = WIZARD_STEPS.length;
   const currentStepKey = WIZARD_STEPS[currentStep];
@@ -119,19 +123,38 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
   const calculate = useCallback(() => {
     const res = calculateCO2Allocation(wizardData);
     setResult(res);
+    const newId = generateCalcId();
+    setCalcId(newId);
+    saveHistoryEntry({
+      calcId: newId,
+      savedAt: new Date().toISOString(),
+      wizardData,
+      result: res,
+    });
     return res;
   }, [wizardData]);
+
+  const loadFromHistory = useCallback((id: string): boolean => {
+    const entry = getHistoryEntry(id);
+    if (!entry) return false;
+    setWizardData(entry.wizardData);
+    setResult(entry.result);
+    setCalcId(entry.calcId);
+    setCurrentStep(WIZARD_STEPS.length - 1);
+    return true;
+  }, []);
 
   const reset = useCallback(() => {
     setWizardData({});
     setCurrentStep(0);
     setResult(null);
+    setCalcId(null);
   }, []);
 
   return (
     <CalculatorContext.Provider value={{
       wizardData, setWizardField, currentStep, currentStepKey, totalSteps,
-      goNext, goBack, goToStep, canGoNext, isLastStep, result, calculate, reset,
+      goNext, goBack, goToStep, canGoNext, isLastStep, result, calcId, calculate, loadFromHistory, reset,
     }}>
       {children}
     </CalculatorContext.Provider>
