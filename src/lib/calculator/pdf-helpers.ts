@@ -143,13 +143,13 @@ export function getSubjectLine(data: WizardData, _result: CalculationResult): st
   switch (docCase) {
     case 'C':
     case 'D':
-      return `Berechnung der CO₂-Kosten und Erstattungsanspruch nach dem CO2KostAufG`;
+      return `Berechnung der CO2-Kosten und Erstattungsanspruch nach dem CO2KostAufG`;
     case 'B':
-      return `CO₂-Kostenaufteilung für die Wärmeversorgung im Abrechnungszeitraum ${period}`;
+      return `CO2-Kostenaufteilung für die Wärmeversorgung im Abrechnungszeitraum ${period}`;
     case 'E':
-      return `CO₂-Kostenaufteilung (Nichtwohngebäude) für den Abrechnungszeitraum ${period}`;
+      return `CO2-Kostenaufteilung (Nichtwohngebäude) für den Abrechnungszeitraum ${period}`;
     default:
-      return `CO₂-Kostenaufteilung für den Abrechnungszeitraum ${period}`;
+      return `CO2-Kostenaufteilung für den Abrechnungszeitraum ${period}`;
   }
 }
 
@@ -176,18 +176,18 @@ export function getIntroText(data: WizardData, _result: CalculationResult): stri
 
   switch (docCase) {
     case 'A':
-      return `anbei erhalten Sie die CO₂-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Die Aufteilung der CO₂-Kosten zwischen Vermieter und Mieter erfolgt gemäß dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG).`;
+      return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Die Aufteilung der CO2-Kosten zwischen Vermieter und Mieter erfolgt gemäß dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG).`;
     case 'B':
-      return `anbei erhalten Sie die CO₂-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Die Aufteilung der CO₂-Kosten für die Wärmeversorgung des Gebäudes erfolgt gemäß dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG).`;
+      return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Die Aufteilung der CO2-Kosten für die Wärmeversorgung des Gebäudes erfolgt gemäß dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG).`;
     case 'C':
-      return `anbei erhalten Sie die CO₂-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Als Mieter/in mit eigener Wärmeversorgung (Etagenheizung) ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) ein möglicher Erstattungsanspruch gegenüber dem Vermieter in Höhe des ausgewiesenen Vermieteranteils der CO₂-Kosten.`;
+      return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Als Mieter/in mit eigener Wärmeversorgung (Etagenheizung) ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) ein möglicher Erstattungsanspruch gegenüber dem Vermieter in Höhe des ausgewiesenen Vermieteranteils der CO2-Kosten.`;
     case 'D':
-      return `anbei erhalten Sie die CO₂-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Als Mieter/in mit direkter Wärmebelieferung ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) ein möglicher Erstattungsanspruch gegenüber dem Vermieter in Höhe des ausgewiesenen Vermieteranteils der CO₂-Kosten.`;
+      return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Als Mieter/in mit direkter Wärmebelieferung ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) ein möglicher Erstattungsanspruch gegenüber dem Vermieter in Höhe des ausgewiesenen Vermieteranteils der CO2-Kosten.`;
     case 'E':
       if (data.restrictionCase === 'fall1und2') {
-        return `anbei erhalten Sie die CO₂-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Da für das Nichtwohngebäude sowohl Einschränkungen bei der energetischen Verbesserung des Gebäudes (Fall 1) als auch bei der Wärmeversorgung (Fall 2) vorliegen, trägt der Mieter die CO₂-Kosten gemäß Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) vollständig.`;
+        return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Da für das Nichtwohngebäude sowohl Einschränkungen bei der energetischen Verbesserung des Gebäudes (Fall 1) als auch bei der Wärmeversorgung (Fall 2) vorliegen, trägt der Mieter die CO2-Kosten gemäß Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) vollständig.`;
       }
-      return `anbei erhalten Sie die CO₂-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Für das Nichtwohngebäude ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) im Regelfall eine hälftige Aufteilung der CO₂-Kosten zwischen Mieter und Vermieter.`;
+      return `anbei erhalten Sie die CO2-Kostenaufteilungsrechnung${liegenschaft} im Abrechnungszeitraum ${period}. Für das Nichtwohngebäude ergibt sich nach dem Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Mieter und Vermieter.`;
   }
 }
 
@@ -208,9 +208,9 @@ const STUFEN_RANGES = [
 export function getStufenmodellRangeText(step: number): string {
   if (step < 1 || step > 10) return '';
   const range = STUFEN_RANGES[step - 1];
-  if (step === 1) return `< ${range.max} kg CO₂ / m² / a`;
-  if (step === 10) return `≥ ${range.min} kg CO₂ / m² / a`;
-  return `${range.min} bis < ${range.max} kg CO₂ / m² / a`;
+  if (step === 1) return `< ${range.max} kg CO2 / m² / a`;
+  if (step === 10) return `≥ ${range.min} kg CO2 / m² / a`;
+  return `${range.min} bis < ${range.max} kg CO2 / m² / a`;
 }
 
 // ── Section 3: Special circumstances text ─────────────────────────────────
@@ -226,19 +226,19 @@ export function getSpecialCircumstancesText(data: WizardData, result: Calculatio
     }
   } else if (restriction === 'fall1und2') {
     if (result.isResidential) {
-      lines.push('Basierend auf den Anwenderangaben liegen sowohl eine Einschränkung bei der energetischen Verbesserung des Gebäudes (Fall 1, z. B. Denkmalschutz) als auch eine Einschränkung bei der Wärmeversorgung (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz) vor. Gemäß § 7 Abs. 2 CO2KostAufG entfallen die CO₂-Kosten in diesem Fall vollständig auf den Mieter (Mieter 100 % / Vermieter 0 %).');
+      lines.push('Basierend auf den Anwenderangaben liegen sowohl eine Einschränkung bei der energetischen Verbesserung des Gebäudes (Fall 1, z. B. Denkmalschutz) als auch eine Einschränkung bei der Wärmeversorgung (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz) vor. Gemäß § 7 Abs. 2 CO2KostAufG entfallen die CO2-Kosten in diesem Fall vollständig auf den Mieter (Mieter 100 % / Vermieter 0 %).');
     } else {
-      lines.push('Auf Grundlage der ausgewählten rechtlichen Beschränkungen nach § 9 CO2KostAufG erfolgt keine Aufteilung der CO₂-Kosten; der Vermieteranteil entfällt vollständig (Mieter 100 % / Vermieter 0 %).');
+      lines.push('Auf Grundlage der ausgewählten rechtlichen Beschränkungen nach § 9 CO2KostAufG erfolgt keine Aufteilung der CO2-Kosten; der Vermieteranteil entfällt vollständig (Mieter 100 % / Vermieter 0 %).');
     }
   } else if (restriction === 'fall1') {
     if (result.isResidential) {
-      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1, z. B. Denkmalschutz). Der Vermieteranteil an den CO₂-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der energetischen Verbesserung des Gebäudes vor (Fall 1, z. B. Denkmalschutz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
       lines.push('Auf Grundlage der ausgewählten rechtlichen Beschränkung nach § 9 CO2KostAufG reduziert sich der Vermieteranteil bei Nichtwohngebäuden von 50 % auf 25 % (Mieter 75 % / Vermieter 25 %).');
     }
   } else if (restriction === 'fall2') {
     if (result.isResidential) {
-      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz). Der Vermieteranteil an den CO₂-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
+      lines.push('Basierend auf den Anwenderangaben liegt eine Einschränkung bei der Wärmeversorgung vor (Fall 2, z. B. Anschlusszwang an ein Fernwärmenetz). Der Vermieteranteil an den CO2-Kosten wird daher gemäß § 9 Abs. 1 CO2KostAufG gegenüber dem Stufenmodell halbiert.');
     } else {
       lines.push('Auf Grundlage der ausgewählten rechtlichen Beschränkung nach § 9 CO2KostAufG reduziert sich der Vermieteranteil bei Nichtwohngebäuden von 50 % auf 25 % (Mieter 75 % / Vermieter 25 %).');
     }
@@ -254,7 +254,7 @@ export function getSpecialCircumstancesText(data: WizardData, result: Calculatio
   }
 
   if (result.usedDirectCost) {
-    lines.push('Die CO₂-Kosten wurden ganz oder teilweise direkt aus der Abrechnung des Wärmelieferanten übernommen und nicht rechnerisch aus der Brennstoffmenge ermittelt.');
+    lines.push('Die CO2-Kosten wurden ganz oder teilweise direkt aus der Abrechnung des Wärmelieferanten übernommen und nicht rechnerisch aus der Brennstoffmenge ermittelt.');
   }
 
   return lines.join('\n\n');
@@ -292,10 +292,10 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
   steps.push(`Brennstoff: ${fr.fuelLabel}`);
   steps.push(`Menge: ${fmt.number(fr.inputAmount, 0)} ${getFuelUnitLabel(fr.fuelType)}`);
   steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(fr.energyHeatingValueKwh, 2)} kWh`);
-  steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO₂/kWh`);
-  steps.push(`CO₂-Emissionen: ${fmt.number(fr.co2Kg, 1)} kg`);
+  steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
+  steps.push(`CO2-Emissionen: ${fmt.number(fr.co2Kg, 1)} kg`);
   if (fr.usedDirectCost) {
-    steps.push(`CO₂-Kosten (direkt übernommen): ${fmt.currency(fr.co2CostGross)} brutto`);
+    steps.push(`CO2-Kosten (direkt übernommen): ${fmt.currency(fr.co2CostGross)} brutto`);
   }
   return steps;
 }
@@ -318,12 +318,12 @@ export function getBuildingTypeLabel(data: WizardData): string {
 export function getClosingText(data: WizardData): string {
   const docCase = getDocumentCase(data);
   if (docCase === 'C' || docCase === 'D') {
-    return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Ich bitte um Erstattung des ausgewiesenen Vermieteranteils an den CO₂-Kosten innerhalb der gesetzlich vorgesehenen Frist.\n\nFür Rückfragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
+    return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Ich bitte um Erstattung des ausgewiesenen Vermieteranteils an den CO2-Kosten innerhalb der gesetzlich vorgesehenen Frist.\n\nFür Rückfragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
   }
   if (docCase === 'E') {
-    return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Diese Mitteilung dient der Information über die Aufteilung der CO₂-Kosten gemäß den gesetzlichen Anforderungen für Nichtwohngebäude.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
+    return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Diese Mitteilung dient der Information über die Aufteilung der CO2-Kosten gemäß den gesetzlichen Anforderungen für Nichtwohngebäude.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
   }
-  return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Diese Mitteilung dient der Information über die Aufteilung der CO₂-Kosten gemäß den gesetzlichen Anforderungen.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
+  return 'Die vorstehende Berechnung erfolgte auf Grundlage der gesetzlichen Vorgaben des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG). Diese Mitteilung dient der Information über die Aufteilung der CO2-Kosten gemäß den gesetzlichen Anforderungen.\n\nFür Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen';
 }
 
 // ── Dynamic area label for PDF ────────────────────────────────────────────
@@ -343,7 +343,7 @@ export function getAreaLabelForPDF(data: WizardData): string {
 export function getSummaryText(data: WizardData, result: CalculationResult): string {
   const docCase = getDocumentCase(data);
   if (docCase === 'C' || docCase === 'D') {
-    return `Nach der Berechnung entfallen ${result.landlordPercent} % der CO₂-Kosten (${fmt.currency(result.landlordShare)}) auf den Vermieter und ${result.tenantPercent} % (${fmt.currency(result.tenantShare)}) auf den/die Mieter/in.`;
+    return `Nach der Berechnung entfallen ${result.landlordPercent} % der CO2-Kosten (${fmt.currency(result.landlordShare)}) auf den Vermieter und ${result.tenantPercent} % (${fmt.currency(result.tenantShare)}) auf den/die Mieter/in.`;
   }
-  return `Nach der Berechnung entfallen ${result.landlordPercent} % der CO₂-Kosten auf den Vermieter und ${result.tenantPercent} % auf den Mieter.`;
+  return `Nach der Berechnung entfallen ${result.landlordPercent} % der CO2-Kosten auf den Vermieter und ${result.tenantPercent} % auf den Mieter.`;
 }
