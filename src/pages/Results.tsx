@@ -237,7 +237,10 @@ export default function ResultsPage() {
                   {result.reimbursementReductionApplied ? (
                     <>
                       <div className="text-xs text-primary font-medium mt-1 tabular-nums">
-                        {result.baseLandlordPercent}&nbsp;% abzüglich {result.reimbursementReductionPercent}&nbsp;% Kürzung
+                        {result.baseLandlordPercent}&nbsp;% Ausgangsanteil
+                      </div>
+                      <div className="text-xs text-primary font-medium tabular-nums">
+                        abzgl. {result.reimbursementReductionPercent}&nbsp;% Kürzung
                       </div>
                       <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                         wegen zusätzlichem Gasgerät ohne eigenen Zähler
@@ -251,9 +254,14 @@ export default function ResultsPage() {
                   <div className="text-xs text-muted-foreground mb-1">Anteil Mieter</div>
                   <div className="text-2xl font-bold text-accent tabular-nums">{formatCurrency(result.tenantShare)}</div>
                   {result.reimbursementReductionApplied ? (
-                    <div className="text-xs text-accent font-medium mt-1 tabular-nums">
-                      {result.baseTenantPercent}&nbsp;% zuzüglich verschobenem Kürzungsbetrag
-                    </div>
+                    <>
+                      <div className="text-xs text-accent font-medium mt-1 tabular-nums">
+                        {result.baseTenantPercent}&nbsp;% Ausgangsanteil
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                        erhöht um den beim Vermieter abgezogenen Betrag
+                      </div>
+                    </>
                   ) : (
                     <div className="text-xs text-accent font-medium mt-1 tabular-nums">{result.tenantPercent}&nbsp;%</div>
                   )}
