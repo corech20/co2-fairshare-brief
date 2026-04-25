@@ -91,13 +91,13 @@ export default function StepInputValues() {
   const needsApartmentArea = wizardData.heatSupplyType === 'etage' ||
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
-  // Whitelist: hide the optional "Gebäudewohnfläche" field only in these two self-supply / direct-supply cases:
+  // Hide the optional building total area for tenant self-/direct-supply cases:
   //   1) tenant + apartment-owned heating (etage)
-  //   2) tenant + district heating + tenant receives own invoice from heat supplier
+  //   2) tenant + district heating (always direct supply in tenant flow)
   const hideOptionalBuildingArea =
     wizardData.userRole === 'mieter' && (
       wizardData.heatSupplyType === 'etage' ||
-      (wizardData.heatSupplyType === 'fernwaerme' && wizardData.tenantIsDirectContractParty === true)
+      wizardData.heatSupplyType === 'fernwaerme'
     );
   const showOptionalBuildingArea = needsApartmentArea && !hideOptionalBuildingArea;
 
