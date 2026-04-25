@@ -177,6 +177,17 @@ export default function ResultsPage() {
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="container-narrow flex h-14 items-center px-4">
           <span className="text-sm font-semibold text-foreground">Ergebnis der CO2-Kostenaufteilung</span>
+          <div className="ml-auto flex items-center gap-3">
+            {calcId && (
+              <span className="hidden sm:inline text-xs text-muted-foreground tabular-nums">
+                ID: {calcId}
+              </span>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => navigate('/verlauf')}>
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">Verlauf</span>
+            </Button>
+          </div>
         </div>
       </header>
 
