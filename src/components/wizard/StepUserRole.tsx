@@ -6,7 +6,7 @@ const OPTIONS: { value: UserRole; label: string; desc: string; icon: typeof User
   {
     value: 'mieter',
     label: 'Berechnung als Mieter',
-    desc: 'CO₂-Kostenaufteilung für Mieter mit eigener Wärmeversorgung oder direkter Wärmelieferung – bei Bedarf mit Erstattungsschreiben.',
+    desc: 'CO2-Kostenaufteilung für Mieter mit eigener Wärmeversorgung oder direkter Wärmelieferung – bei Bedarf mit Erstattungsschreiben.',
     icon: User,
   },
   {

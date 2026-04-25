@@ -68,13 +68,13 @@ export default function ResultsPage() {
                 <div className="space-y-2">
                   <h2 className="text-xl font-bold text-foreground">Keine Anwendbarkeit des CO2KostAufG</h2>
                   <p className="text-sm text-foreground leading-relaxed">
-                    Für diesen Fernwärmefall wird keine CO₂-Kostenaufteilung nach dem CO2KostAufG berechnet,
+                    Für diesen Fernwärmefall wird keine CO2-Kostenaufteilung nach dem CO2KostAufG berechnet,
                     da ein erstmaliger Anschluss an das Wärmenetz ab dem 1. Januar 2023 vorliegt.
                   </p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {isTenant
                       ? 'Ein Erstattungsanspruch nach dem CO2KostAufG wird für diesen Fall nicht berechnet.'
-                      : 'Eine Aufteilung der CO₂-Kosten nach dem CO2KostAufG wird für diesen Fall nicht berechnet.'}
+                      : 'Eine Aufteilung der CO2-Kosten nach dem CO2KostAufG wird für diesen Fall nicht berechnet.'}
                   </p>
                 </div>
               </div>
