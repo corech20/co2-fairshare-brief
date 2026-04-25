@@ -21,6 +21,13 @@ const BASE_FUELS: { value: BaseFuel; label: string; desc: string; icon: typeof F
 /** Fuels that have a KWK variant in the engine. */
 const KWK_CAPABLE: BaseFuel[] = ['erdgas', 'heizoel', 'fluessiggas'];
 
+/** KWK options shown as concrete fuel-bound choices in the advanced section. */
+const KWK_OPTIONS: { fuel: BaseFuel; label: string }[] = [
+  { fuel: 'erdgas', label: 'KWK (Erdgas)' },
+  { fuel: 'heizoel', label: 'KWK (Heizöl)' },
+  { fuel: 'fluessiggas', label: 'KWK (Flüssiggas)' },
+];
+
 /** Map (baseFuel, kwk) → internal engine FuelType. */
 function toFuelType(base: BaseFuel, kwk: boolean): FuelType {
   if (base === 'kohle') return 'braunkohle';
@@ -54,7 +61,6 @@ export default function StepFuelSource() {
   const isMultiFuel = fuelEntries.length > 0;
 
   const current = fromFuelType(wizardData.fuelType);
-  const [kwkChecked, setKwkChecked] = useState<boolean>(current.kwk);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(current.kwk);
 
   // Filter out Fernwärme if already selected as heat supply type in step 3
@@ -63,17 +69,13 @@ export default function StepFuelSource() {
     : BASE_FUELS;
 
   const selectBaseFuel = (base: BaseFuel) => {
-    const useKwk = kwkChecked && KWK_CAPABLE.includes(base);
-    setWizardField('fuelType', toFuelType(base, useKwk));
+    setWizardField('fuelType', toFuelType(base, false));
     if (fuelEntries.length > 0) setWizardField('fuelEntries', undefined);
   };
 
-  const toggleKwk = (checked: boolean) => {
-    setKwkChecked(checked);
-    // Re-derive currently selected fuel if applicable
-    if (current.base && KWK_CAPABLE.includes(current.base)) {
-      setWizardField('fuelType', toFuelType(current.base, checked));
-    }
+  const selectKwk = (fuel: BaseFuel) => {
+    setWizardField('fuelType', toFuelType(fuel, true));
+    if (fuelEntries.length > 0) setWizardField('fuelEntries', undefined);
   };
 
   const addFuelEntry = () => {
@@ -120,6 +122,7 @@ export default function StepFuelSource() {
   // Single fuel mode
   if (!isMultiFuel) {
     const selectedBase = current.base;
+    const selectedKwk = current.kwk;
     return (
       <div className="space-y-6">
         <div>
@@ -129,7 +132,7 @@ export default function StepFuelSource() {
 
         <div className="grid gap-3">
           {visibleBaseFuels.map(opt => {
-            const active = selectedBase === opt.value;
+            const active = selectedBase === opt.value && !selectedKwk;
             return (
               <button
                 key={opt.value}
@@ -158,24 +161,24 @@ export default function StepFuelSource() {
             <span className="text-xs text-muted-foreground font-normal ml-1">optional – nur auswählen, wenn bekannt</span>
           </button>
           {showAdvanced && (
-            <div className="mt-3 pl-6">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <Checkbox
-                  checked={kwkChecked}
-                  onCheckedChange={(v) => toggleKwk(v === true)}
-                  disabled={selectedBase ? !KWK_CAPABLE.includes(selectedBase) : false}
-                  className="mt-0.5"
-                />
-                <div>
-                  <div className="text-sm font-medium text-foreground">KWK-Anlage (Kraft-Wärme-Kopplung)</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">z. B. Blockheizkraftwerk</div>
-                  {selectedBase && !KWK_CAPABLE.includes(selectedBase) && (
-                    <div className="text-xs text-muted-foreground mt-1 italic">
-                      Für die gewählte Heizungsart nicht anwendbar.
-                    </div>
-                  )}
-                </div>
-              </label>
+            <div className="mt-3 pl-6 space-y-2">
+              {KWK_OPTIONS.map(opt => {
+                const active = selectedKwk && selectedBase === opt.fuel;
+                return (
+                  <button
+                    key={opt.fuel}
+                    onClick={() => selectKwk(opt.fuel)}
+                    className={`w-full rounded-lg border-2 px-3 py-2.5 text-left text-sm font-medium transition-all ${
+                      active
+                        ? 'border-accent bg-accent/5 text-foreground shadow-sm'
+                        : 'border-border bg-card text-foreground hover:border-primary/30'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+              <p className="text-xs text-muted-foreground mt-2">Kraft-Wärme-Kopplung (z. B. Blockheizkraftwerk)</p>
             </div>
           )}
         </div>
