@@ -250,6 +250,51 @@ export default function StepInputValues() {
           />
         )}
 
+        {/* Multi-fuel: one input block per selected position */}
+        {isMultiFuel && !crossYear && (
+          <div className="space-y-4">
+            {wizardData.fuelEntries!.map((entry: FuelEntry, idx: number) => (
+              <div key={`${entry.fuelType}-${idx}`} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
+                <div className="text-sm font-semibold text-foreground">{getEntryLabel(entry.fuelType)}</div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Menge</label>
+                  <div className="relative">
+                    <IntegerInput
+                      value={entry.amount > 0 ? entry.amount : undefined}
+                      onChange={v => {
+                        const updated = [...wizardData.fuelEntries!];
+                        updated[idx] = { ...updated[idx], amount: v ?? 0 };
+                        setWizardField('fuelEntries', updated);
+                      }}
+                      placeholder="z. B. 45000"
+                      className="pr-16"
+                    />
+                    <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">{getEntryUnit(entry.fuelType)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{getEntryHint(entry.fuelType)}</p>
+                </div>
+                {entry.fuelType === 'fernwaerme' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Emissionsfaktor (kg CO2/kWh)</label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={entry.emissionFactorCustom ?? ''}
+                      onChange={e => {
+                        const updated = [...wizardData.fuelEntries!];
+                        updated[idx] = { ...updated[idx], emissionFactorCustom: parseFloat(e.target.value) || undefined };
+                        setWizardField('fuelEntries', updated);
+                      }}
+                      placeholder="z. B. 0.18"
+                      className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Fuel amount – only for same-year, single fuel (integer-only) */}
         {!isMultiFuel && !crossYear && (
           <div className="space-y-1.5">
