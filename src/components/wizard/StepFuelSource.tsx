@@ -223,9 +223,6 @@ export default function StepFuelSource() {
           </button>
           {showAdvanced && (
             <div className="mt-3 pl-6 space-y-2">
-              <p className="text-xs text-muted-foreground mb-1">
-                Eine KWK-Auswahl wird als zusätzliche Wärmequelle <strong>neben</strong> der normalen Heizungsart erfasst. Sie können die KWK-Brennstoffmenge separat eingeben.
-              </p>
               {KWK_OPTIONS.map(opt => {
                 const active = selectedKwkFuel === opt.fuel;
                 return (
@@ -242,7 +239,6 @@ export default function StepFuelSource() {
                   </button>
                 );
               })}
-              <p className="text-xs text-muted-foreground mt-2">Kraft-Wärme-Kopplung (z. B. Blockheizkraftwerk)</p>
             </div>
           )}
         </div>
@@ -267,16 +263,16 @@ export default function StepFuelSource() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="space-y-3">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Brennstoffe / Wärmequellen</h2>
-          <p className="text-muted-foreground mt-2">
-            Normale Heizung und KWK werden als getrennte Wärmequellen mit eigener Brennstoffmenge berechnet. Die finnische Methode wird auf KWK-Einträge automatisch angewendet.
-          </p>
+          <Button variant="ghost" size="sm" onClick={exitMultiFuel} className="-ml-2 h-auto px-2 py-1">
+            ← Zurück zur Einzelauswahl
+          </Button>
         </div>
-        <Button variant="ghost" size="sm" onClick={exitMultiFuel}>
-          Zurück zur Einzelauswahl
-        </Button>
+        <h2 className="text-2xl font-bold text-foreground">Brennstoffe / Wärmequellen</h2>
+        <p className="text-muted-foreground text-sm">
+          Fügen Sie bei Bedarf mehrere Brennstoffe oder KWK-Anlagen hinzu.
+        </p>
       </div>
 
       <div className="space-y-4">
@@ -313,13 +309,13 @@ export default function StepFuelSource() {
                     checked={kwk}
                     onCheckedChange={(v) => toggleEntryKwk(index, v === true)}
                   />
-                  <span>KWK-Anlage (Kraft-Wärme-Kopplung)</span>
+                  <span>KWK-Anlage</span>
                 </label>
               )}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div>
                   <label className="text-xs text-muted-foreground">
-                    {kwk ? 'KWK-Brennstoffmenge (nur ganze Zahlen)' : 'Menge (nur ganze Zahlen)'}
+                    Menge
                   </label>
                   <IntegerInput
                     value={entry.amount > 0 ? entry.amount : undefined}
@@ -342,11 +338,6 @@ export default function StepFuelSource() {
                   </div>
                 )}
               </div>
-              {kwk && (
-                <p className="text-xs text-muted-foreground">
-                  Aus dieser KWK-Brennstoffmenge wird nach finnischer Methode automatisch nur der Wärmeanteil in die CO2-Kosten übernommen. Der Stromanteil bleibt außen vor.
-                </p>
-              )}
             </div>
           );
         })}
@@ -357,9 +348,7 @@ export default function StepFuelSource() {
           <Plus className="h-4 w-4 mr-1" />
           Weiteren Brennstoff hinzufügen
         </Button>
-      ) : (
-        <p className="text-xs text-muted-foreground">Maximal 3 Brennstoffe / Wärmequellen pro Berechnung.</p>
-      )}
+      ) : null}
     </div>
   );
 }
