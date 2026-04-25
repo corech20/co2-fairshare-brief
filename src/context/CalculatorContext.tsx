@@ -67,15 +67,8 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'buildingType': return !!wizardData.buildingType;
       case 'heatSupply': {
         if (!wizardData.heatSupplyType) return false;
-        // Mieter + Fernwärme (außer Sonderausschluss): Vertragspartner-Frage muss beantwortet sein
-        if (
-          wizardData.userRole === 'mieter' &&
-          wizardData.heatSupplyType === 'fernwaerme' &&
-          !wizardData.districtHeatingConnectedAfter2023 &&
-          wizardData.tenantIsDirectContractParty === undefined
-        ) {
-          return false;
-        }
+        // Mieter + Fernwärme/Nahwärme gilt verbindlich als Direktlieferungsfall –
+        // keine zusätzliche Vertragspartner-Frage mehr erforderlich.
         return true;
       }
       case 'restriction': return !!wizardData.restrictionCase;
