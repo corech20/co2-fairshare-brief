@@ -247,6 +247,11 @@ export function validateBillingPeriod(start?: string, end?: string): string | nu
   if (!start || !end) return null;
   const s = new Date(start);
   const e = new Date(end);
+  if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Bitte ein gültiges Datum eingeben.';
+  const MIN_YEAR = 2023;
+  if (s.getFullYear() < MIN_YEAR || e.getFullYear() < MIN_YEAR) {
+    return `Es werden nur Abrechnungszeiträume ab dem Jahr ${MIN_YEAR} unterstützt.`;
+  }
   if (e <= s) return 'Das Enddatum muss nach dem Startdatum liegen.';
   const days = getBillingPeriodDays(start, end);
   if (days > 365) return 'Der angegebene Zeitraum darf nicht länger als 365 Tage sein.';
