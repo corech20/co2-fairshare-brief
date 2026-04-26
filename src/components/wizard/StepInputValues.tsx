@@ -61,7 +61,7 @@ function InputField({ label, hint, value, onChange, type = 'number', placeholder
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors pr-16"
+          className="block w-full box-border h-12 rounded-lg border-2 border-border bg-card px-4 py-3 text-base leading-tight text-foreground focus:border-accent focus:outline-none transition-colors pr-16"
         />
         {unit && (
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{unit}</span>
@@ -92,7 +92,7 @@ function AddressFields({ title, address, onChangeAddress, showApartment }: {
             <select
               value={addr.salutation || ''}
               onChange={e => set('salutation', e.target.value)}
-              className="w-full appearance-none rounded-lg border-2 border-border bg-card px-4 py-3 pr-10 text-foreground focus:border-accent focus:outline-none transition-colors"
+              className="block w-full box-border h-12 appearance-none rounded-lg border-2 border-border bg-card px-4 py-3 pr-10 text-base leading-tight text-foreground focus:border-accent focus:outline-none transition-colors"
             >
               <option value="">Anrede</option>
               <option value="Herr">Herr</option>
