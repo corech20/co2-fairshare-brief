@@ -91,23 +91,125 @@ export function generatePDF(
 
   /**
    * Justified body text for the cover-letter (page 1) only.
-   * Renders the paragraph with clean left/right alignment ("Blocksatz").
-   * jsPDF does not support automatic German hyphenation reliably, so per the
-   * fallback rule we keep justified text without hyphenation and rely on the
-   * standard text width / line height to avoid overly large word gaps.
-   * The last line of the paragraph stays left-aligned (standard typographic rule).
+   * Renders the paragraph with clean left/right alignment ("Blocksatz")
+   * and real German hyphenation (Knuth-Liang patterns, de-1996 reform spelling)
+   * via the `hyphen/de` library. Long words are broken at valid hyphenation
+   * points when they don't fit on a line, then the line is justified by
+   * distributing extra space evenly between words. The last line of each
+   * paragraph stays left-aligned (standard typographic rule).
    */
   const justifiedLetterBody = (text: string, indent = 0) => {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
     const maxWidth = cw - indent;
-    const lines = doc.splitTextToSize(text, maxWidth) as string[];
-    for (let i = 0; i < lines.length; i++) {
+    const SOFT = '\u00AD';
+    const HYPHEN_CHAR = '-';
+
+    // Pre-hyphenate the entire paragraph: inserts soft hyphens (U+00AD) at
+    // every valid German break point. This does NOT add any visible character
+    // until we explicitly choose to break a word.
+    const hyphenated = hyphenateSync(text, { hyphenChar: SOFT }) as string;
+
+    // Tokenize on whitespace (preserve no whitespace inside tokens).
+    const tokens = hyphenated.split(/\s+/).filter(Boolean);
+
+    // Greedy line-break with hyphenation fallback.
+    const builtLines: string[] = [];
+    let current: string[] = []; // visible words on the current line
+    let currentWidth = 0;
+    const spaceW = doc.getTextWidth(' ');
+
+    const stripSoft = (s: string) => s.replace(/\u00AD/g, '');
+    const widthOf = (s: string) => doc.getTextWidth(stripSoft(s));
+
+    const flush = () => {
+      if (current.length) {
+        builtLines.push(current.join(' '));
+        current = [];
+        currentWidth = 0;
+      }
+    };
+
+    for (const rawToken of tokens) {
+      const tokenWidth = widthOf(rawToken);
+      const addedWidth = current.length ? spaceW + tokenWidth : tokenWidth;
+
+      if (currentWidth + addedWidth <= maxWidth) {
+        current.push(stripSoft(rawToken));
+        currentWidth += addedWidth;
+        continue;
+      }
+
+      // Token doesn't fit. Try to hyphenate it across the line break.
+      const parts = rawToken.split(SOFT);
+      if (parts.length > 1) {
+        // Find the largest prefix (joined with HYPHEN_CHAR at the break) that
+        // still fits on the current line.
+        const remainingWidth = maxWidth - currentWidth - (current.length ? spaceW : 0);
+        let bestPrefixIdx = -1;
+        for (let p = 1; p < parts.length; p++) {
+          const head = parts.slice(0, p).join('') + HYPHEN_CHAR;
+          if (doc.getTextWidth(head) <= remainingWidth) {
+            bestPrefixIdx = p;
+          } else {
+            break;
+          }
+        }
+        if (bestPrefixIdx > 0) {
+          const head = parts.slice(0, bestPrefixIdx).join('') + HYPHEN_CHAR;
+          const tail = parts.slice(bestPrefixIdx).join('');
+          current.push(head);
+          flush();
+          // Push the tail back through the same logic by treating it as the next token.
+          const tailWidth = widthOf(tail);
+          if (tailWidth <= maxWidth) {
+            current.push(stripSoft(tail));
+            currentWidth = tailWidth;
+          } else {
+            // Tail still too long — recursively try hyphenating it once more.
+            // (Rare; falls back to flushing the tail on its own line as-is.)
+            const tailParts = tail.split(SOFT);
+            if (tailParts.length > 1) {
+              // Take prefix that fits maxWidth.
+              let q = -1;
+              for (let p = 1; p < tailParts.length; p++) {
+                const head2 = tailParts.slice(0, p).join('') + HYPHEN_CHAR;
+                if (doc.getTextWidth(head2) <= maxWidth) q = p;
+                else break;
+              }
+              if (q > 0) {
+                current.push(tailParts.slice(0, q).join('') + HYPHEN_CHAR);
+                flush();
+                current.push(stripSoft(tailParts.slice(q).join('')));
+                currentWidth = widthOf(tailParts.slice(q).join(''));
+              } else {
+                current.push(stripSoft(tail));
+                currentWidth = tailWidth;
+              }
+            } else {
+              current.push(stripSoft(tail));
+              currentWidth = tailWidth;
+            }
+          }
+          continue;
+        }
+      }
+
+      // No hyphenation possible (or no break point fits): wrap the whole token
+      // to the next line.
+      flush();
+      current.push(stripSoft(rawToken));
+      currentWidth = tokenWidth;
+    }
+    flush();
+
+    // Render with justification (last line of paragraph remains left-aligned).
+    for (let i = 0; i < builtLines.length; i++) {
       ensureSpace(5);
-      const line = lines[i];
-      const isLast = i === lines.length - 1;
-      const words = line.trim().split(/\s+/);
+      const line = builtLines[i];
+      const isLast = i === builtLines.length - 1;
+      const words = line.split(' ').filter(Boolean);
       if (isLast || words.length < 2) {
         doc.text(line, mL + indent, y);
       } else {
