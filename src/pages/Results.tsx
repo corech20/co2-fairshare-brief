@@ -359,9 +359,13 @@ export default function ResultsPage() {
             <div id="detailed-calculation" className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-start gap-3 animate-fade-in">
               <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div className="flex-1 space-y-0.5">
-                <p className="text-sm font-semibold text-foreground">Kauf abgeschlossen</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {pendingOutputType === 'letter_tenant_reimbursement'
+                    ? 'Das Erstattungsschreiben wurde erstellt.'
+                    : 'Der Berechnungsnachweis wurde erstellt.'}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Ihre PDF-Berechnungsgrundlage steht jetzt zum Download bereit.
+                  Ihre PDF steht zum Download bereit.
                 </p>
               </div>
               <Button variant="cta" size="sm" onClick={handleDownloadPdf}>
