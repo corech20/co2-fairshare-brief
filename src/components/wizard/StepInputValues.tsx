@@ -212,10 +212,10 @@ export default function StepInputValues() {
 
   const getAreaHint = () => {
     if (isNonResidential) {
-      return isTenant ? 'Mietfläche Ihrer Einheit' : 'Gesamte Nutzfläche des Gebäudes';
+      return isTenant ? 'Mietfläche Ihrer Einheit' : undefined;
     }
-    if (needsApartmentArea) return 'Wohnfläche Ihrer Wohnung';
-    return isTenant ? 'Wohnfläche Ihrer Wohnung' : 'Gesamte Wohnfläche des Gebäudes';
+    if (needsApartmentArea) return undefined;
+    return isTenant ? undefined : undefined;
   };
 
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
