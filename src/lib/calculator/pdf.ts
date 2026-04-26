@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { hyphenateSync } from 'hyphen/de';
 import type { WizardData, CalculationResult } from './types';
 import {
   fmt,
