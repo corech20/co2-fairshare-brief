@@ -119,6 +119,16 @@ export default function ResultsPage() {
   const handleNewCalculation = () => { reset(); navigate('/rechner'); };
 
   const handleRequestDocument = (outputType: OutputType) => {
+    // Direct download flow for the reimbursement letter (no payment step).
+    if (outputType === 'letter_tenant_reimbursement') {
+      generatePDF(wizardData, result!, outputType, calcId ?? undefined);
+      setPendingOutputType(outputType);
+      setPurchased(true);
+      setTimeout(() => {
+        document.getElementById('detailed-calculation')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+      return;
+    }
     setPendingOutputType(outputType);
     setPaymentOpen(true);
   };
