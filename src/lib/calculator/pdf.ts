@@ -88,6 +88,40 @@ export function generatePDF(
     }
   };
 
+  /**
+   * Justified body text for the cover-letter (page 1) only.
+   * Renders the paragraph with clean left/right alignment ("Blocksatz").
+   * jsPDF does not support automatic German hyphenation reliably, so per the
+   * fallback rule we keep justified text without hyphenation and rely on the
+   * standard text width / line height to avoid overly large word gaps.
+   * The last line of the paragraph stays left-aligned (standard typographic rule).
+   */
+  const justifiedLetterBody = (text: string, indent = 0) => {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    const maxWidth = cw - indent;
+    const lines = doc.splitTextToSize(text, maxWidth) as string[];
+    for (let i = 0; i < lines.length; i++) {
+      ensureSpace(5);
+      const line = lines[i];
+      const isLast = i === lines.length - 1;
+      const words = line.trim().split(/\s+/);
+      if (isLast || words.length < 2) {
+        doc.text(line, mL + indent, y);
+      } else {
+        const wordsWidth = words.reduce((sum, w) => sum + doc.getTextWidth(w), 0);
+        const gap = (maxWidth - wordsWidth) / (words.length - 1);
+        let x = mL + indent;
+        for (let w = 0; w < words.length; w++) {
+          doc.text(words[w], x, y);
+          x += doc.getTextWidth(words[w]) + gap;
+        }
+      }
+      y += 4;
+    }
+  };
+
   const detailRow = (label: string, value: string, indent = 0, bold = false) => {
     ensureSpace(5);
     doc.setFontSize(9);
@@ -189,7 +223,7 @@ export function generatePDF(
     y += 6;
 
     const introText = getIntroText(data, result);
-    bodyText(introText);
+    justifiedLetterBody(introText);
     y += 6;
 
     // ═══ COMPACT RESULT SUMMARY on letter page ═══
@@ -203,7 +237,7 @@ export function generatePDF(
     const closingText = getClosingText(data);
     const closingParagraphs = closingText.split('\n\n');
     for (const para of closingParagraphs) {
-      if (para.trim()) { bodyText(para.trim()); y += 2; }
+      if (para.trim()) { justifiedLetterBody(para.trim()); y += 2; }
     }
     y += 4;
     if (senderName2) {
