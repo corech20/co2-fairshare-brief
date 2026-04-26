@@ -87,17 +87,29 @@ function AddressFields({ title, address, onChangeAddress, showApartment }: {
     <div className="space-y-3">
       <h4 className="text-sm font-semibold text-foreground">{title}</h4>
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="sm:col-span-1">
-          <select
-            value={addr.salutation || ''}
-            onChange={e => set('salutation', e.target.value)}
-            className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
-          >
-            <option value="">Anrede</option>
-            <option value="Herr">Herr</option>
-            <option value="Frau">Frau</option>
-            <option value="Firma">Firma</option>
-          </select>
+        <div className="space-y-1.5">
+          <div className="relative">
+            <select
+              value={addr.salutation || ''}
+              onChange={e => set('salutation', e.target.value)}
+              className="w-full appearance-none rounded-lg border-2 border-border bg-card px-4 py-3 pr-10 text-foreground focus:border-accent focus:outline-none transition-colors"
+            >
+              <option value="">Anrede</option>
+              <option value="Herr">Herr</option>
+              <option value="Frau">Frau</option>
+              <option value="Firma">Firma</option>
+            </select>
+            <svg
+              aria-hidden="true"
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+            </svg>
+          </div>
         </div>
         <InputField label="" value={addr.firstName} onChange={v => set('firstName', v)} type="text" placeholder="Vorname" />
         <InputField label="" value={addr.lastName} onChange={v => set('lastName', v)} type="text" placeholder="Nachname" />
