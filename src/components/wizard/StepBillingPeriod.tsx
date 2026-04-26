@@ -121,9 +121,10 @@ export default function StepBillingPeriod() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Im Standardmodus werden nur aktuell praktisch relevante Abrechnungsjahre angezeigt.
-            Für abweichende oder jahresübergreifende Zeiträume können frühere unterstützte Jahre
-            im Sonderfall weiterhin ausgewählt werden.
+            Frühere Abrechnungsjahre werden im Standardmodus nicht mehr angezeigt, da ein
+            Erstattungsanspruch in Selbstversorgungs- und Direktbelieferungsfällen innerhalb
+            von 12 Monaten nach der Abrechnung durch den Brennstoff- oder Wärmelieferanten
+            geltend gemacht werden muss.
           </p>
 
           <button
