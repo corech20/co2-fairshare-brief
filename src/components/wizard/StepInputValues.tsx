@@ -91,7 +91,7 @@ function AddressFields({ title, address, onChangeAddress, showApartment }: {
           <select
             value={addr.salutation || ''}
             onChange={e => set('salutation', e.target.value)}
-            className="w-full rounded-lg border-2 border-border bg-card px-3 py-3 text-foreground focus:border-accent focus:outline-none transition-colors text-sm"
+            className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
           >
             <option value="">Anrede</option>
             <option value="Herr">Herr</option>

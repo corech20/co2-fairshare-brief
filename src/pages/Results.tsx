@@ -280,10 +280,8 @@ export default function ResultsPage() {
 
               {result.reimbursementReductionApplied && (
                 <p className="text-xs text-muted-foreground leading-relaxed border-t border-primary/20 pt-3">
-                  Die Aufteilung erfolgt zunächst gemäß dem Schlüssel{' '}
-                  {result.baseLandlordPercent}/{result.baseTenantPercent}. Der Vermieteranteil wurde anschließend
-                  pauschal um {result.reimbursementReductionPercent}&nbsp;% gekürzt, da ein zusätzliches Gasgerät
-                  ohne eigenen Zähler vorhanden ist.
+                  Vermieteranteil pauschal um {result.reimbursementReductionPercent}&nbsp;% gekürzt
+                  (zusätzliches Gasgerät ohne eigenen Zähler).
                 </p>
               )}
 
@@ -299,7 +297,9 @@ export default function ResultsPage() {
 
               {result.notes.length > 0 && (
                 <ul className="border-t border-primary/20 pt-3 space-y-1">
-                  {result.notes.map((note, i) => (
+                  {result.notes
+                    .filter(n => !(result.reimbursementReductionApplied && /Gasgerät/.test(n)))
+                    .map((note, i) => (
                     <li key={i} className="text-xs text-muted-foreground flex gap-2">
                       <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       {note}
