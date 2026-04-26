@@ -5,7 +5,13 @@ import type { YearlySegment } from '@/lib/calculator/types';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
-const AVAILABLE_YEARS = [2023, 2024, 2025];
+/** Years shown as quick-select tiles in default mode.
+ *  2023 is intentionally omitted here – it remains selectable via the
+ *  "abweichender Zeitraum"-Modus (date inputs) for cross-year cases like
+ *  01.10.2023 – 30.09.2024. The hard lower bound is enforced in
+ *  validateBillingPeriod() in engine.ts. */
+const AVAILABLE_YEARS = [2024, 2025];
+const MIN_DATE = '2023-01-01';
 
 export default function StepBillingPeriod() {
   const { wizardData, setWizardField } = useCalculator();
@@ -114,6 +120,12 @@ export default function StepBillingPeriod() {
             ))}
           </div>
 
+          <p className="text-xs text-muted-foreground">
+            Im Standardmodus werden nur aktuell praktisch relevante Abrechnungsjahre angezeigt.
+            Für abweichende oder jahresübergreifende Zeiträume können frühere unterstützte Jahre
+            im Sonderfall weiterhin ausgewählt werden.
+          </p>
+
           <button
             onClick={openDeviating}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -151,6 +163,7 @@ export default function StepBillingPeriod() {
               <label className="text-sm font-medium text-foreground">Von</label>
               <input
                 type="date"
+                min={MIN_DATE}
                 value={start ?? ''}
                 onChange={e => setWizardField('billingPeriodStart', e.target.value)}
                 className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
@@ -160,6 +173,7 @@ export default function StepBillingPeriod() {
               <label className="text-sm font-medium text-foreground">Bis</label>
               <input
                 type="date"
+                min={MIN_DATE}
                 value={end ?? ''}
                 onChange={e => setWizardField('billingPeriodEnd', e.target.value)}
                 className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
