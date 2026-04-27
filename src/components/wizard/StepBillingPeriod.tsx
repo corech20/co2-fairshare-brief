@@ -1,9 +1,7 @@
 import { useCalculator } from '@/context/CalculatorContext';
-import { validateBillingPeriod, isCrossYearPeriod, getYearBoundaries, getCO2PriceForYear } from '@/lib/calculator/engine';
+import { validateBillingPeriod, isCrossYearPeriod } from '@/lib/calculator/engine';
 import { AlertTriangle, Info } from 'lucide-react';
-import type { YearlySegment } from '@/lib/calculator/types';
 import { useEffect } from 'react';
-import { IntegerInput } from './IntegerInput';
 
 /** Hard lower bound for the date inputs. Cross-year periods like
  *  01.10.2023 – 30.09.2024 remain valid; the actual bounds are enforced
@@ -17,38 +15,13 @@ export default function StepBillingPeriod() {
   const end = wizardData.billingPeriodEnd;
   const validationError = start && end ? validateBillingPeriod(start, end) : null;
   const crossYear = start && end && !validationError ? isCrossYearPeriod(start, end) : false;
-  const yearBoundaries = crossYear && start && end ? getYearBoundaries(start, end) : [];
 
-  // Auto-initialize yearly segments when cross-year is detected
-  // Serialize boundaries for comparison to detect date changes
-  const boundariesKey = JSON.stringify(yearBoundaries.map(b => [b.year, b.periodStart, b.periodEnd]));
-
+  // Cleanup: legacy yearly segment data is no longer used in the standard flow.
   useEffect(() => {
-    if (crossYear && yearBoundaries.length > 0) {
-      const existing = wizardData.yearlySegments;
-      // Re-initialize if segment count changed OR if the actual dates changed
-      const needsReinit = !existing || existing.length !== yearBoundaries.length ||
-        existing.some((seg, i) => seg.periodStart !== yearBoundaries[i].periodStart || seg.periodEnd !== yearBoundaries[i].periodEnd);
-      if (needsReinit) {
-        const segments: YearlySegment[] = yearBoundaries.map((b, i) => ({
-          year: b.year,
-          periodStart: b.periodStart,
-          periodEnd: b.periodEnd,
-          amount: existing?.[i]?.amount ?? 0,
-          co2PricePerTon: getCO2PriceForYear(b.year),
-        }));
-        setWizardField('yearlySegments', segments);
-      }
-    } else if (!crossYear && wizardData.yearlySegments) {
+    if (wizardData.yearlySegments) {
       setWizardField('yearlySegments', undefined);
     }
-  }, [crossYear, boundariesKey]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const updateSegmentAmount = (index: number, amount: number) => {
-    const segments = [...(wizardData.yearlySegments ?? [])];
-    segments[index] = { ...segments[index], amount };
-    setWizardField('yearlySegments', segments);
-  };
+  }, [wizardData.yearlySegments, setWizardField]);
 
   return (
     <div className="space-y-5">
@@ -109,46 +82,14 @@ export default function StepBillingPeriod() {
           )}
 
           {crossYear && !validationError && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-border bg-muted/50 p-4 flex gap-3">
-                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Jahresübergreifender Zeitraum</p>
-                  <p className="mt-1">
-                    Da unterschiedliche CO2-Preise gelten, werden die Verbrauchsmengen getrennt nach Jahren erfasst.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {yearBoundaries.map((seg, i) => {
-                  const co2Price = getCO2PriceForYear(seg.year);
-                  const segAmount = wizardData.yearlySegments?.[i]?.amount ?? 0;
-                  return (
-                    <div key={seg.year} className="rounded-lg border-2 border-border bg-card p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-foreground">
-                          {seg.year}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          CO2-Preis: {co2Price} €/t
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(seg.periodStart).toLocaleDateString('de-DE')} – {new Date(seg.periodEnd).toLocaleDateString('de-DE')}
-                      </p>
-                      <div className="space-y-1">
-                        <label className="text-xs text-muted-foreground">Verbrauchsmenge (nur ganze Zahlen)</label>
-                        <IntegerInput
-                          value={segAmount > 0 ? segAmount : undefined}
-                          onChange={v => updateSegmentAmount(i, v ?? 0)}
-                          placeholder="z. B. 25000"
-                          className="px-3 py-2 text-sm"
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+            <div className="rounded-lg border border-border bg-muted/50 p-4 flex gap-3">
+              <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">Jahresübergreifender Zeitraum</p>
+                <p className="mt-1">
+                  Bei jahresübergreifenden Zeiträumen sind keine kalenderjährlichen Teilmengen einzugeben.
+                  Bitte geben Sie nur die Gesamtwerte für den gesamten Rechnungszeitraum ein.
+                </p>
               </div>
             </div>
           )}

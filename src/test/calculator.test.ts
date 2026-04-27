@@ -522,7 +522,7 @@ describe('Cross-year detection', () => {
 // ===================================================================
 
 describe('Cross-year calculation', () => {
-  it('calculates with separate CO2 prices and VAT rates per year segment', () => {
+  it('calculates cross-year periods from a single total amount (no manual yearly splits)', () => {
     const data: WizardData = {
       userRole: 'vermieter',
       buildingType: 'wohngebaeude',
@@ -532,31 +532,37 @@ describe('Cross-year calculation', () => {
       billingPeriodEnd: '2025-01-31',
       fuelType: 'erdgas',
       buildingArea: 290,
-      yearlySegments: [
-        { year: 2024, periodStart: '2024-02-01', periodEnd: '2024-12-31', amount: 35000, co2PricePerTon: 45 },
-        { year: 2025, periodStart: '2025-01-01', periodEnd: '2025-01-31', amount: 10000, co2PricePerTon: 55 },
-      ],
+      fuelAmount: 45000, // total over the whole billing period, no manual 2024/2025 split
     };
 
     const r = calculateCO2Allocation(data);
-    expect(r.isCrossYear).toBe(true);
-    expect(r.segmentResults).toHaveLength(2);
-    // Energy values are rounded to 2 decimals after conversion
-    // 35000 × 0.9030 = 31605.00 kWh → 31605.00 × 0.20088 = 6348.81 kg
-    expect(round2(r.segmentResults![0].co2Kg)).toBe(round2(31605.00 * 0.20088));
-    // 10000 × 0.9030 = 9030.00 kWh → 9030.00 × 0.20088 = 1813.95 kg
-    expect(round2(r.segmentResults![1].co2Kg)).toBe(round2(9030.00 * 0.20088));
 
-    // Net costs from rounded energy values
-    const seg1NetRaw = 31605.00 * 0.20088 * 45 / 1000;
-    const seg2NetRaw = 9030.00 * 0.20088 * 55 / 1000;
-    expect(round2(r.segmentResults![0].co2CostGross)).toBe(round2(mixedVATGross(seg1NetRaw, '2024-02-01', '2024-12-31')));
-    expect(round2(r.segmentResults![1].co2CostGross)).toBe(round2(seg2NetRaw * 1.19));
+    // Cross-year flag stays off in the new flow – we no longer use the
+    // segmented calculation path. The result has no segment breakdown.
+    expect(r.isCrossYear).toBe(false);
+    expect(r.segmentResults).toBeUndefined();
 
-    // Total gross is computed using full-period VAT (BMWK-aligned), not sum of segment grosses
-    const totalNetRaw = seg1NetRaw + seg2NetRaw;
-    const expectedTotalGross = mixedVATGross(totalNetRaw, '2024-02-01', '2025-01-31');
-    expect(round2(r.totalCO2Cost)).toBe(round2(expectedTotalGross));
+    // CO2 price = end-year price (2025 → 55 €/t)
+    expect(r.co2PricePerTon).toBe(55);
+
+    // Total emissions: 45000 × 0.9030 = 40635.00 kWh → × 0.20088 ≈ 8162.76 kg
+    const expectedKwh = round2(45000 * 0.9030);
+    const expectedCo2Kg = expectedKwh * 0.20088;
+    expect(round2(r.totalEmissionsKg)).toBe(round2(expectedCo2Kg));
+
+    // Euro costs: net = co2Kg × 55 / 1000, gross via full-period VAT (mixed 7%/19%).
+    // Crucially, costs are NOT annualized.
+    const expectedNet = expectedCo2Kg * 55 / 1000;
+    const expectedGross = mixedVATGross(expectedNet, '2024-02-01', '2025-01-31');
+    expect(round2(r.totalCO2CostNet)).toBe(round2(expectedNet));
+    expect(round2(r.totalCO2Cost)).toBe(round2(expectedGross));
+
+    // Emissions per m² are annualized ONLY for the stage classification.
+    // Period = 366 days (2024-02-01 .. 2025-01-31 inclusive ≈ 365 days),
+    // so the annualization factor is ~1 and the stage uses (roughly) the
+    // actual emissions per m². We just assert the annualized field exists
+    // OR matches the actual when the period is essentially a full year.
+    expect(r.emissionsPerSqmYear).toBeGreaterThan(0);
   });
 });
 

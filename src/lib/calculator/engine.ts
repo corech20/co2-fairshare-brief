@@ -461,13 +461,16 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
   const primaryFuelType = data.fuelType ?? 'erdgas';
   const primaryEmissionFactor = data.emissionFactorCustom;
 
-  // --- Cross-year segmented calculation ---
-  if (crossYear && data.yearlySegments && data.yearlySegments.length > 0) {
-    return calculateCrossYear(data, notes);
-  }
-
   // --- Standard same-year calculation ---
   const co2PricePerTon = getCO2PriceForYear(billingYear);
+
+  if (crossYear) {
+    notes.push(
+      `Jahresübergreifender Zeitraum: Berechnung auf Basis der Gesamtmenge des Rechnungszeitraums. ` +
+      `Für die Stufenermittlung werden die Emissionen auf ein Jahr normiert; die CO2-Kosten werden nicht hochgerechnet. ` +
+      `Der CO2-Preis des Endjahres (${billingYear}: ${co2PricePerTon} €/t) wird angesetzt.`,
+    );
+  }
 
   // Build fuel entries
   const fuelEntries: FuelEntry[] = data.fuelEntries && data.fuelEntries.length > 0
