@@ -308,29 +308,73 @@ export default function StepInputValues() {
         {!expertMode && (
           <div className="space-y-4 rounded-xl border-2 border-border bg-card p-4">
             <div>
-              <label className="text-sm font-medium text-foreground">
-                CO2-Emissionen lt. Abrechnung
-              </label>
+              <h3 className="text-sm font-semibold text-foreground">Werte aus Ihrer Abrechnung</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Tragen Sie den in Ihrer Heizkosten- oder Brennstoffabrechnung ausgewiesenen
-                CO2-Ausstoß für den gesamten Rechnungszeitraum ein (in Kilogramm).
-                Die CO2-Kosten werden daraus mit dem CO2-Preis des Endjahres
-                ({wizardData.billingPeriodEnd ? new Date(wizardData.billingPeriodEnd).getFullYear() : '–'}) berechnet.
+                Bitte tragen Sie beide Werte für den gesamten Rechnungszeitraum genau so ein,
+                wie sie in Ihrer Heizkosten- oder Brennstoffabrechnung ausgewiesen sind.
               </p>
             </div>
-            <div className="relative">
-              <IntegerInput
-                value={wizardData.co2EmissionsDirect}
-                onChange={v => setWizardField('co2EmissionsDirect', v)}
-                placeholder="z. B. 1800"
-                className="pr-16"
-              />
-              <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">kg</span>
+
+            {/* CO2-Emissionen (kg) – Pflicht */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">CO2-Emissionen lt. Abrechnung</label>
+              <div className="relative">
+                <IntegerInput
+                  value={wizardData.co2EmissionsDirect}
+                  onChange={v => setWizardField('co2EmissionsDirect', v)}
+                  placeholder="z. B. 1800"
+                  className="pr-16"
+                />
+                <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">kg</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Wird auf ein Jahr normiert und für die Einstufung nach dem Stufenmodell verwendet.
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Alternativ können Sie weiter unten die CO2-Kosten direkt in Euro eingeben, falls
-              diese in Ihrer Abrechnung bereits ausgewiesen sind.
-            </p>
+
+            {/* CO2-Kosten (EUR) – Pflicht */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">CO2-Kosten lt. Abrechnung</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={wizardData.co2CostDirect ?? ''}
+                  onChange={e => setWizardField('co2CostDirect', e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="z. B. 250"
+                  className="block w-full box-border h-12 rounded-lg border-2 border-border bg-card px-4 py-3 text-base leading-tight text-foreground focus:border-accent focus:outline-none transition-colors pr-16"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Exakter Rechnungsbetrag der CO2-Kosten – wird anschließend nach dem Stufenmodell verteilt.
+              </p>
+            </div>
+
+            {/* Brutto/Netto-Schalter direkt im Block */}
+            {hasDirectCost && (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
+                <div className="flex gap-3">
+                  {([
+                    { value: 'brutto' as CostInputType, label: 'Brutto (inkl. USt.)' },
+                    { value: 'netto' as CostInputType, label: 'Netto (zzgl. USt.)' },
+                  ]).map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setWizardField('co2CostDirectType', opt.value)}
+                      className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all ${
+                        (wizardData.co2CostDirectType ?? 'brutto') === opt.value
+                          ? 'border-accent bg-accent/5 text-foreground'
+                          : 'border-border bg-card text-muted-foreground hover:border-primary/30'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
