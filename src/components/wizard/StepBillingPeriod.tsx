@@ -1,5 +1,5 @@
 import { useCalculator } from '@/context/CalculatorContext';
-import { validateBillingPeriod, isCrossYearPeriod } from '@/lib/calculator/engine';
+import { validateBillingPeriod } from '@/lib/calculator/engine';
 import { AlertTriangle } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -25,7 +25,6 @@ export default function StepBillingPeriod() {
   const start = wizardData.billingPeriodStart;
   const end = wizardData.billingPeriodEnd;
   const validationError = start && end ? validateBillingPeriod(start, end) : null;
-  const crossYear = start && end && !validationError ? isCrossYearPeriod(start, end) : false;
   const isTenant = wizardData.userRole === 'mieter';
   const calcNoun = isTenant ? 'Erstattungsbeträge' : 'CO2-Kostenaufteilung';
 
