@@ -497,12 +497,6 @@ export function generatePDF(
     }
     
     detailRow('CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
-
-    // CO2 price note
-    y += 2;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`CO2-Preis: ${fmt.currency(result.co2PricePerTon)} pro Tonne (${result.billingYear})`, mL + 2, y);
   }
 
   // Pellets / biomass note

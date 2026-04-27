@@ -157,9 +157,6 @@ export function DetailedCalculationView({ data, result }: Props) {
                   value={fmt.currency(result.totalCO2Cost - result.totalCO2CostNet)}
                 />
                 <Row label="CO2-Kosten brutto:" value={fmt.currency(result.totalCO2Cost)} bold />
-                <p className="text-[11px] text-muted-foreground mt-2">
-                  CO2-Preis: {fmt.currency(result.co2PricePerTon)} pro Tonne ({result.billingYear})
-                </p>
               </div>
             </>
           )}
