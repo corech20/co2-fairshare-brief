@@ -312,7 +312,7 @@ export default function ResultsPage() {
               <div className="space-y-1">
                 <h3 className="text-sm font-semibold text-foreground">Dokument erstellen</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Die vollständige Berechnungsgrundlage wird nach dem Kauf als druckfertiges PDF bereitgestellt und hier angezeigt.
+                  Die vollständige Berechnungsgrundlage wird als druckfertiges PDF bereitgestellt.
                 </p>
               </div>
 
