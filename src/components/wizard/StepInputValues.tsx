@@ -2,7 +2,7 @@ import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData, FuelType, FuelEntry } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
-import { ChevronDown, X, Settings2 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
@@ -141,8 +141,8 @@ export default function StepInputValues() {
     return !!hasAddr;
   });
 
-  const isMultiFuel = wizardData.fuelEntries && wizardData.fuelEntries.length > 0;
-  const expertMode = !!wizardData.expertMode;
+  const isMultiFuel = false;
+  const expertMode = false;
   const needsApartmentArea = wizardData.heatSupplyType === 'etage' ||
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
@@ -222,16 +222,16 @@ export default function StepInputValues() {
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
   const hasDirectEmissions = wizardData.co2EmissionsDirect != null && wizardData.co2EmissionsDirect > 0;
 
-  // In standard (non-expert) mode, multi-fuel selection is hidden — auto-collapse it back
-  // to single-fuel by clearing fuelEntries on entering this step without expert mode.
+  // Expertenmodus dauerhaft deaktiviert: Multi-Fuel-Einträge auf Single-Fuel zurückführen
+  // und etwaige Expertenmodus-Flags zurücksetzen.
   useEffect(() => {
-    if (!expertMode && wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
-      // Promote the first non-KWK entry back to single-fuel
+    if (wizardData.expertMode) setWizardField('expertMode', false);
+    if (wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
       const primary = wizardData.fuelEntries.find(e => !e.fuelType.endsWith('_kwk')) ?? wizardData.fuelEntries[0];
       setWizardField('fuelType', primary.fuelType);
       setWizardField('fuelEntries', undefined);
     }
-  }, [expertMode, wizardData.fuelEntries, setWizardField]);
+  }, [wizardData.expertMode, wizardData.fuelEntries, setWizardField]);
 
   return (
     <div className="space-y-6">
@@ -311,7 +311,7 @@ export default function StepInputValues() {
               <h3 className="text-sm font-semibold text-foreground">Werte aus Ihrer Abrechnung</h3>
               <p className="text-xs text-muted-foreground mt-1">
                 Bitte tragen Sie beide Werte für den gesamten Rechnungszeitraum genau so ein,
-                wie sie in Ihrer Heizkosten- oder Brennstoffabrechnung ausgewiesen sind.
+                wie sie in Ihrer Wärmeliefer- oder Brennstoffabrechnung ausgewiesen sind.
               </p>
             </div>
 
