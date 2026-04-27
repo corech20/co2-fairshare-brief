@@ -90,13 +90,17 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
           (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
         // Multi-fuel mode: amounts entered as totals for the whole billing period
         const isMultiFuel = !!(wizardData.fuelEntries && wizardData.fuelEntries.length > 0);
+        // Standard mode primary inputs: CO2 emissions (kg) OR direct CO2 cost (EUR)
+        const hasDirectEmissions = !!(wizardData.co2EmissionsDirect && wizardData.co2EmissionsDirect > 0);
+        const hasDirectCost = !!(wizardData.co2CostDirect && wizardData.co2CostDirect > 0);
         const hasFuelAmount = isMultiFuel
           ? wizardData.fuelEntries!.every(e => e.amount > 0)
           : !!(wizardData.fuelAmount && wizardData.fuelAmount > 0);
+        const hasAnyEnergyInput = hasDirectEmissions || hasDirectCost || hasFuelAmount;
         if (needsApartment) {
-          return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasFuelAmount);
+          return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasAnyEnergyInput);
         }
-        return !!(wizardData.buildingArea && wizardData.buildingArea > 0 && hasFuelAmount);
+        return !!(wizardData.buildingArea && wizardData.buildingArea > 0 && hasAnyEnergyInput);
       }
       default: return false;
     }
