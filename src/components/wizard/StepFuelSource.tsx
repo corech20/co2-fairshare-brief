@@ -8,12 +8,12 @@ import { useState } from 'react';
 type BaseFuel = 'erdgas' | 'heizoel' | 'fernwaerme' | 'fluessiggas' | 'pellets' | 'kohle';
 
 const BASE_FUELS: { value: BaseFuel; label: string; desc: string; icon: typeof Flame }[] = [
-  { value: 'erdgas', label: 'Erdgas', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Gasabrechnung; im Expertenmodus Brennstoffmenge in kWh (Brennwert/Hs).', icon: Flame },
-  { value: 'heizoel', label: 'Heizöl', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Abrechnung; im Expertenmodus Verbrauch in Litern.', icon: Droplets },
-  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Wärmeabrechnung; im Expertenmodus Verbrauch in kWh – Emissionsfaktor wird separat abgefragt.', icon: Thermometer },
-  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Abrechnung; im Expertenmodus Verbrauch in kg.', icon: Zap },
+  { value: 'erdgas', label: 'Erdgas', desc: 'CO2-Emissionen oder CO2-Kosten lt. Gasabrechnung.', icon: Flame },
+  { value: 'heizoel', label: 'Heizöl', desc: 'CO2-Emissionen oder CO2-Kosten lt. Abrechnung.', icon: Droplets },
+  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'CO2-Emissionen oder CO2-Kosten lt. Wärmeabrechnung.', icon: Thermometer },
+  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'CO2-Emissionen oder CO2-Kosten lt. Abrechnung.', icon: Zap },
   { value: 'pellets', label: 'Holzpellets', desc: 'Nicht BEHG-pflichtig – keine CO2-Kosten anzusetzen.', icon: Leaf },
-  { value: 'kohle', label: 'Kohle', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Abrechnung; im Expertenmodus Verbrauch in kg (Braunkohlebriketts).', icon: Factory },
+  { value: 'kohle', label: 'Kohle', desc: 'CO2-Emissionen oder CO2-Kosten lt. Abrechnung.', icon: Factory },
 ];
 
 /** KWK options shown in the "Besondere Anlagentechnik" collapsible. */
@@ -67,6 +67,7 @@ function sortEntries(entries: FuelEntry[]): FuelEntry[] {
 
 export default function StepFuelSource() {
   const { wizardData, setWizardField } = useCalculator();
+  const expertMode = !!wizardData.expertMode;
 
   const fuelEntries = wizardData.fuelEntries ?? [];
   const isMulti = fuelEntries.length > 0;
@@ -253,6 +254,7 @@ export default function StepFuelSource() {
       </div>
 
       {/* 2. Additional fuels section */}
+      {expertMode && (
       <div className="space-y-3">
         <h3 className="text-sm font-semibold text-foreground">Gibt es einen weiteren Brennstoff?</h3>
 
@@ -294,8 +296,10 @@ export default function StepFuelSource() {
           Weiteren Brennstoff hinzufügen
         </Button>
       </div>
+      )}
 
       {/* 3. Besondere Anlagentechnik (collapsible, KWK options) */}
+      {expertMode && (
       <div className="rounded-xl border border-border bg-muted/30 p-4">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
@@ -326,6 +330,7 @@ export default function StepFuelSource() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
