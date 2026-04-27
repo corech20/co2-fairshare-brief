@@ -77,6 +77,10 @@ export interface WizardData {
   co2CostDirect?: number;
   co2CostDirectType?: CostInputType;
   emissionFactorCustom?: number;
+  /** Primary input in standard mode: CO2 emissions per billing period (kg). */
+  co2EmissionsDirect?: number;
+  /** Expert mode: show fuel amount, multi-fuel, KWK and emission factor inputs. */
+  expertMode?: boolean;
   fuelEntries?: FuelEntry[];
   /** Structured address for landlord */
   landlordAddress?: AddressData;
@@ -118,6 +122,8 @@ export interface FuelCalculationResult {
   co2CostNet: number;
   co2CostGross: number;
   usedDirectCost: boolean;
+  /** True if CO2 emissions were entered directly (kg) instead of derived from fuel amount. */
+  usedDirectEmissions?: boolean;
 }
 
 export interface CalculationResult {
