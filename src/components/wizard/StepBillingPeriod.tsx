@@ -15,6 +15,8 @@ export default function StepBillingPeriod() {
   const end = wizardData.billingPeriodEnd;
   const validationError = start && end ? validateBillingPeriod(start, end) : null;
   const crossYear = start && end && !validationError ? isCrossYearPeriod(start, end) : false;
+  const isTenant = wizardData.userRole === 'mieter';
+  const calcNoun = isTenant ? 'Erstattungsbeträge' : 'CO2-Kostenaufteilung';
 
   // Cleanup: legacy yearly segment data is no longer used in the standard flow.
   useEffect(() => {
@@ -35,15 +37,11 @@ export default function StepBillingPeriod() {
       <div className="space-y-4">
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">
-              Das Tool berechnet Erstattungsbeträge für die Abrechnungsjahre 2024 und 2025
-              (CO2-Preis: 45 €/t in 2024, 55 €/t in 2025). Jahresübergreifende Zeiträume
-              werden automatisch nach Kalenderjahren aufgeteilt.
+              Das Tool berechnet {calcNoun} für 2024 und 2025
+              (CO2-Preis: 45 €/t in 2024, 55 €/t in 2025).
             </p>
             <p className="text-xs text-muted-foreground">
-              Frühere Abrechnungsjahre werden im Standardmodus nicht mehr angezeigt, da ein
-              Erstattungsanspruch in Selbstversorgungs- und Direktbelieferungsfällen innerhalb
-              von 12 Monaten nach der Abrechnung durch den Brennstoff- oder Wärmelieferanten
-              geltend gemacht werden muss.
+              Frühere Jahre: Erstattungsansprüche müssen innerhalb von 12 Monaten nach Abrechnung geltend gemacht werden.
             </p>
           </div>
 
@@ -87,8 +85,7 @@ export default function StepBillingPeriod() {
               <div className="text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">Jahresübergreifender Zeitraum</p>
                 <p className="mt-1">
-                  Bei jahresübergreifenden Zeiträumen sind keine kalenderjährlichen Teilmengen einzugeben.
-                  Bitte geben Sie nur die Gesamtwerte für den gesamten Rechnungszeitraum ein.
+                  Bitte geben Sie die Gesamtwerte für den gesamten Rechnungszeitraum ein.
                 </p>
               </div>
             </div>
