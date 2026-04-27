@@ -88,15 +88,22 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'inputValues': {
         const needsApartment = wizardData.heatSupplyType === 'etage' ||
           (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
-        // Multi-fuel mode: amounts entered as totals for the whole billing period
         const isMultiFuel = !!(wizardData.fuelEntries && wizardData.fuelEntries.length > 0);
-        // Standard mode primary inputs: CO2 emissions (kg) OR direct CO2 cost (EUR)
         const hasDirectEmissions = !!(wizardData.co2EmissionsDirect && wizardData.co2EmissionsDirect > 0);
         const hasDirectCost = !!(wizardData.co2CostDirect && wizardData.co2CostDirect > 0);
         const hasFuelAmount = isMultiFuel
           ? wizardData.fuelEntries!.every(e => e.amount > 0)
           : !!(wizardData.fuelAmount && wizardData.fuelAmount > 0);
-        const hasAnyEnergyInput = hasDirectEmissions || hasDirectCost || hasFuelAmount;
+        // Pellets: keine CO2-Kosten anzusetzen → CO2-Kosten dürfen 0/leer sein
+        const isPellets = wizardData.fuelType === 'pellets';
+        // Standard-Modus: BEIDE Pflicht (Emissionen kg + Kosten €), außer bei Pellets
+        const standardModeOk = wizardData.expertMode
+          ? false
+          : (isPellets ? hasDirectEmissions : (hasDirectEmissions && hasDirectCost));
+        // Expertenmodus: Brennstoffmenge oder direkte Eingaben
+        const expertModeOk = !!wizardData.expertMode &&
+          (hasDirectEmissions || hasDirectCost || hasFuelAmount);
+        const hasAnyEnergyInput = standardModeOk || expertModeOk;
         if (needsApartment) {
           return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasAnyEnergyInput);
         }
