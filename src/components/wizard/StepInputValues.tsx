@@ -275,6 +275,35 @@ export default function StepInputValues() {
           />
         )}
 
+        {/* Expert-mode toggle */}
+        <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
+          <div className="flex items-start gap-2">
+            <Settings2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <div className="text-sm font-medium text-foreground">Expertenmodus</div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Eingabe der Brennstoffmenge (kWh, Liter, kg) statt CO2-Emissionen.
+                Mehrere Brennstoffe und KWK werden ebenfalls nur hier angeboten.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={expertMode}
+            onClick={() => setWizardField('expertMode', !expertMode)}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+              expertMode ? 'bg-accent' : 'bg-muted-foreground/30'
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform ${
+                expertMode ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+
         {/* ── Standard mode: primary input is CO2 emissions (kg) ───────────── */}
         {!expertMode && (
           <div className="space-y-4 rounded-xl border-2 border-border bg-card p-4">
