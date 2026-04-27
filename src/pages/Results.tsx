@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { FileText, RotateCcw, ArrowLeft, Info, AlertTriangle, Building2, Flame, CalendarDays, Download, CheckCircle2, History } from 'lucide-react';
 import { generatePDF } from '@/lib/calculator/pdf';
 import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText, isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
-import { PaymentDialog } from '@/components/PaymentDialog';
 import { useEffect } from 'react';
 
 import type { OutputType } from '@/lib/calculator/types';
@@ -44,7 +43,6 @@ export default function ResultsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { result, wizardData, reset, calcId, loadFromHistory } = useCalculator();
-  const [paymentOpen, setPaymentOpen] = useState(false);
   const [pendingOutputType, setPendingOutputType] = useState<OutputType>('calculation');
   const [purchased, setPurchased] = useState(false);
 
@@ -119,21 +117,9 @@ export default function ResultsPage() {
   const handleNewCalculation = () => { reset(); navigate('/rechner'); };
 
   const handleRequestDocument = (outputType: OutputType) => {
-    // Direct download flow for the reimbursement letter (no payment step).
-    if (outputType === 'letter_tenant_reimbursement') {
-      generatePDF(wizardData, result!, outputType, calcId ?? undefined);
-      setPendingOutputType(outputType);
-      setPurchased(true);
-      setTimeout(() => {
-        document.getElementById('detailed-calculation')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 80);
-      return;
-    }
+    // Direct PDF creation – no payment step.
+    generatePDF(wizardData, result!, outputType, calcId ?? undefined);
     setPendingOutputType(outputType);
-    setPaymentOpen(true);
-  };
-
-  const handlePaymentComplete = () => {
     setPurchased(true);
     setTimeout(() => {
       document.getElementById('detailed-calculation')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -392,22 +378,6 @@ export default function ResultsPage() {
           </div>
         </div>
       </main>
-
-      <PaymentDialog
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
-        documentLabel={
-          pendingOutputType === 'letter_tenant_reimbursement'
-            ? 'Erstattungsschreiben erstellen'
-            : 'Berechnung als PDF erstellen'
-        }
-        documentDescription={
-          pendingOutputType === 'letter_tenant_reimbursement'
-            ? 'Erstellt ein druckfertiges Schreiben auf Grundlage Ihrer Berechnung. Der Betrag wird einmalig berechnet.'
-            : 'Erstellt ein druckbares PDF mit vollständiger Berechnungsgrundlage und Ergebnissen. Der Betrag wird einmalig berechnet.'
-        }
-        onPaymentComplete={handlePaymentComplete}
-      />
     </div>
   );
 }
