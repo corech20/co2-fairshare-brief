@@ -2,7 +2,7 @@ import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData, FuelType, FuelEntry } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, Settings2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
@@ -142,6 +142,7 @@ export default function StepInputValues() {
   });
 
   const isMultiFuel = wizardData.fuelEntries && wizardData.fuelEntries.length > 0;
+  const expertMode = !!wizardData.expertMode;
   const needsApartmentArea = wizardData.heatSupplyType === 'etage' ||
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
@@ -219,6 +220,18 @@ export default function StepInputValues() {
   };
 
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
+  const hasDirectEmissions = wizardData.co2EmissionsDirect != null && wizardData.co2EmissionsDirect > 0;
+
+  // In standard (non-expert) mode, multi-fuel selection is hidden — auto-collapse it back
+  // to single-fuel by clearing fuelEntries on entering this step without expert mode.
+  useEffect(() => {
+    if (!expertMode && wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
+      // Promote the first non-KWK entry back to single-fuel
+      const primary = wizardData.fuelEntries.find(e => !e.fuelType.endsWith('_kwk')) ?? wizardData.fuelEntries[0];
+      setWizardField('fuelType', primary.fuelType);
+      setWizardField('fuelEntries', undefined);
+    }
+  }, [expertMode, wizardData.fuelEntries, setWizardField]);
 
   return (
     <div className="space-y-6">
@@ -262,8 +275,67 @@ export default function StepInputValues() {
           />
         )}
 
-        {/* Multi-fuel: one input block per selected position */}
-        {isMultiFuel && (
+        {/* Expert-mode toggle */}
+        <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
+          <div className="flex items-start gap-2">
+            <Settings2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <div className="text-sm font-medium text-foreground">Expertenmodus</div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Eingabe der Brennstoffmenge (kWh, Liter, kg) statt CO2-Emissionen.
+                Mehrere Brennstoffe und KWK werden ebenfalls nur hier angeboten.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={expertMode}
+            onClick={() => setWizardField('expertMode', !expertMode)}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+              expertMode ? 'bg-accent' : 'bg-muted-foreground/30'
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform ${
+                expertMode ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* ── Standard mode: primary input is CO2 emissions (kg) ───────────── */}
+        {!expertMode && (
+          <div className="space-y-4 rounded-xl border-2 border-border bg-card p-4">
+            <div>
+              <label className="text-sm font-medium text-foreground">
+                CO2-Emissionen lt. Abrechnung
+              </label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tragen Sie den in Ihrer Heizkosten- oder Brennstoffabrechnung ausgewiesenen
+                CO2-Ausstoß für den gesamten Rechnungszeitraum ein (in Kilogramm).
+                Die CO2-Kosten werden daraus mit dem CO2-Preis des Endjahres
+                ({wizardData.billingPeriodEnd ? new Date(wizardData.billingPeriodEnd).getFullYear() : '–'}) berechnet.
+              </p>
+            </div>
+            <div className="relative">
+              <IntegerInput
+                value={wizardData.co2EmissionsDirect}
+                onChange={v => setWizardField('co2EmissionsDirect', v)}
+                placeholder="z. B. 1800"
+                className="pr-16"
+              />
+              <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">kg</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Alternativ können Sie weiter unten die CO2-Kosten direkt in Euro eingeben, falls
+              diese in Ihrer Abrechnung bereits ausgewiesen sind.
+            </p>
+          </div>
+        )}
+
+        {/* Multi-fuel: one input block per selected position (expert only) */}
+        {expertMode && isMultiFuel && (
           <div className="space-y-4">
             {wizardData.fuelEntries!.map((entry: FuelEntry, idx: number) => (
               <div key={`${entry.fuelType}-${idx}`} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
@@ -322,8 +394,8 @@ export default function StepInputValues() {
           </div>
         )}
 
-        {/* Fuel amount – only for same-year, single fuel (integer-only) */}
-        {!isMultiFuel && (
+        {/* Fuel amount – expert mode only */}
+        {expertMode && !isMultiFuel && (
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{fuelLabel}</label>
             <div className="relative">
@@ -349,7 +421,7 @@ export default function StepInputValues() {
         )}
 
         {/* District heating emission factor */}
-        {!isMultiFuel && wizardData.fuelType === 'fernwaerme' && (
+        {expertMode && !isMultiFuel && wizardData.fuelType === 'fernwaerme' && (
           <InputField
             label="Emissionsfaktor Fernwärme"
             hint="Vom Fernwärmeversorger mitgeteilt (kg CO2/kWh)"
@@ -360,7 +432,7 @@ export default function StepInputValues() {
           />
         )}
 
-        {!isMultiFuel && wizardData.fuelType === 'fernwaerme' && !wizardData.emissionFactorCustom && (
+        {expertMode && !isMultiFuel && wizardData.fuelType === 'fernwaerme' && !wizardData.emissionFactorCustom && (
           <p className="text-xs text-destructive">Bitte geben Sie den Emissionsfaktor aus Ihrer Fernwärmeabrechnung an.</p>
         )}
 

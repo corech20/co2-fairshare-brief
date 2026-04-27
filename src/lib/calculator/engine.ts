@@ -472,6 +472,52 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
     );
   }
 
+  // --- Direct CO2 emissions input path (standard mode) ---
+  // When the user enters CO2 emissions directly (kg), we skip fuel-amount → energy → emissions
+  // conversion entirely. CO2 cost = emissions(t) × CO2 price of end-year.
+  if (
+    !data.expertMode &&
+    (!data.fuelEntries || data.fuelEntries.length === 0) &&
+    data.co2EmissionsDirect != null && data.co2EmissionsDirect > 0
+  ) {
+    const co2Kg = data.co2EmissionsDirect;
+    const isZeroCost = ZERO_COST_FUELS.has(primaryFuelType);
+    let co2CostNet: number;
+    let co2CostGross: number;
+    let usedDirectCost = false;
+    if (data.co2CostDirect != null && data.co2CostDirect > 0) {
+      // User provided BOTH emissions and cost → cost wins for the money side
+      const isNet = data.co2CostDirectType === 'netto';
+      co2CostGross = isNet
+        ? computeVAT(data.co2CostDirect, primaryFuelType, data.billingPeriodStart, data.billingPeriodEnd).grossCost
+        : data.co2CostDirect;
+      co2CostNet = isNet
+        ? data.co2CostDirect
+        : data.co2CostDirect / getVATRate(primaryFuelType, data.billingPeriodEnd);
+      usedDirectCost = true;
+    } else if (isZeroCost) {
+      co2CostNet = 0;
+      co2CostGross = 0;
+    } else {
+      co2CostNet = (co2Kg * co2PricePerTon) / 1000;
+      co2CostGross = computeVAT(co2CostNet, primaryFuelType, data.billingPeriodStart, data.billingPeriodEnd).grossCost;
+    }
+    const fuelResults: FuelCalculationResult[] = [{
+      fuelType: primaryFuelType,
+      fuelLabel: getFuelLabel(primaryFuelType),
+      inputAmount: 0,
+      energyHeatingValueKwh: 0,
+      emissionFactor: getEmissionFactor(primaryFuelType, primaryEmissionFactor),
+      co2Kg,
+      co2CostNet,
+      co2CostGross,
+      usedDirectCost,
+      usedDirectEmissions: true,
+    }];
+    notes.push('Berechnung auf Basis der direkt eingegebenen CO2-Emissionen (kg) lt. Abrechnung.');
+    return buildResult(data, fuelResults, co2PricePerTon, billingYear, notes, crossYear, undefined);
+  }
+
   // Build fuel entries
   const fuelEntries: FuelEntry[] = data.fuelEntries && data.fuelEntries.length > 0
     ? data.fuelEntries
