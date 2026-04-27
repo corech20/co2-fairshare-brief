@@ -2,7 +2,7 @@ import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData, FuelType, FuelEntry } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
-import { ChevronDown, X, Settings2 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
@@ -141,8 +141,8 @@ export default function StepInputValues() {
     return !!hasAddr;
   });
 
-  const isMultiFuel = wizardData.fuelEntries && wizardData.fuelEntries.length > 0;
-  const expertMode = !!wizardData.expertMode;
+  const isMultiFuel = false;
+  const expertMode = false;
   const needsApartmentArea = wizardData.heatSupplyType === 'etage' ||
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
@@ -222,16 +222,16 @@ export default function StepInputValues() {
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
   const hasDirectEmissions = wizardData.co2EmissionsDirect != null && wizardData.co2EmissionsDirect > 0;
 
-  // In standard (non-expert) mode, multi-fuel selection is hidden — auto-collapse it back
-  // to single-fuel by clearing fuelEntries on entering this step without expert mode.
+  // Expertenmodus dauerhaft deaktiviert: Multi-Fuel-Einträge auf Single-Fuel zurückführen
+  // und etwaige Expertenmodus-Flags zurücksetzen.
   useEffect(() => {
-    if (!expertMode && wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
-      // Promote the first non-KWK entry back to single-fuel
+    if (wizardData.expertMode) setWizardField('expertMode', false);
+    if (wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
       const primary = wizardData.fuelEntries.find(e => !e.fuelType.endsWith('_kwk')) ?? wizardData.fuelEntries[0];
       setWizardField('fuelType', primary.fuelType);
       setWizardField('fuelEntries', undefined);
     }
-  }, [expertMode, wizardData.fuelEntries, setWizardField]);
+  }, [wizardData.expertMode, wizardData.fuelEntries, setWizardField]);
 
   return (
     <div className="space-y-6">
@@ -275,43 +275,13 @@ export default function StepInputValues() {
           />
         )}
 
-        {/* Expert-mode toggle */}
-        <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
-          <div className="flex items-start gap-2">
-            <Settings2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-            <div>
-              <div className="text-sm font-medium text-foreground">Expertenmodus</div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Eingabe der Brennstoffmenge (kWh, Liter, kg) statt CO2-Emissionen.
-                Mehrere Brennstoffe und KWK werden ebenfalls nur hier angeboten.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={expertMode}
-            onClick={() => setWizardField('expertMode', !expertMode)}
-            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-              expertMode ? 'bg-accent' : 'bg-muted-foreground/30'
-            }`}
-          >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform ${
-                expertMode ? 'translate-x-5' : 'translate-x-0.5'
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* ── Standard mode: primary input is CO2 emissions (kg) ───────────── */}
-        {!expertMode && (
-          <div className="space-y-4 rounded-xl border-2 border-border bg-card p-4">
+        {/* ── Werte aus der Abrechnung: CO2-Emissionen + CO2-Kosten ───────── */}
+        <div className="space-y-4 rounded-xl border-2 border-border bg-card p-4">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Werte aus Ihrer Abrechnung</h3>
               <p className="text-xs text-muted-foreground mt-1">
                 Bitte tragen Sie beide Werte für den gesamten Rechnungszeitraum genau so ein,
-                wie sie in Ihrer Heizkosten- oder Brennstoffabrechnung ausgewiesen sind.
+                wie sie in Ihrer Wärmeliefer- oder Brennstoffabrechnung ausgewiesen sind.
               </p>
             </div>
 
@@ -376,151 +346,6 @@ export default function StepInputValues() {
               </div>
             )}
           </div>
-        )}
-
-        {/* Multi-fuel: one input block per selected position (expert only) */}
-        {expertMode && isMultiFuel && (
-          <div className="space-y-4">
-            {wizardData.fuelEntries!.map((entry: FuelEntry, idx: number) => (
-              <div key={`${entry.fuelType}-${idx}`} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="text-sm font-semibold text-foreground">{getEntryLabel(entry.fuelType)}</div>
-                  {wizardData.fuelEntries!.length > 1 && (
-                    <button
-                      type="button"
-                      aria-label="Eingabeblock entfernen"
-                      onClick={() => {
-                        const updated = wizardData.fuelEntries!.filter((_, i) => i !== idx);
-                        setWizardField('fuelEntries', updated);
-                      }}
-                      className="text-muted-foreground hover:text-destructive transition-colors -mr-1 -mt-1 p-1"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Menge</label>
-                  <div className="relative">
-                    <IntegerInput
-                      value={entry.amount > 0 ? entry.amount : undefined}
-                      onChange={v => {
-                        const updated = [...wizardData.fuelEntries!];
-                        updated[idx] = { ...updated[idx], amount: v ?? 0 };
-                        setWizardField('fuelEntries', updated);
-                      }}
-                      placeholder="z. B. 45000"
-                      className="pr-16"
-                    />
-                    <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">{getEntryUnit(entry.fuelType)}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{getEntryHint(entry.fuelType)}</p>
-                </div>
-                {entry.fuelType === 'fernwaerme' && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-muted-foreground">Emissionsfaktor (kg CO2/kWh)</label>
-                    <input
-                      type="number"
-                      step="0.0001"
-                      value={entry.emissionFactorCustom ?? ''}
-                      onChange={e => {
-                        const updated = [...wizardData.fuelEntries!];
-                        updated[idx] = { ...updated[idx], emissionFactorCustom: parseFloat(e.target.value) || undefined };
-                        setWizardField('fuelEntries', updated);
-                      }}
-                      placeholder="z. B. 0.18"
-                      className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Fuel amount – expert mode only */}
-        {expertMode && !isMultiFuel && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">{fuelLabel}</label>
-            <div className="relative">
-              <IntegerInput
-                value={wizardData.fuelAmount}
-                onChange={v => setWizardField('fuelAmount', v)}
-                placeholder={`z. B. ${wizardData.fuelType === 'heizoel' ? '3000' : '50000'}`}
-                className="pr-16"
-              />
-              <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">{fuelUnit}</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk'
-                ? 'Verbrauch in kWh lt. Abrechnung (Brennwert/Hs) für den gesamten Rechnungszeitraum. Nur ganze Zahlen – wird intern auf Heizwert umgerechnet.'
-                : `Verbrauch in ${fuelUnit} für den gesamten Rechnungszeitraum (nur ganze Zahlen).`}
-            </p>
-            {crossYear && (
-              <p className="text-xs text-muted-foreground">
-                Bei jahresübergreifenden Zeiträumen bitte die Gesamtmenge des gesamten Rechnungszeitraums eingeben – keine Aufteilung nach Kalenderjahren.
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* District heating emission factor */}
-        {expertMode && !isMultiFuel && wizardData.fuelType === 'fernwaerme' && (
-          <InputField
-            label="Emissionsfaktor Fernwärme"
-            hint="Vom Fernwärmeversorger mitgeteilt (kg CO2/kWh)"
-            value={wizardData.emissionFactorCustom}
-            onChange={v => setWizardField('emissionFactorCustom', v ? parseFloat(v) : undefined)}
-            placeholder="z. B. 0.18"
-            unit="kg CO2/kWh"
-          />
-        )}
-
-        {expertMode && !isMultiFuel && wizardData.fuelType === 'fernwaerme' && !wizardData.emissionFactorCustom && (
-          <p className="text-xs text-destructive">Bitte geben Sie den Emissionsfaktor aus Ihrer Fernwärmeabrechnung an.</p>
-        )}
-
-        {/* Direct CO2 cost (Expertenmodus only) */}
-        {expertMode && (
-          <InputField
-            label="CO2-Kosten direkt eingeben (optional)"
-            hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
-            value={wizardData.co2CostDirect}
-            onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
-            placeholder="z. B. 250"
-            unit="EUR"
-          />
-        )}
-
-        {/* Gross / Net selector – Expertenmodus only (Standard hat eigenen Schalter im Block) */}
-        {expertMode && hasDirectCost && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
-            <div className="flex gap-3">
-              {([
-                { value: 'brutto' as CostInputType, label: 'Brutto (inkl. USt.)' },
-                { value: 'netto' as CostInputType, label: 'Netto (zzgl. USt.)' },
-              ]).map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => setWizardField('co2CostDirectType', opt.value)}
-                  className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all ${
-                    (wizardData.co2CostDirectType ?? 'brutto') === opt.value
-                      ? 'border-accent bg-accent/5 text-foreground'
-                      : 'border-border bg-card text-muted-foreground hover:border-primary/30'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-          </div>
-            <p className="text-xs text-muted-foreground">
-              {(wizardData.co2CostDirectType ?? 'brutto') === 'netto'
-                ? 'Der Nettobetrag wird mit dem jeweils geltenden USt.-Satz auf den Bruttobetrag hochgerechnet.'
-                : 'Der eingegebene Betrag wird als Bruttobetrag (inkl. USt.) verwendet.'}
-            </p>
-          </div>
-        )}
 
         {/* Tenant apartment heating: extra gas device question */}
         {showGasDeviceQuestion && (
