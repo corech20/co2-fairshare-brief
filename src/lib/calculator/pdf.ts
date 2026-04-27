@@ -65,7 +65,7 @@ export function generatePDF(
 
   const sectionHeading = (title: string) => {
     ensureSpace(16);
-    y += 3;
+    y += 2.4;
     doc.setFontSize(10.5);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(30, 55, 90);
