@@ -2,7 +2,7 @@ import { useCalculator } from '@/context/CalculatorContext';
 import type { CostInputType, AddressData, FuelType, FuelEntry } from '@/lib/calculator/types';
 import { isCrossYearPeriod } from '@/lib/calculator/engine';
 import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, Settings2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
 
@@ -142,6 +142,7 @@ export default function StepInputValues() {
   });
 
   const isMultiFuel = wizardData.fuelEntries && wizardData.fuelEntries.length > 0;
+  const expertMode = !!wizardData.expertMode;
   const needsApartmentArea = wizardData.heatSupplyType === 'etage' ||
     (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
   const needsBuildingArea = !needsApartmentArea;
@@ -219,6 +220,18 @@ export default function StepInputValues() {
   };
 
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
+  const hasDirectEmissions = wizardData.co2EmissionsDirect != null && wizardData.co2EmissionsDirect > 0;
+
+  // In standard (non-expert) mode, multi-fuel selection is hidden — auto-collapse it back
+  // to single-fuel by clearing fuelEntries on entering this step without expert mode.
+  useEffect(() => {
+    if (!expertMode && wizardData.fuelEntries && wizardData.fuelEntries.length > 0) {
+      // Promote the first non-KWK entry back to single-fuel
+      const primary = wizardData.fuelEntries.find(e => !e.fuelType.endsWith('_kwk')) ?? wizardData.fuelEntries[0];
+      setWizardField('fuelType', primary.fuelType);
+      setWizardField('fuelEntries', undefined);
+    }
+  }, [expertMode, wizardData.fuelEntries, setWizardField]);
 
   return (
     <div className="space-y-6">
