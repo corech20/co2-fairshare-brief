@@ -8,12 +8,12 @@ import { useState } from 'react';
 type BaseFuel = 'erdgas' | 'heizoel' | 'fernwaerme' | 'fluessiggas' | 'pellets' | 'kohle';
 
 const BASE_FUELS: { value: BaseFuel; label: string; desc: string; icon: typeof Flame }[] = [
-  { value: 'erdgas', label: 'Erdgas', desc: 'Eingabe in kWh (Brennwert/Hs) lt. Gasabrechnung', icon: Flame },
-  { value: 'heizoel', label: 'Heizöl', desc: 'Eingabe in Litern lt. Lieferschein oder Abrechnung', icon: Droplets },
-  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'Eingabe in kWh – Emissionsfaktor wird separat abgefragt', icon: Thermometer },
-  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'Eingabe in kg lt. Abrechnung', icon: Zap },
-  { value: 'pellets', label: 'Holzpellets', desc: 'Nicht BEHG-pflichtig – keine CO2-Kosten', icon: Leaf },
-  { value: 'kohle', label: 'Kohle', desc: 'Eingabe in kg (Braunkohlebriketts)', icon: Factory },
+  { value: 'erdgas', label: 'Erdgas', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Gasabrechnung; im Expertenmodus Brennstoffmenge in kWh (Brennwert/Hs).', icon: Flame },
+  { value: 'heizoel', label: 'Heizöl', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Abrechnung; im Expertenmodus Verbrauch in Litern.', icon: Droplets },
+  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Wärmeabrechnung; im Expertenmodus Verbrauch in kWh – Emissionsfaktor wird separat abgefragt.', icon: Thermometer },
+  { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Abrechnung; im Expertenmodus Verbrauch in kg.', icon: Zap },
+  { value: 'pellets', label: 'Holzpellets', desc: 'Nicht BEHG-pflichtig – keine CO2-Kosten anzusetzen.', icon: Leaf },
+  { value: 'kohle', label: 'Kohle', desc: 'Bevorzugt CO2-Emissionen oder alternativ CO2-Kosten lt. Abrechnung; im Expertenmodus Verbrauch in kg (Braunkohlebriketts).', icon: Factory },
 ];
 
 /** KWK options shown in the "Besondere Anlagentechnik" collapsible. */
