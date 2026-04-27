@@ -393,7 +393,7 @@ export function generatePDF(
       doc.setTextColor(100, 100, 100);
       doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
     }
-    y += 8;
+    y += 6.4;
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -521,7 +521,7 @@ export function generatePDF(
     }
   }
 
-  y += 8;
+  y += 6.4;
 
   // ═══════════════════════════════════════════════════════════════════════
   // PART III — ALLOCATION
@@ -604,6 +604,7 @@ export function generatePDF(
   const specialParagraphs = specialText.split('\n\n').filter(p => p.trim());
 
   if (specialParagraphs.length > 0) {
+    y += 1.6;
     const section3Title = isNonResidential
       ? '3. Besonderheiten zur Aufteilung der CO2-Kosten'
       : '3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell';
@@ -613,7 +614,7 @@ export function generatePDF(
       bodyText(para, 2);
       y += 2;
     }
-    y += 4;
+    y += 3.2;
   }
 
   // ═══════════════════════════════════════════════════════════════════════
