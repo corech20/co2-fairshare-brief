@@ -263,7 +263,7 @@ export default function StepInputValues() {
         )}
 
         {/* Multi-fuel: one input block per selected position */}
-        {isMultiFuel && !crossYear && (
+        {isMultiFuel && (
           <div className="space-y-4">
             {wizardData.fuelEntries!.map((entry: FuelEntry, idx: number) => (
               <div key={`${entry.fuelType}-${idx}`} className="rounded-xl border-2 border-border bg-card p-4 space-y-3">
@@ -323,7 +323,7 @@ export default function StepInputValues() {
         )}
 
         {/* Fuel amount – only for same-year, single fuel (integer-only) */}
-        {!isMultiFuel && !crossYear && (
+        {!isMultiFuel && (
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{fuelLabel}</label>
             <div className="relative">
@@ -337,16 +337,14 @@ export default function StepInputValues() {
             </div>
             <p className="text-xs text-muted-foreground">
               {wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk'
-                ? 'Verbrauch in kWh lt. Abrechnung (Brennwert/Hs). Nur ganze Zahlen – wird intern auf Heizwert umgerechnet.'
-                : `Verbrauch im Abrechnungszeitraum in ${fuelUnit} (nur ganze Zahlen).`}
+                ? 'Verbrauch in kWh lt. Abrechnung (Brennwert/Hs) für den gesamten Rechnungszeitraum. Nur ganze Zahlen – wird intern auf Heizwert umgerechnet.'
+                : `Verbrauch in ${fuelUnit} für den gesamten Rechnungszeitraum (nur ganze Zahlen).`}
             </p>
-          </div>
-        )}
-
-        {/* Cross-year notice */}
-        {crossYear && !isMultiFuel && (
-          <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-            Die Verbrauchsmengen pro Jahresabschnitt wurden bereits im Schritt „Abrechnungszeitraum" eingegeben.
+            {crossYear && (
+              <p className="text-xs text-muted-foreground">
+                Bei jahresübergreifenden Zeiträumen bitte die Gesamtmenge des gesamten Rechnungszeitraums eingeben – keine Aufteilung nach Kalenderjahren.
+              </p>
+            )}
           </div>
         )}
 
@@ -367,19 +365,17 @@ export default function StepInputValues() {
         )}
 
         {/* Direct CO2 cost */}
-        {!crossYear && (
-          <InputField
-            label="CO2-Kosten direkt eingeben (optional)"
-            hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
-            value={wizardData.co2CostDirect}
-            onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
-            placeholder="z. B. 250"
-            unit="EUR"
-          />
-        )}
+        <InputField
+          label="CO2-Kosten direkt eingeben (optional)"
+          hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
+          value={wizardData.co2CostDirect}
+          onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
+          placeholder="z. B. 250"
+          unit="EUR"
+        />
 
         {/* Gross / Net selector */}
-        {hasDirectCost && !crossYear && (
+        {hasDirectCost && (
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
             <div className="flex gap-3">
