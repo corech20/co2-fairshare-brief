@@ -300,7 +300,7 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
   steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
   steps.push(`CO2-Emissionen: ${fmt.number(fr.co2Kg, 1)} kg`);
   if (fr.usedDirectCost) {
-    steps.push(`CO2-Kosten (direkt übernommen): ${fmt.currency(fr.co2CostGross)} brutto`);
+    steps.push(`CO2-Kosten (aus Brennstoff-/Wärmeabrechnung): ${fmt.currency(fr.co2CostGross)} brutto`);
   }
   return steps;
 }
