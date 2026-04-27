@@ -480,18 +480,20 @@ export default function StepInputValues() {
           <p className="text-xs text-destructive">Bitte geben Sie den Emissionsfaktor aus Ihrer Fernwärmeabrechnung an.</p>
         )}
 
-        {/* Direct CO2 cost */}
-        <InputField
-          label="CO2-Kosten direkt eingeben (optional)"
-          hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
-          value={wizardData.co2CostDirect}
-          onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
-          placeholder="z. B. 250"
-          unit="EUR"
-        />
+        {/* Direct CO2 cost (Expertenmodus only) */}
+        {expertMode && (
+          <InputField
+            label="CO2-Kosten direkt eingeben (optional)"
+            hint="Nur ausfüllen, wenn der CO2-Betrag in Ihrer Abrechnung bereits direkt ausgewiesen ist."
+            value={wizardData.co2CostDirect}
+            onChange={v => setWizardField('co2CostDirect', v ? parseFloat(v) : undefined)}
+            placeholder="z. B. 250"
+            unit="EUR"
+          />
+        )}
 
-        {/* Gross / Net selector */}
-        {hasDirectCost && (
+        {/* Gross / Net selector – Expertenmodus only (Standard hat eigenen Schalter im Block) */}
+        {expertMode && hasDirectCost && (
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
             <div className="flex gap-3">
