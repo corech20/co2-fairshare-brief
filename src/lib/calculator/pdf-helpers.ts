@@ -253,7 +253,7 @@ export function getSpecialCircumstancesText(data: WizardData, result: Calculatio
   }
 
   if (result.usedDirectCost) {
-    lines.push('Die CO2-Kosten wurden ganz oder teilweise direkt aus der Abrechnung des Wärmelieferanten übernommen und nicht rechnerisch aus der Brennstoffmenge ermittelt.');
+    lines.push('Die CO2-Kosten wurden ganz oder teilweise direkt aus der Abrechnung des Wärmelieferanten übernommen.');
   }
 
   return lines.join('\n\n');
@@ -289,8 +289,14 @@ export function getEnergyHeatingValueLabel(fuelType: string): string {
 export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
   const steps: string[] = [];
   steps.push(`Brennstoff: ${fr.fuelLabel}`);
-  steps.push(`Menge: ${fmt.number(fr.inputAmount, 0)} ${getFuelUnitLabel(fr.fuelType)}`);
-  steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(fr.energyHeatingValueKwh, 2)} kWh`);
+  if (fr.inputAmount && fr.inputAmount > 0) {
+    steps.push(`Menge: ${fmt.number(fr.inputAmount, 0)} ${getFuelUnitLabel(fr.fuelType)}`);
+  }
+  // Energiegehalt: bei Direkteingabe der Emissionen über Emissionsfaktor zurückrechnen
+  const energyKwh = (fr.energyHeatingValueKwh && fr.energyHeatingValueKwh > 0)
+    ? fr.energyHeatingValueKwh
+    : (fr.emissionFactor > 0 ? fr.co2Kg / fr.emissionFactor : 0);
+  steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(energyKwh, 2)} kWh`);
   steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
   steps.push(`CO2-Emissionen: ${fmt.number(fr.co2Kg, 1)} kg`);
   if (fr.usedDirectCost) {
