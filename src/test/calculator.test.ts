@@ -565,7 +565,6 @@ describe('Cross-year calculation', () => {
     expect(r.emissionsPerSqmYear).toBeGreaterThan(0);
   });
 });
-});
 
 // ===================================================================
 // 13. STAGE MODEL BOUNDARIES
