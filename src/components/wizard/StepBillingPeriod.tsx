@@ -1,60 +1,21 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import { validateBillingPeriod, isCrossYearPeriod, getYearBoundaries, getCO2PriceForYear } from '@/lib/calculator/engine';
-import { AlertTriangle, Info, ChevronDown } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
 import type { YearlySegment } from '@/lib/calculator/types';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { IntegerInput } from './IntegerInput';
 
-/** Years shown as quick-select tiles in default mode.
- *  2023 is intentionally omitted here – it remains selectable via the
- *  "abweichender Zeitraum"-Modus (date inputs) for cross-year cases like
- *  01.10.2023 – 30.09.2024. The hard lower bound is enforced in
- *  validateBillingPeriod() in engine.ts. */
-const AVAILABLE_YEARS = [2024, 2025];
+/** Hard lower bound for the date inputs. Cross-year periods like
+ *  01.10.2023 – 30.09.2024 remain valid; the actual bounds are enforced
+ *  in validateBillingPeriod() in engine.ts. */
 const MIN_DATE = '2023-01-01';
 
 export default function StepBillingPeriod() {
   const { wizardData, setWizardField } = useCalculator();
 
-  // Detect if we're in "deviating period" mode
-  const isDeviating = (() => {
-    if (!wizardData.billingPeriodStart || !wizardData.billingPeriodEnd) return false;
-    // Check if it matches a full calendar year
-    const start = wizardData.billingPeriodStart;
-    const end = wizardData.billingPeriodEnd;
-    return !AVAILABLE_YEARS.some(y => start === `${y}-01-01` && end === `${y}-12-31`);
-  })();
-
-  const [showDeviating, setShowDeviating] = useState(isDeviating);
-
-  const selectedYear = (() => {
-    if (!wizardData.billingPeriodStart || !wizardData.billingPeriodEnd) return undefined;
-    for (const y of AVAILABLE_YEARS) {
-      if (wizardData.billingPeriodStart === `${y}-01-01` && wizardData.billingPeriodEnd === `${y}-12-31`) {
-        return y;
-      }
-    }
-    return undefined;
-  })();
-
-  const selectYear = (year: number) => {
-    setWizardField('billingPeriodStart', `${year}-01-01`);
-    setWizardField('billingPeriodEnd', `${year}-12-31`);
-    setWizardField('yearlySegments', undefined);
-    setShowDeviating(false);
-  };
-
-  const openDeviating = () => {
-    setShowDeviating(true);
-    // Clear year selection
-    setWizardField('billingPeriodStart', undefined);
-    setWizardField('billingPeriodEnd', undefined);
-    setWizardField('yearlySegments', undefined);
-  };
-
   const start = wizardData.billingPeriodStart;
   const end = wizardData.billingPeriodEnd;
-  const validationError = showDeviating ? validateBillingPeriod(start, end) : null;
+  const validationError = start && end ? validateBillingPeriod(start, end) : null;
   const crossYear = start && end && !validationError ? isCrossYearPeriod(start, end) : false;
   const yearBoundaries = crossYear && start && end ? getYearBoundaries(start, end) : [];
 
@@ -98,61 +59,19 @@ export default function StepBillingPeriod() {
         </p>
       </div>
 
-      {/* Year selection (default mode) */}
-      {!showDeviating && (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {AVAILABLE_YEARS.map(year => (
-              <button
-                key={year}
-                onClick={() => selectYear(year)}
-                className={`rounded-lg border-2 p-4 text-center transition-all hover:shadow-md ${
-                  selectedYear === year
-                    ? 'border-accent bg-accent/5 shadow-sm'
-                    : 'border-border bg-card hover:border-primary/30'
-                }`}
-              >
-                <div className="font-semibold text-foreground text-lg">{year}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  CO2-Preis: {getCO2PriceForYear(year)} €/t
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            Frühere Abrechnungsjahre werden im Standardmodus nicht mehr angezeigt, da ein
-            Erstattungsanspruch in Selbstversorgungs- und Direktbelieferungsfällen innerhalb
-            von 12 Monaten nach der Abrechnung durch den Brennstoff- oder Wärmelieferanten
-            geltend gemacht werden muss.
-          </p>
-
-          <button
-            onClick={openDeviating}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ChevronDown className="h-4 w-4" />
-            Abweichenden Zeitraum eingeben
-          </button>
-        </>
-      )}
-
-      {/* Deviating period mode */}
-      {showDeviating && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">Abweichender Abrechnungszeitraum</span>
-            <button
-              onClick={() => {
-                setShowDeviating(false);
-                setWizardField('billingPeriodStart', undefined);
-                setWizardField('billingPeriodEnd', undefined);
-                setWizardField('yearlySegments', undefined);
-              }}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Zurück zur Jahresauswahl
-            </button>
+      <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Das Tool berechnet Erstattungsbeträge für die Abrechnungsjahre 2024 und 2025
+              (CO2-Preis: 45 €/t in 2024, 55 €/t in 2025). Jahresübergreifende Zeiträume
+              werden automatisch nach Kalenderjahren aufgeteilt.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Frühere Abrechnungsjahre werden im Standardmodus nicht mehr angezeigt, da ein
+              Erstattungsanspruch in Selbstversorgungs- und Direktbelieferungsfällen innerhalb
+              von 12 Monaten nach der Abrechnung durch den Brennstoff- oder Wärmelieferanten
+              geltend gemacht werden muss.
+            </p>
           </div>
 
           <p className="text-sm text-muted-foreground">
@@ -239,8 +158,7 @@ export default function StepBillingPeriod() {
               Der Abrechnungszeitraum darf maximal 365 Tage umfassen. Erstreckt sich der Zeitraum über mehrere Kalenderjahre, werden die Verbrauchsmengen getrennt nach Jahren erfasst.
             </p>
           )}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
