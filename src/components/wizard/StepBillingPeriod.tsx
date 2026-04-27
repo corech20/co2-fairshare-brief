@@ -1,6 +1,6 @@
 import { useCalculator } from '@/context/CalculatorContext';
-import { validateBillingPeriod, isCrossYearPeriod } from '@/lib/calculator/engine';
-import { AlertTriangle, Info } from 'lucide-react';
+import { validateBillingPeriod } from '@/lib/calculator/engine';
+import { AlertTriangle } from 'lucide-react';
 import { useEffect } from 'react';
 
 /** Hard lower bound for the date inputs. Cross-year periods like
@@ -8,13 +8,23 @@ import { useEffect } from 'react';
  *  in validateBillingPeriod() in engine.ts. */
 const MIN_DATE = '2023-01-01';
 
+/** Add days to a YYYY-MM-DD string and return the same format. */
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+/** Subtract days. */
+function subDays(dateStr: string, days: number): string {
+  return addDays(dateStr, -days);
+}
+
 export default function StepBillingPeriod() {
   const { wizardData, setWizardField } = useCalculator();
 
   const start = wizardData.billingPeriodStart;
   const end = wizardData.billingPeriodEnd;
   const validationError = start && end ? validateBillingPeriod(start, end) : null;
-  const crossYear = start && end && !validationError ? isCrossYearPeriod(start, end) : false;
   const isTenant = wizardData.userRole === 'mieter';
   const calcNoun = isTenant ? 'Erstattungsbeträge' : 'CO2-Kostenaufteilung';
 
@@ -24,6 +34,15 @@ export default function StepBillingPeriod() {
       setWizardField('yearlySegments', undefined);
     }
   }, [wizardData.yearlySegments, setWizardField]);
+
+  // Enforce 365-day window directly on the date inputs.
+  // - "Bis" max is start + 364 days (so end - start <= 364 → period <= 365 days inclusive)
+  // - "Von" min/max constrain to keep window <= 365 days when an end is already set
+  const endMax = start ? addDays(start, 364) : undefined;
+  const startMinFromEnd = end ? subDays(end, 364) : undefined;
+  const startMin = MIN_DATE > (startMinFromEnd ?? MIN_DATE) ? MIN_DATE : (startMinFromEnd ?? MIN_DATE);
+  const startMax = end ?? undefined;
+  const endMin = start ?? MIN_DATE;
 
   return (
     <div className="space-y-5">
@@ -54,7 +73,8 @@ export default function StepBillingPeriod() {
               <label className="text-sm font-medium text-foreground">Von</label>
               <input
                 type="date"
-                min={MIN_DATE}
+                min={startMin}
+                max={startMax}
                 value={start ?? ''}
                 onChange={e => setWizardField('billingPeriodStart', e.target.value)}
                 className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
@@ -64,7 +84,8 @@ export default function StepBillingPeriod() {
               <label className="text-sm font-medium text-foreground">Bis</label>
               <input
                 type="date"
-                min={MIN_DATE}
+                min={endMin}
+                max={endMax}
                 value={end ?? ''}
                 onChange={e => setWizardField('billingPeriodEnd', e.target.value)}
                 className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
@@ -77,24 +98,6 @@ export default function StepBillingPeriod() {
               <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive font-medium">{validationError}</p>
             </div>
-          )}
-
-          {crossYear && !validationError && (
-            <div className="rounded-lg border border-border bg-muted/50 p-4 flex gap-3">
-              <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">Jahresübergreifender Zeitraum</p>
-                <p className="mt-1">
-                  Bitte geben Sie die Gesamtwerte für den gesamten Rechnungszeitraum ein.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {!crossYear && !validationError && start && end && (
-            <p className="text-xs text-muted-foreground">
-              Der Abrechnungszeitraum darf maximal 365 Tage umfassen. Erstreckt sich der Zeitraum über mehrere Kalenderjahre, werden die Verbrauchsmengen getrennt nach Jahren erfasst.
-            </p>
           )}
       </div>
     </div>
