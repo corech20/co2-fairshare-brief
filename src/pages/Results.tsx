@@ -143,6 +143,10 @@ export default function ResultsPage() {
   const isLandlord = wizardData.userRole === 'vermieter';
   const mixedVAT = getMixedVATInfo(wizardData, result.isCrossYear);
 
+  // Sonderfall Holzpellets / Hackschnitzel: keine Aufteilung, kein Stufenmodell
+  const isPelletsSpecialCase = result.fuelResults.length > 0 &&
+    result.fuelResults.every(fr => fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel');
+
   const allocationExplanation = (() => {
     if (result.isResidential && result.stufenmodellStep > 0) {
       const rangeText = getStufenmodellRangeText(result.stufenmodellStep);
@@ -208,6 +212,35 @@ export default function ResultsPage() {
           </div>
 
           {/* ═══════════ Compact result summary ═══════════ */}
+          {isPelletsSpecialCase ? (
+            <section className="rounded-lg border-2 border-primary bg-primary/5">
+              <header className="border-b border-primary/20 px-5 py-3">
+                <h2 className="text-sm font-semibold text-foreground">Ergebnis – Sonderfall Holzpellets</h2>
+              </header>
+              <div className="px-5 py-5 space-y-4">
+                <dl className="space-y-1.5 text-sm">
+                  <div className="flex items-baseline gap-2">
+                    <dt className="text-muted-foreground shrink-0">Brennstoff:</dt>
+                    <dd className="ml-auto text-right text-foreground font-semibold">Holzpellets</dd>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <dt className="text-muted-foreground shrink-0">CO2-Kosten:</dt>
+                    <dd className="ml-auto text-right text-foreground font-semibold tabular-nums">{formatCurrency(0)}</dd>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <dt className="text-muted-foreground shrink-0">Aufteilung:</dt>
+                    <dd className="ml-auto text-right text-foreground font-medium">keine Aufteilung erforderlich</dd>
+                  </div>
+                </dl>
+                <div className="rounded-md border border-primary/30 bg-background p-4 flex items-start gap-3">
+                  <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground leading-relaxed">
+                    Für Holzpellets sind in dieser Pilotversion keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Etwaige Emissionsangaben werden nur informatorisch ausgewiesen.
+                  </p>
+                </div>
+              </div>
+            </section>
+          ) : (
           <section className="rounded-lg border-2 border-primary bg-primary/5">
             <header className="border-b border-primary/20 px-5 py-3">
               <h2 className="text-sm font-semibold text-foreground">Ergebnis</h2>
@@ -305,6 +338,7 @@ export default function ResultsPage() {
               )}
             </div>
           </section>
+          )}
 
           {/* Document section — opens payment dialog directly */}
           {!purchased && (

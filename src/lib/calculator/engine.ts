@@ -738,6 +738,52 @@ function buildResult(
 
   const primaryFuel = fuelResults[0];
 
+  // ── Sonderfall Holzpellets / Hackschnitzel ──────────────────────────────
+  // Renewable biomass: keine nach CO2KostAufG zu verteilenden CO2-Kosten.
+  // Keine Aufteilung, kein Stufenmodell, keine Annualisierung der Emissionen.
+  const allZeroCost = fuelResults.length > 0 &&
+    fuelResults.every(r => ZERO_COST_FUELS.has(r.fuelType));
+  if (allZeroCost) {
+    return {
+      totalEmissionsKg,
+      emissionsPerSqmYear,
+      co2PricePerTon,
+      totalCO2Cost: 0,
+      totalCO2CostNet: 0,
+      appliedVATRate: 1,
+      vatPercent: 0,
+      landlordShare: 0,
+      tenantShare: 0,
+      landlordPercent: 0,
+      tenantPercent: 0,
+      baseLandlordPercent: 0,
+      baseTenantPercent: 0,
+      stufenmodellStep: 0,
+      fuelLabel: primaryFuel?.fuelLabel ?? '',
+      emissionFactor: primaryFuel?.emissionFactor ?? 0,
+      totalEnergyHeatingValueKwh,
+      weightedEmissionFactor,
+      fuelResults,
+      billingYear,
+      relevantArea,
+      restrictionApplied: restriction,
+      restrictionNote: undefined,
+      isResidential,
+      usedDirectCost: false,
+      reimbursementReductionApplied: false,
+      reimbursementReductionPercent: 0,
+      landlordShareBeforeReduction: undefined,
+      notes: [
+        ...notes.filter(n => !/hochgerechnet|Stufe|Stufenmodell/i.test(n)),
+        'Für Holzpellets sind in dieser Pilotversion keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Etwaige Emissionsangaben werden nur informatorisch ausgewiesen.',
+      ],
+      isCrossYear,
+      segmentResults,
+      annualizationFactor: undefined,
+      emissionsPerSqmAnnualized: undefined,
+    };
+  }
+
   return {
     totalEmissionsKg,
     emissionsPerSqmYear,
