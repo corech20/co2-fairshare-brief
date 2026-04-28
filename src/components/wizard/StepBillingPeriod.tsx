@@ -3,10 +3,10 @@ import { validateBillingPeriod } from '@/lib/calculator/engine';
 import { AlertTriangle } from 'lucide-react';
 import { useEffect } from 'react';
 
-/** Hard lower bound for the date inputs. Cross-year periods like
- *  01.10.2023 – 30.09.2024 remain valid; the actual bounds are enforced
- *  in validateBillingPeriod() in engine.ts. */
-const MIN_DATE = '2023-01-01';
+/** Hard date bounds for the inputs. Pilotversion: nur Zeiträume innerhalb
+ *  der Jahre 2024–2026 zulässig (z. B. 01.02.2025 – 31.01.2026). */
+const MIN_DATE = '2024-01-01';
+const MAX_DATE = '2026-12-31';
 
 /** Add days to a YYYY-MM-DD string and return the same format. */
 function addDays(dateStr: string, days: number): string {
@@ -41,8 +41,9 @@ export default function StepBillingPeriod() {
   const endMax = start ? addDays(start, 364) : undefined;
   const startMinFromEnd = end ? subDays(end, 364) : undefined;
   const startMin = MIN_DATE > (startMinFromEnd ?? MIN_DATE) ? MIN_DATE : (startMinFromEnd ?? MIN_DATE);
-  const startMax = end ?? undefined;
+  const startMax = end ?? MAX_DATE;
   const endMin = start ?? MIN_DATE;
+  const endMaxBounded = endMax && endMax < MAX_DATE ? endMax : MAX_DATE;
 
   return (
     <div className="space-y-5">
@@ -85,7 +86,7 @@ export default function StepBillingPeriod() {
               <input
                 type="date"
                 min={endMin}
-                max={endMax}
+                max={endMaxBounded}
                 value={end ?? ''}
                 onChange={e => setWizardField('billingPeriodEnd', e.target.value)}
                 className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
