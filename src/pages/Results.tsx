@@ -341,7 +341,7 @@ export default function ResultsPage() {
           )}
 
           {/* Document section — opens payment dialog directly */}
-          {!purchased && !isPelletsSpecialCase && (
+          {!purchased && (
             <div className="rounded-lg border border-border bg-card p-5 space-y-4">
               <div className="space-y-1">
                 <h3 className="text-sm font-semibold text-foreground">Dokument erstellen</h3>
