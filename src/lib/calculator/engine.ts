@@ -248,9 +248,13 @@ export function validateBillingPeriod(start?: string, end?: string): string | nu
   const s = new Date(start);
   const e = new Date(end);
   if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Bitte ein gültiges Datum eingeben.';
-  const MIN_YEAR = 2023;
+  const MIN_YEAR = 2024;
+  const MAX_YEAR = 2026;
   if (s.getFullYear() < MIN_YEAR || e.getFullYear() < MIN_YEAR) {
     return `Es werden nur Abrechnungszeiträume ab dem Jahr ${MIN_YEAR} unterstützt.`;
+  }
+  if (s.getFullYear() > MAX_YEAR || e.getFullYear() > MAX_YEAR) {
+    return `Es werden nur Abrechnungszeiträume bis zum Jahr ${MAX_YEAR} unterstützt.`;
   }
   if (e <= s) return 'Das Enddatum muss nach dem Startdatum liegen.';
   const days = getBillingPeriodDays(start, end);
