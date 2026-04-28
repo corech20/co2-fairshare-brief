@@ -8,6 +8,7 @@ import { getDocumentCase, getBuildingTypeLabel, fmt, getStufenmodellRangeText, i
 import { useEffect } from 'react';
 
 import type { OutputType } from '@/lib/calculator/types';
+import SiteFooter from '@/components/SiteFooter';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
   const isTenant = wizardData.userRole === 'mieter';
@@ -412,6 +413,7 @@ export default function ResultsPage() {
           </div>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }
