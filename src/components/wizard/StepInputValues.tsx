@@ -221,6 +221,7 @@ export default function StepInputValues() {
 
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
   const hasDirectEmissions = wizardData.co2EmissionsDirect != null && wizardData.co2EmissionsDirect > 0;
+  const isPellets = wizardData.fuelType === 'pellets';
 
   // Expertenmodus dauerhaft deaktiviert: Multi-Fuel-Einträge auf Single-Fuel zurückführen
   // und etwaige Expertenmodus-Flags zurücksetzen.
@@ -280,14 +281,17 @@ export default function StepInputValues() {
             <div>
               <h3 className="text-sm font-semibold text-foreground">Werte aus Ihrer Abrechnung</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Bitte tragen Sie beide Werte für den gesamten Rechnungszeitraum genau so ein,
-                wie sie in Ihrer Wärmeliefer- oder Brennstoffabrechnung ausgewiesen sind.
+                {isPellets
+                  ? 'Holzpellets sind ein Sonderfall: Es sind keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Eine Eingabe ist nicht erforderlich.'
+                  : 'Bitte tragen Sie beide Werte für den gesamten Rechnungszeitraum genau so ein, wie sie in Ihrer Wärmeliefer- oder Brennstoffabrechnung ausgewiesen sind.'}
               </p>
             </div>
 
             {/* CO2-Emissionen (kg) – Pflicht */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">CO2-Emissionen lt. Abrechnung</label>
+              <label className="text-sm font-medium text-foreground">
+                CO2-Emissionen lt. Abrechnung{isPellets ? ' (optional)' : ''}
+              </label>
               <div className="relative">
                 <IntegerInput
                   value={wizardData.co2EmissionsDirect}
@@ -298,31 +302,35 @@ export default function StepInputValues() {
                 <span className="absolute right-4 top-[1.05rem] text-sm text-muted-foreground pointer-events-none">kg</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Wird auf ein Jahr normiert und für die Einstufung nach dem Stufenmodell verwendet.
+                {isPellets
+                  ? 'Nur informatorisch; keine Grundlage der Kostenaufteilung.'
+                  : 'Wird auf ein Jahr normiert und für die Einstufung nach dem Stufenmodell verwendet.'}
               </p>
             </div>
 
-            {/* CO2-Kosten (EUR) – Pflicht */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">CO2-Kosten lt. Abrechnung</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={wizardData.co2CostDirect ?? ''}
-                  onChange={e => setWizardField('co2CostDirect', e.target.value ? parseFloat(e.target.value) : undefined)}
-                  placeholder="z. B. 250"
-                  className="block w-full box-border h-12 rounded-lg border-2 border-border bg-card px-4 py-3 text-base leading-tight text-foreground focus:border-accent focus:outline-none transition-colors pr-16"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
+            {/* CO2-Kosten (EUR) – Pflicht (nicht für Pellets) */}
+            {!isPellets && (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">CO2-Kosten lt. Abrechnung</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={wizardData.co2CostDirect ?? ''}
+                    onChange={e => setWizardField('co2CostDirect', e.target.value ? parseFloat(e.target.value) : undefined)}
+                    placeholder="z. B. 250"
+                    className="block w-full box-border h-12 rounded-lg border-2 border-border bg-card px-4 py-3 text-base leading-tight text-foreground focus:border-accent focus:outline-none transition-colors pr-16"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Exakter Rechnungsbetrag der CO2-Kosten – wird anschließend nach dem Stufenmodell verteilt.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Exakter Rechnungsbetrag der CO2-Kosten – wird anschließend nach dem Stufenmodell verteilt.
-              </p>
-            </div>
+            )}
 
-            {/* Brutto/Netto-Schalter direkt im Block */}
-            {hasDirectCost && (
+            {/* Brutto/Netto-Schalter direkt im Block (nicht für Pellets) */}
+            {!isPellets && hasDirectCost && (
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
                 <div className="flex gap-3">
