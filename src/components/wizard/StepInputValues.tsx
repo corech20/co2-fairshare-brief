@@ -334,7 +334,7 @@ export default function StepInputValues() {
                       key={opt.value}
                       onClick={() => setWizardField('co2CostDirectType', opt.value)}
                       className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all ${
-                        (wizardData.co2CostDirectType ?? 'brutto') === opt.value
+                          wizardData.co2CostDirectType === opt.value
                           ? 'border-accent bg-accent/5 text-foreground'
                           : 'border-border bg-card text-muted-foreground hover:border-primary/30'
                       }`}
@@ -343,6 +343,11 @@ export default function StepInputValues() {
                     </button>
                   ))}
                 </div>
+                {!wizardData.co2CostDirectType && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Bitte geben Sie an, ob der CO2-Kostenbetrag netto oder brutto ausgewiesen ist.
+                  </p>
+                )}
               </div>
             )}
           </div>

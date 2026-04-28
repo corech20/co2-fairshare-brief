@@ -92,7 +92,11 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
         const hasDirectCost = !!(wizardData.co2CostDirect && wizardData.co2CostDirect > 0);
         // Pellets: keine CO2-Kosten anzusetzen → nur Emissionen verpflichtend
         const isPellets = wizardData.fuelType === 'pellets';
-        const hasAnyEnergyInput = isPellets ? hasDirectEmissions : (hasDirectEmissions && hasDirectCost);
+        // Pilotversion: Wenn CO2-Kosten eingegeben sind, MUSS netto/brutto explizit gewählt sein.
+        const hasCostTypeIfNeeded = isPellets ? true : (hasDirectCost && !!wizardData.co2CostDirectType);
+        const hasAnyEnergyInput = isPellets
+          ? hasDirectEmissions
+          : (hasDirectEmissions && hasDirectCost && hasCostTypeIfNeeded);
         if (needsApartment) {
           return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasAnyEnergyInput);
         }
