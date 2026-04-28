@@ -5,6 +5,7 @@ import { ArrowLeft, FileText, Trash2, Building2, Flame, Calculator as Calculator
 import { listHistory, deleteHistoryEntry, clearHistory, type HistoryEntry } from '@/lib/calculator/historyStore';
 import { fmt, getBuildingTypeLabel } from '@/lib/calculator/pdf-helpers';
 import { useCalculator } from '@/context/CalculatorContext';
+import SiteFooter from '@/components/SiteFooter';
 
 const FUEL_LABELS: Record<string, string> = {
   erdgas: 'Erdgas', heizoel: 'Heizöl', fernwaerme: 'Fernwärme', fluessiggas: 'Flüssiggas',
@@ -158,6 +159,7 @@ export default function HistoryPage() {
           )}
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

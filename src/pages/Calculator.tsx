@@ -9,6 +9,7 @@ import StepRestriction from '@/components/wizard/StepRestriction';
 import StepBillingPeriod from '@/components/wizard/StepBillingPeriod';
 import StepFuelSource from '@/components/wizard/StepFuelSource';
 import StepInputValues from '@/components/wizard/StepInputValues';
+import SiteFooter from '@/components/SiteFooter';
 
 const STEP_LABELS = [
   'Rolle',
@@ -133,5 +134,10 @@ function WizardContent() {
 }
 
 export default function CalculatorPage() {
-  return <WizardContent />;
+  return (
+    <>
+      <WizardContent />
+      <SiteFooter />
+    </>
+  );
 }

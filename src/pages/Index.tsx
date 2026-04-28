@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Scale, BarChart3, FileText, Building2, Flame, ListChecks, FileDown, Users } from 'lucide-react';
 import { useState } from 'react';
+import SiteFooter from '@/components/SiteFooter';
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
@@ -190,12 +191,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-background py-6">
-        <div className="container-wide px-4 text-center text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} CO2-Kostenaufteilungsrechner · Alle Angaben ohne Gewähr</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
