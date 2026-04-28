@@ -90,12 +90,13 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
           (wizardData.userRole === 'mieter' && wizardData.heatSupplyType === 'fernwaerme');
         const hasDirectEmissions = !!(wizardData.co2EmissionsDirect && wizardData.co2EmissionsDirect > 0);
         const hasDirectCost = !!(wizardData.co2CostDirect && wizardData.co2CostDirect > 0);
-        // Pellets: keine CO2-Kosten anzusetzen → nur Emissionen verpflichtend
+        // Pellets: Sonderfall – keine CO2-Kosten, keine Aufteilung.
+        // Emissionen sind nur informatorisch und daher optional.
         const isPellets = wizardData.fuelType === 'pellets';
         // Pilotversion: Wenn CO2-Kosten eingegeben sind, MUSS netto/brutto explizit gewählt sein.
         const hasCostTypeIfNeeded = isPellets ? true : (hasDirectCost && !!wizardData.co2CostDirectType);
         const hasAnyEnergyInput = isPellets
-          ? hasDirectEmissions
+          ? true
           : (hasDirectEmissions && hasDirectCost && hasCostTypeIfNeeded);
         if (needsApartment) {
           return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasAnyEnergyInput);
