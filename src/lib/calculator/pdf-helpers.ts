@@ -252,10 +252,6 @@ export function getSpecialCircumstancesText(data: WizardData, result: Calculatio
     lines.push(`In der Wohnung befindet sich ein zusätzliches Gasgerät ohne eigenen Zähler (z. B. Gasherd, Gasdurchlauferhitzer). Der Erstattungsanspruch gegenüber dem Vermieter wurde daher gemäß § 5 Abs. 5 CO2KostAufG pauschal um ${result.reimbursementReductionPercent} % gekürzt.`);
   }
 
-  if (result.usedDirectCost) {
-    lines.push('Die CO2-Kosten wurden ganz oder teilweise direkt aus der Abrechnung des Wärmelieferanten übernommen.');
-  }
-
   return lines.join('\n\n');
 }
 
@@ -298,7 +294,7 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
     : (fr.emissionFactor > 0 ? fr.co2Kg / fr.emissionFactor : 0);
   steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(energyKwh, 2)} kWh`);
   steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
-  steps.push(`CO2-Emissionen: ${fmt.number(fr.co2Kg, 1)} kg`);
+  steps.push(`CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung): ${fmt.number(fr.co2Kg, 1)} kg`);
   if (fr.usedDirectCost) {
     steps.push(`CO2-Kosten (aus Brennstoff-/Wärmeabrechnung): ${fmt.currency(fr.co2CostGross)} brutto`);
   }
