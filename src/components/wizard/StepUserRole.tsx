@@ -37,10 +37,10 @@ export default function StepUserRole() {
                 : 'border-border bg-card hover:border-primary/30'
             }`}
           >
-            <div className="h-8 mb-3 flex items-start">
-              <opt.icon className={`h-8 w-8 ${wizardData.userRole === opt.value ? 'text-accent' : 'text-muted-foreground'}`} />
+            <div className="flex items-center gap-3 mb-2">
+              <opt.icon className={`h-8 w-8 shrink-0 ${wizardData.userRole === opt.value ? 'text-accent' : 'text-muted-foreground'}`} />
+              <div className="font-semibold text-foreground text-lg leading-none">{opt.label}</div>
             </div>
-            <div className="font-semibold text-foreground text-lg">{opt.label}</div>
             <div className="text-sm text-muted-foreground mt-1">{opt.desc}</div>
           </button>
         ))}
