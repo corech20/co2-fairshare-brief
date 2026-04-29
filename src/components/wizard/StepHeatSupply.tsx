@@ -8,14 +8,14 @@ type HeatOption = { value: HeatSupplyType; label: string; desc: string; icon: ty
 
 const OPT_ZENTRAL: HeatOption = {
   value: 'zentral',
-  label: 'Zentrale Heizungsanlage',
-  desc: 'Gemeinsame Heizung für das gesamte Gebäude (z.\u00A0B. Zentralheizung im Keller)',
+  label: 'Wärmeerzeugung im Gebäude',
+  desc: 'Die Wärme wird im Gebäude über eine zentrale Heizungsanlage erzeugt.',
   icon: Flame,
 };
 const OPT_FERNWAERME: HeatOption = {
   value: 'fernwaerme',
   label: 'Fernwärme / Nahwärme',
-  desc: 'Wärmeversorgung über ein Fernwärme- oder Nahwärmenetz',
+  desc: 'Die Wärme wird über ein Fernwärme- oder Nahwärmenetz geliefert.',
   icon: Thermometer,
 };
 const OPT_ETAGE_WOHN: HeatOption = {
