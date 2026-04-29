@@ -104,13 +104,13 @@ export function DetailedCalculationView({ data, result }: Props) {
                   <Row label="Menge:" value={fmt.number(seg.amount, 0)} indent={8} />
                   <Row label="CO2-Preis:" value={`${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`} indent={8} />
                   <Row label={`${getEnergyHeatingValueLabel(primaryFuel ?? '')}:`} value={`${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`} indent={8} />
-                  <Row label="CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung):" value={`${fmt.number(seg.co2Kg, 1)} kg`} indent={8} />
+                  <Row label="CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung):" value={`${fmt.number(seg.co2Kg, 4)} kg`} indent={8} />
                   <Row label="CO2-Kosten netto:" value={fmt.currency(seg.co2CostNet)} indent={8} />
                   <Row label="CO2-Kosten brutto:" value={fmt.currency(seg.co2CostGross)} indent={8} />
                 </div>
               ))}
               <hr className="border-border" />
-              <Row label="Gesamte CO2-Emissionen:" value={`${fmt.number(result.totalEmissionsKg, 1)} kg`} bold />
+              <Row label="Gesamte CO2-Emissionen:" value={`${fmt.number(result.totalEmissionsKg, 4)} kg`} bold />
               <Row label="Gesamte CO2-Kosten netto:" value={fmt.currency(result.totalCO2CostNet)} />
               <Row label="Gesamte CO2-Kosten brutto:" value={fmt.currency(result.totalCO2Cost)} bold />
             </>
@@ -141,7 +141,7 @@ export function DetailedCalculationView({ data, result }: Props) {
                 <>
                   <hr className="border-border" />
                   <Row label="Gesamtenergie (Heizwert):" value={`${fmt.number(result.totalEnergyHeatingValueKwh, 2)} kWh`} bold />
-                  <Row label="Gesamte CO2-Emissionen:" value={`${fmt.number(result.totalEmissionsKg, 1)} kg`} bold />
+                  <Row label="Gesamte CO2-Emissionen:" value={`${fmt.number(result.totalEmissionsKg, 4)} kg`} bold />
                   <Row label="Gewichteter Emissionsfaktor:" value={`${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`} />
                 </>
               )}
