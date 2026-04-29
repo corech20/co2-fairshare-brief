@@ -37,7 +37,9 @@ export default function StepUserRole() {
                 : 'border-border bg-card hover:border-primary/30'
             }`}
           >
-            <opt.icon className={`h-8 w-8 mb-3 ${wizardData.userRole === opt.value ? 'text-accent' : 'text-muted-foreground'}`} />
+            <div className="h-8 mb-3 flex items-start">
+              <opt.icon className={`h-8 w-8 ${wizardData.userRole === opt.value ? 'text-accent' : 'text-muted-foreground'}`} />
+            </div>
             <div className="font-semibold text-foreground text-lg">{opt.label}</div>
             <div className="text-sm text-muted-foreground mt-1">{opt.desc}</div>
           </button>
