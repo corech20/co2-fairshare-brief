@@ -294,7 +294,7 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
     : (fr.emissionFactor > 0 ? fr.co2Kg / fr.emissionFactor : 0);
   steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(energyKwh, 2)} kWh`);
   steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
-  steps.push(`CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung): ${fmt.number(fr.co2Kg, 1)} kg`);
+  steps.push(`CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung): ${fmt.number(fr.co2Kg, 4)} kg`);
   if (fr.usedDirectCost) {
     steps.push(`CO2-Kosten (aus Brennstoff-/Wärmeabrechnung): ${fmt.currency(fr.co2CostGross)} brutto`);
   }
