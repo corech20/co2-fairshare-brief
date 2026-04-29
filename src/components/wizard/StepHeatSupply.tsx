@@ -20,14 +20,14 @@ const OPT_FERNWAERME: HeatOption = {
 };
 const OPT_ETAGE_WOHN: HeatOption = {
   value: 'etage',
-  label: 'Wohnungseigene Heizung',
-  desc: 'Eigene Heizungsanlage in der Wohnung (z.\u00A0B. Gastherme, Gasetagenheizung)',
+  label: 'Eigene Heizungsanlage der Mieteinheit',
+  desc: 'Die Wärme wird in der gemieteten Einheit selbst erzeugt (z.\u00A0B. durch eine Gastherme).',
   icon: Heater,
 };
 const OPT_ETAGE_NWG: HeatOption = {
   value: 'etage',
-  label: 'Eigene Heizungsanlage der Mietfläche',
-  desc: 'Eigene Heizungsanlage für die gemietete Einheit (z.\u00A0B. Gastherme der Mietfläche)',
+  label: 'Eigene Heizungsanlage der Mieteinheit',
+  desc: 'Die Wärme wird in der gemieteten Einheit selbst erzeugt (z.\u00A0B. durch eine Gastherme).',
   icon: Heater,
 };
 
