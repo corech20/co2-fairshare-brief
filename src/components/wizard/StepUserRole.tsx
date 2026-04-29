@@ -6,7 +6,7 @@ const OPTIONS: { value: UserRole; label: string; desc: string; icon: typeof User
   {
     value: 'mieter',
     label: 'Berechnung als Mieter',
-    desc: 'Zur Prüfung des CO2-Kostenanteils und möglicher Erstattungsansprüche – insbesondere bei eigener Wärmeversorgung oder direkter Wärmelieferung.',
+    desc: 'Prüfung des CO2-Kostenanteils und möglicher Erstattungsansprüche – bei eigener Wärmeversorgung oder direkter Wärmelieferung.',
     icon: User,
   },
   {
@@ -31,7 +31,7 @@ export default function StepUserRole() {
           <button
             key={opt.value}
             onClick={() => setWizardField('userRole', opt.value)}
-            className={`rounded-xl border-2 p-6 text-left transition-all hover:shadow-md ${
+            className={`rounded-xl border-4 p-6 text-left transition-all hover:shadow-md ${
               wizardData.userRole === opt.value
                 ? 'border-accent bg-accent/5 shadow-sm'
                 : 'border-border bg-card hover:border-primary/30'
