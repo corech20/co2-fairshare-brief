@@ -6,13 +6,13 @@ const OPTIONS: { value: UserRole; label: string; desc: string; icon: typeof User
   {
     value: 'mieter',
     label: 'Berechnung als Mieter',
-    desc: 'CO2-Kostenaufteilung für Mieter mit eigener Wärmeversorgung oder direkter Wärmelieferung – bei Bedarf mit Erstattungsschreiben.',
+    desc: 'Zur Prüfung des CO2-Kostenanteils und möglicher Erstattungsansprüche – insbesondere bei eigener Wärmeversorgung oder direkter Wärmelieferung.',
     icon: User,
   },
   {
     value: 'vermieter',
     label: 'Berechnung als Vermieter',
-    desc: 'Gesetzliche CO2-Kostenaufteilung berechnen und als Berechnungsgrundlage dokumentieren.',
+    desc: 'Gesetzliche CO2-Kostenaufteilung berechnen und als Berechnungsnachweis dokumentieren.',
     icon: Building2,
   },
 ];
@@ -23,7 +23,7 @@ export default function StepUserRole() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Wie möchten Sie berechnen?</h2>
+        <h2 className="text-2xl font-bold text-foreground">Wer nutzt das Tool?</h2>
         <p className="text-muted-foreground mt-2">Bitte wählen Sie aus, ob Sie die Berechnung als Mieter oder als Vermieter durchführen möchten.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
