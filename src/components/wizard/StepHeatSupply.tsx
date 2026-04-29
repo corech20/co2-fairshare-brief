@@ -15,7 +15,7 @@ const OPT_ZENTRAL: HeatOption = {
 const OPT_FERNWAERME: HeatOption = {
   value: 'fernwaerme',
   label: 'Fernwärme / Nahwärme',
-  desc: 'Die Wärme wird über ein Fernwärme- oder Nahwärmenetz geliefert.',
+  desc: 'Die Wärme wird über ein Fernwärme- oder Nahwärmenetz bezogen.',
   icon: Thermometer,
 };
 const OPT_ETAGE_WOHN: HeatOption = {
