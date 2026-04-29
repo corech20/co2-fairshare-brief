@@ -100,7 +100,7 @@ function WizardContent() {
       </div>
 
       {/* Content */}
-      <main className="flex-1 px-4 py-8 md:py-12">
+      <main className="flex-1 px-4 py-8 md:py-12 border">
         <div className="container-narrow px-4 animate-fade-in">
           {renderStep()}
         </div>
