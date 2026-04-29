@@ -165,8 +165,8 @@ export default function Index() {
               answer="Bei Nichtwohngebäuden gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten. Liegen bestimmte öffentlich-rechtliche Einschränkungen vor, kann die Aufteilung abweichen."
             />
             <FAQItem
-              question="Was ist, wenn der Abrechnungszeitraum über zwei Jahre läuft?"
-              answer="Bitte übernehmen Sie die CO2-Emissionen und CO2-Kosten aus der Rechnung für den Liefer- bzw. Abrechnungszeitraum. Die Ermittlung dieser Werte erfolgt durch den Brennstoff- oder Wärmelieferanten im Rahmen seiner Rechnungserstellung. Eine kalenderjährliche Aufteilung durch Sie ist nicht erforderlich."
+              question="Was gilt bei Erdgas oder Fernwärme, wenn der Abrechnungszeitraum jahresübergreifend ist?"
+              answer="Bei Erdgas und Fernwärme geben Sie bitte die CO2-Emissionen und CO2-Kosten für den gesamten Liefer- bzw. Abrechnungszeitraum so ein, wie sie in Ihrer Rechnung ausgewiesen sind. Eine Aufteilung nach Kalenderjahren ist nicht erforderlich."
             />
             <FAQItem
               question="Was gilt bei angelieferten Brennstoffen wie Heizöl, Flüssiggas oder Kohle, wenn mehrere Rechnungen vorliegen?"
