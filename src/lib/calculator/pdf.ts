@@ -384,7 +384,7 @@ export function generatePDF(
     doc.setTextColor(80, 80, 80);
     doc.text(`Erstellt am: ${today}`, mL, y);
     doc.text(`Berechnungs-Nr.: ${calcId}`, pw - mR, y, { align: 'right' });
-    y += 5;
+    y += 4;
     doc.setTextColor(60, 60, 60);
     doc.text(`Abrechnungszeitraum: ${period}`, mL, y);
     if (result.isCrossYear) {
@@ -422,7 +422,7 @@ export function generatePDF(
       detailRow('Menge:', fmt.number(seg.amount, 0), 4);
       detailRow('CO2-Preis:', `${fmt.number(seg.co2PricePerTon, 2)} EUR/Tonne`, 4);
       detailRow(`${getEnergyHeatingValueLabel(data.fuelType ?? result.fuelResults[0]?.fuelType ?? '')}:`, `${fmt.number(seg.energyHeatingValueKwh, 2)} kWh`, 4);
-      detailRow('CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung):', `${fmt.number(seg.co2Kg, 1)} kg`, 4);
+      detailRow('CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung):', `${fmt.number(seg.co2Kg, 4)} kg`, 4);
       detailRow('CO2-Kosten netto:', fmt.currency(seg.co2CostNet), 4);
       detailRow('CO2-Kosten brutto:', fmt.currency(seg.co2CostGross), 4);
       y += 3;
@@ -432,7 +432,7 @@ export function generatePDF(
     doc.setLineWidth(0.3);
     doc.line(mL + 2, y, pw - mR, y);
     y += 5;
-    detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
+    detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 4)} kg`, 2, true);
     detailRow('Gesamte CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
     detailRow('Gesamte CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
   } else {
@@ -464,7 +464,7 @@ export function generatePDF(
       doc.line(mL + 2, y, pw - mR, y);
       y += 5;
       detailRow('Gesamtenergie (Heizwert):', `${fmt.number(result.totalEnergyHeatingValueKwh, 2)} kWh`, 2, true);
-      detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 1)} kg`, 2, true);
+      detailRow('Gesamte CO2-Emissionen:', `${fmt.number(result.totalEmissionsKg, 4)} kg`, 2, true);
       detailRow('Gewichteter Emissionsfaktor:', `${fmt.number(result.weightedEmissionFactor, 5)} kg CO2/kWh`, 2);
     }
 
