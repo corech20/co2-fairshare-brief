@@ -54,7 +54,7 @@ export default function Index() {
             </h1>
             <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
               Ermitteln Sie die gesetzliche Aufteilung der CO2-Kosten zwischen Mieter und Vermieter –
-              nachvollziehbar, strukturiert und als druckfähige Berechnungsgrundlage.
+              nachvollziehbar, strukturiert und als druckfähiger Berechnungsnachweis.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button variant="cta" size="lg" onClick={() => navigate('/rechner')}>
@@ -78,16 +78,16 @@ export default function Index() {
               {
                 icon: BarChart3,
                 title: 'Gesetzliche Aufteilung',
-                desc: 'Berechnung der CO2-Kostenaufteilung nach dem 10-Stufen-Modell – Schritt für Schritt, mit nachvollziehbarer Einstufung.',
+                desc: 'Für Wohngebäude nach dem Stufenmodell, für Nichtwohngebäude nach den gesetzlichen Verteilungsregeln.',
               },
               {
                 icon: Users,
                 title: 'Für Mieter und Vermieter',
-                desc: 'Nutzbar aus beiden Perspektiven: Mieter prüfen ihre Kostenaufteilung, Vermieter erstellen die Berechnungsgrundlage für die Abrechnung.',
+                desc: 'Nutzbar aus beiden Perspektiven: Mieter prüfen ihren CO2-Kostenanteil sowie mögliche Erstattungsansprüche. Vermieter erstellen einen strukturierten Berechnungsnachweis.',
               },
               {
                 icon: FileText,
-                 title: 'Berechnungsgrundlage als PDF',
+                 title: 'Berechnungsnachweis als PDF',
                  desc: 'Erstellen Sie einen strukturierten Berechnungsnachweis als PDF – zur Dokumentation, Weitergabe oder als Anlage zur Abrechnung.',
               },
             ].map((item, i) => (
@@ -109,7 +109,7 @@ export default function Index() {
           <h2 className="text-xl font-bold text-foreground mb-6">Was dieses Tool kann</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { icon: Scale, label: 'Stufenmodell-Einstufung' },
+              { icon: Scale, label: 'CO2-Einstufung und Kostenverteilung' },
               { icon: BarChart3, label: 'Nachvollziehbare Berechnung' },
               { icon: FileDown, label: 'Druckfähiges PDF' },
               { icon: Building2, label: 'Wohn- & Nichtwohngebäude' },
@@ -131,8 +131,8 @@ export default function Index() {
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-1">Daten aus Ihrer Abrechnung</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Die meisten Eingaben – wie Verbrauchsmenge, Abrechnungszeitraum und Fläche – können
-                in der Regel direkt aus Ihrer Heizkosten- oder Energieabrechnung übernommen werden.
+                Die meisten Eingaben, insbesondere CO2-Emissionen, CO2-Kosten und der Abrechnungszeitraum,
+                können in der Regel direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernommen werden.
               </p>
             </div>
           </div>
@@ -154,11 +154,11 @@ export default function Index() {
             />
             <FAQItem
               question="Welche Unterlagen brauche ich?"
-              answer="Sie benötigen Ihre Heizkosten- oder Brennstoffabrechnung mit Angaben zum Abrechnungszeitraum und der Verbrauchsmenge (z. B. kWh, Liter). Außerdem die Wohn- bzw. Gebäudefläche. Bei Fernwärme ist zusätzlich der Emissionsfaktor Ihres Versorgers erforderlich."
+              answer="Sie benötigen Ihre Wärmeliefer- oder Brennstoffabrechnung mit Angaben zum Abrechnungszeitraum, den CO2-Emissionen (in kg) und den CO2-Kosten (in Euro). Außerdem die Wohn- bzw. Gebäudefläche."
             />
             <FAQItem
               question="Gilt das auch bei Fernwärme?"
-              answer="Ja. Bei Fernwärme benötigen Sie den individuellen Emissionsfaktor Ihres Wärmeversorgers, der in der Regel in der Abrechnung ausgewiesen ist."
+              answer="Ja. Bei Fernwärme benötigen Sie die CO2-Emissionen der Wärmelieferung sowie die in der Rechnung ausgewiesenen CO2-Kosten des Wärmeversorgers."
             />
             <FAQItem
               question="Wie wird bei Nichtwohngebäuden gerechnet?"
@@ -166,7 +166,11 @@ export default function Index() {
             />
             <FAQItem
               question="Was ist, wenn der Abrechnungszeitraum über zwei Jahre läuft?"
-              answer="Der Rechner erkennt jahresübergreifende Zeiträume automatisch. Sie geben die Verbrauchsmengen getrennt nach Kalenderjahren ein, damit die jeweils geltenden CO2-Preise korrekt berücksichtigt werden."
+              answer="Bitte übernehmen Sie die CO2-Emissionen und CO2-Kosten aus der Rechnung für den Liefer- bzw. Abrechnungszeitraum. Die Ermittlung dieser Werte erfolgt durch den Brennstoff- oder Wärmelieferanten im Rahmen seiner Rechnungserstellung. Eine kalenderjährliche Aufteilung durch Sie ist nicht erforderlich."
+            />
+            <FAQItem
+              question="Was gilt bei angelieferten Brennstoffen wie Heizöl, Flüssiggas oder Kohle, wenn mehrere Rechnungen vorliegen?"
+              answer="Bei zentraler Versorgung durch einen Vermieter ist nicht zwingend eine einzelne Lieferantenrechnung maßgeblich, sondern der Abrechnungszeitraum, für den auch die Heizkostenabrechnung erstellt wird. Bitte geben Sie deshalb die CO2-Emissionen und CO2-Kosten für diesen maßgeblichen Abrechnungszeitraum ein. Diese Werte können aus einer oder mehreren Rechnungen über angelieferte Brennstoffe wie Heizöl, Flüssiggas oder Kohle stammen bzw. daraus für diesen Zeitraum ermittelt sein."
             />
             <FAQItem
               question="Was erhalte ich als Ergebnis?"
