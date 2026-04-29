@@ -5,6 +5,7 @@ import { isReimbursementEligible } from '@/lib/calculator/pdf-helpers';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IntegerInput } from './IntegerInput';
+import { DecimalInput } from './DecimalInput';
 
 /** Per-entry label/unit/hint helpers for multi-fuel input blocks. */
 function getEntryLabel(ft: FuelType): string {
@@ -293,9 +294,10 @@ export default function StepInputValues() {
                 CO2-Emissionen lt. Abrechnung{isPellets ? ' (optional)' : ''}
               </label>
               <div className="relative">
-                <IntegerInput
+                <DecimalInput
                   value={wizardData.co2EmissionsDirect}
                   onChange={v => setWizardField('co2EmissionsDirect', v)}
+                  maxDecimals={4}
                   placeholder="z. B. 1800"
                   className="pr-16"
                 />
@@ -313,13 +315,12 @@ export default function StepInputValues() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">CO2-Kosten lt. Abrechnung</label>
                 <div className="relative">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={wizardData.co2CostDirect ?? ''}
-                    onChange={e => setWizardField('co2CostDirect', e.target.value ? parseFloat(e.target.value) : undefined)}
+                  <DecimalInput
+                    value={wizardData.co2CostDirect}
+                    onChange={v => setWizardField('co2CostDirect', v)}
+                    maxDecimals={2}
                     placeholder="z. B. 250"
-                    className="block w-full box-border h-12 rounded-lg border-2 border-border bg-card px-4 py-3 text-base leading-tight text-foreground focus:border-accent focus:outline-none transition-colors pr-16"
+                    className="pr-16"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
                 </div>
