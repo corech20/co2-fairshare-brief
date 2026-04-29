@@ -25,8 +25,6 @@ export default function StepBillingPeriod() {
   const start = wizardData.billingPeriodStart;
   const end = wizardData.billingPeriodEnd;
   const validationError = start && end ? validateBillingPeriod(start, end) : null;
-  const isTenant = wizardData.userRole === 'mieter';
-  const calcNoun = isTenant ? 'Erstattungsbeträge' : 'CO2-Kostenaufteilung';
 
   // Cleanup: legacy yearly segment data is no longer used in the standard flow.
   useEffect(() => {
@@ -50,23 +48,13 @@ export default function StepBillingPeriod() {
       <div>
         <h2 className="text-2xl font-bold text-foreground">Abrechnungszeitraum</h2>
         <p className="text-muted-foreground mt-2 text-sm">
-          Für welches Abrechnungsjahr möchten Sie die Berechnung durchführen?
+          Für welchen Abrechnungszeitraum möchten Sie die Berechnung durchführen?
         </p>
       </div>
 
       <div className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">
-              Das Tool berechnet {calcNoun} für 2024 und 2025
-              (CO2-Preis: 45 €/t in 2024, 55 €/t in 2025).
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Frühere Jahre: Erstattungsansprüche müssen innerhalb von 12 Monaten nach Abrechnung geltend gemacht werden.
-            </p>
-          </div>
-
           <p className="text-sm text-muted-foreground">
-            Bitte tragen Sie den Zeitraum genau so ein, wie er in Ihrer Heizkosten- oder Brennstoffabrechnung angegeben ist.
+            Bitte tragen Sie den Zeitraum genau so ein, wie er in Ihrer Heizkosten-, Brennstoff- oder Wärmelieferabrechnung angegeben ist. Eine Aufteilung nach Kalenderjahren ist nicht erforderlich. Im Standardmodus werden aktuell nur die Jahre 2024 und 2025 berücksichtigt, da frühere Zeiträume in typischen Erstattungsfällen regelmäßig nicht mehr fristgerecht geltend gemacht werden können.
           </p>
 
           <div className="grid gap-4 sm:grid-cols-2">
