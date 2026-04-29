@@ -3,8 +3,8 @@ import type { BuildingType } from '@/lib/calculator/types';
 import { Home, Building } from 'lucide-react';
 
 const OPTIONS: { value: BuildingType; label: string; desc: string; icon: typeof Home }[] = [
-  { value: 'wohngebaeude', label: 'Wohngebäude', desc: 'Aufteilung nach dem Stufen-Modell gemäß § 5 CO2KostAufG', icon: Home },
-  { value: 'nichtwohngebaeude', label: 'Nichtwohngebäude', desc: 'Im Standardfall hälftige Aufteilung gemäß § 8 CO2KostAufG', icon: Building },
+  { value: 'wohngebaeude', label: 'Wohngebäude', desc: 'Aufteilung nach dem Stufen-Modell gemäß\n§ 5 CO2KostAufG', icon: Home },
+  { value: 'nichtwohngebaeude', label: 'Nichtwohngebäude', desc: 'Im Standardfall hälftige Aufteilung gemäß\n§ 8 CO2KostAufG', icon: Building },
 ];
 
 export default function StepBuildingType() {
@@ -29,7 +29,7 @@ export default function StepBuildingType() {
           >
             <opt.icon className={`h-8 w-8 mb-3 ${wizardData.buildingType === opt.value ? 'text-accent' : 'text-muted-foreground'}`} />
             <div className="font-semibold text-foreground text-lg">{opt.label}</div>
-            <div className="text-sm text-muted-foreground mt-1">{opt.desc}</div>
+            <div className="text-sm text-muted-foreground mt-1 whitespace-pre-line">{opt.desc}</div>
           </button>
         ))}
       </div>
