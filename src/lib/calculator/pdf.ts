@@ -566,7 +566,6 @@ export function generatePDF(
 
   // Stufenmodell display
   if (result.isResidential && result.stufenmodellStep > 0) {
-    y += 2;
     detailRow('Einstufung:', `Stufe ${result.stufenmodellStep} des 10-Stufen-Modells (§ 5 CO2KostAufG)`, 2);
     detailRow('Basis-Aufteilung nach Stufenmodell:', `Mieter ${result.baseTenantPercent} % / Vermieter ${result.baseLandlordPercent} %`, 2);
   }
