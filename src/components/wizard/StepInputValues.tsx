@@ -239,7 +239,7 @@ export default function StepInputValues() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Berechnungsdaten</h2>
-        <p className="text-muted-foreground mt-2">Geben Sie die Verbrauchsdaten und Flächen ein. Die meisten Werte können direkt aus Ihrer Energieabrechnung übernommen werden.</p>
+        <p className="text-muted-foreground mt-2">Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die meisten Werte können direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernommen werden.</p>
       </div>
 
       <div className="space-y-5">
@@ -284,7 +284,7 @@ export default function StepInputValues() {
               <p className="text-xs text-muted-foreground mt-1">
                 {isPellets
                   ? 'Holzpellets sind ein Sonderfall: Es sind keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Eine Eingabe ist nicht erforderlich.'
-                  : 'Bitte tragen Sie beide Werte für den gesamten Rechnungszeitraum genau so ein, wie sie in Ihrer Wärmeliefer- oder Brennstoffabrechnung ausgewiesen sind.'}
+                  : 'Bitte tragen Sie beide Werte für den Abrechnungszeitraum ein. Bei einer einzelnen Rechnung übernehmen Sie die Werte direkt. Bei mehreren Lieferungen sind die Werte aus den jeweiligen Rechnungen zusammenzustellen.'}
               </p>
             </div>
 
