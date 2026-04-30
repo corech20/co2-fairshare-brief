@@ -399,7 +399,7 @@ export default function StepInputValues() {
             {/* CO2-Kosten (EUR) – Pflicht (nicht für Pellets) */}
             {!isPellets && (
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">CO2-Kosten lt. Abrechnung</label>
+                <label className="text-sm font-medium text-foreground">{isFernwaerme ? 'CO2-Kosten lt. Wärmelieferabrechnung' : 'CO2-Kosten lt. Abrechnung'}</label>
                 <div className="relative">
                   <DecimalInput
                     value={wizardData.co2CostDirect}
