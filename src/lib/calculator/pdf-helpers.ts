@@ -302,7 +302,10 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
     steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
   }
   steps.push(`CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung): ${fmt.number(fr.co2Kg, 4)} kg`);
-  if (fr.usedDirectCost) {
+  const isPellet = fr.fuelType === 'pellets' || fr.fuelType === 'hackschnitzel';
+  if (isPellet) {
+    steps.push(`CO2-Kosten (aus Brennstoff-/Wärmeabrechnung): ${fmt.currency(0)} brutto`);
+  } else if (fr.usedDirectCost) {
     steps.push(`CO2-Kosten (aus Brennstoff-/Wärmeabrechnung): ${fmt.currency(fr.co2CostGross)} brutto`);
   }
   return steps;
