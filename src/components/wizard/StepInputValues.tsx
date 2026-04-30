@@ -286,7 +286,9 @@ export default function StepInputValues() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Berechnungsdaten</h2>
-        <p className="text-muted-foreground mt-2">Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die meisten Werte können direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernommen werden.</p>
+        <p className="text-muted-foreground mt-2">{isFernwaerme
+          ? 'Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die Werte zur Wärmemenge, zu den CO2-Emissionen und zu den CO2-Kosten können Sie direkt aus Ihrer Wärmelieferabrechnung übernehmen.'
+          : 'Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die meisten Werte können direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernehmen werden.'}</p>
       </div>
 
       <div className="space-y-5">
@@ -321,59 +323,61 @@ export default function StepInputValues() {
           />
         )}
 
-        {/* Fernwärme/Nahwärme: gelieferte Wärmemenge (Pflichtfeld) */}
-        {isFernwaerme && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">
-              Gelieferte Wärmemenge lt. Abrechnung
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min={0}
-                step="any"
-                value={wizardData.fernwaermeAmountKwh ?? ''}
-                onChange={e => {
-                  const raw = e.target.value;
-                  if (raw === '') { setWizardField('fernwaermeAmountKwh', undefined); return; }
-                  const n = parseFloat(raw);
-                  setWizardField('fernwaermeAmountKwh', Number.isFinite(n) ? n : undefined);
-                }}
-                placeholder="z. B. 12000"
-                aria-invalid={fernwaermeInvalid || undefined}
-                className={`block w-full box-border h-12 rounded-lg border-2 bg-card px-4 py-3 text-base leading-tight text-foreground focus:outline-none transition-colors pr-16 ${
-                  fernwaermeInvalid ? 'border-destructive focus:border-destructive' : 'border-border focus:border-accent'
-                }`}
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kWh</span>
-            </div>
-            {fernwaermeInvalid ? (
-              <p className="text-xs text-destructive font-medium" role="alert">
-                Bitte geben Sie eine Wärmemenge größer als 0 kWh ein.
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Gelieferte Wärmemenge in kWh lt. Abrechnung des Wärmelieferanten.
-              </p>
-            )}
-          </div>
-        )}
-
         {/* ── Werte aus der Abrechnung: CO2-Emissionen + CO2-Kosten ───────── */}
         <div className="space-y-4 rounded-xl border-2 border-border bg-card p-4">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Werte aus Ihrer Abrechnung</h3>
+              <h3 className="text-sm font-semibold text-foreground">{isFernwaerme ? 'Werte aus Ihrer Wärmelieferabrechnung' : 'Werte aus Ihrer Abrechnung'}</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                {isPellets
+                {isFernwaerme
+                  ? 'Bitte tragen Sie die Werte für den Abrechnungszeitraum ein.'
+                  : isPellets
                   ? 'Holzpellets sind ein Sonderfall: Es sind keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Eine Eingabe ist nicht erforderlich.'
                   : 'Bitte tragen Sie beide Werte für den Abrechnungszeitraum ein. Bei einer einzelnen Rechnung übernehmen Sie die Werte direkt. Bei mehreren Lieferungen sind die Werte aus den jeweiligen Rechnungen zusammenzustellen.'}
               </p>
             </div>
 
+            {/* Fernwärme/Nahwärme: gelieferte Wärmemenge (Pflichtfeld) – im Block */}
+            {isFernwaerme && (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
+                  Gelieferte Wärmemenge lt. Wärmelieferabrechnung
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    step="any"
+                    value={wizardData.fernwaermeAmountKwh ?? ''}
+                    onChange={e => {
+                      const raw = e.target.value;
+                      if (raw === '') { setWizardField('fernwaermeAmountKwh', undefined); return; }
+                      const n = parseFloat(raw);
+                      setWizardField('fernwaermeAmountKwh', Number.isFinite(n) ? n : undefined);
+                    }}
+                    placeholder="z. B. 12000"
+                    aria-invalid={fernwaermeInvalid || undefined}
+                    className={`block w-full box-border h-12 rounded-lg border-2 bg-card px-4 py-3 text-base leading-tight text-foreground focus:outline-none transition-colors pr-16 ${
+                      fernwaermeInvalid ? 'border-destructive focus:border-destructive' : 'border-border focus:border-accent'
+                    }`}
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kWh</span>
+                </div>
+                {fernwaermeInvalid ? (
+                  <p className="text-xs text-destructive font-medium" role="alert">
+                    Bitte geben Sie eine Wärmemenge größer als 0 kWh ein.
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Gelieferte Wärmemenge in kWh lt. Abrechnung des Wärmelieferanten.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* CO2-Emissionen (kg) – Pflicht */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                CO2-Emissionen lt. Abrechnung{isPellets ? ' (optional)' : ''}
+                {isFernwaerme ? 'CO2-Emissionen lt. Wärmelieferabrechnung' : `CO2-Emissionen lt. Abrechnung${isPellets ? ' (optional)' : ''}`}
               </label>
               <div className="relative">
                 <DecimalInput
