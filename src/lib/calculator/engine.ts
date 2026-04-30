@@ -781,7 +781,7 @@ function buildResult(
       landlordShareBeforeReduction: undefined,
       notes: [
         ...notes.filter(n => !/hochgerechnet|Stufe|Stufenmodell/i.test(n)),
-        'Für Holzpellets sind in dieser Pilotversion keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Etwaige Emissionsangaben werden nur informatorisch ausgewiesen.',
+        'Für Holzpellets sind keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Etwaige Emissionsangaben werden nur informatorisch ausgewiesen.',
       ],
       isCrossYear,
       segmentResults,
