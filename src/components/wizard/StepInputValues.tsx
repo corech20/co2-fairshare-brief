@@ -266,6 +266,10 @@ export default function StepInputValues() {
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
   const hasDirectEmissions = wizardData.co2EmissionsDirect != null && wizardData.co2EmissionsDirect > 0;
   const isPellets = wizardData.fuelType === 'pellets';
+  const isFernwaerme = wizardData.fuelType === 'fernwaerme';
+  const fernwaermeInvalid = isFernwaerme &&
+    wizardData.fernwaermeAmountKwh != null &&
+    !(wizardData.fernwaermeAmountKwh > 0);
 
   // Expertenmodus dauerhaft deaktiviert: Multi-Fuel-Einträge auf Single-Fuel zurückführen
   // und etwaige Expertenmodus-Flags zurücksetzen.
@@ -315,6 +319,44 @@ export default function StepInputValues() {
             onChange={v => setWizardField('buildingArea', v)}
             placeholder="z. B. 500"
           />
+        )}
+
+        {/* Fernwärme/Nahwärme: gelieferte Wärmemenge (Pflichtfeld) */}
+        {isFernwaerme && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">
+              Gelieferte Wärmemenge lt. Abrechnung
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step="any"
+                value={wizardData.fernwaermeAmountKwh ?? ''}
+                onChange={e => {
+                  const raw = e.target.value;
+                  if (raw === '') { setWizardField('fernwaermeAmountKwh', undefined); return; }
+                  const n = parseFloat(raw);
+                  setWizardField('fernwaermeAmountKwh', Number.isFinite(n) ? n : undefined);
+                }}
+                placeholder="z. B. 12000"
+                aria-invalid={fernwaermeInvalid || undefined}
+                className={`block w-full box-border h-12 rounded-lg border-2 bg-card px-4 py-3 text-base leading-tight text-foreground focus:outline-none transition-colors pr-16 ${
+                  fernwaermeInvalid ? 'border-destructive focus:border-destructive' : 'border-border focus:border-accent'
+                }`}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kWh</span>
+            </div>
+            {fernwaermeInvalid ? (
+              <p className="text-xs text-destructive font-medium" role="alert">
+                Bitte geben Sie eine Wärmemenge größer als 0 kWh ein.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Gelieferte Wärmemenge in kWh lt. Abrechnung des Wärmelieferanten.
+              </p>
+            )}
+          </div>
         )}
 
         {/* ── Werte aus der Abrechnung: CO2-Emissionen + CO2-Kosten ───────── */}
