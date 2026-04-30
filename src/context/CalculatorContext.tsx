@@ -164,8 +164,5 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
   );
 }
 
-export function useCalculator() {
-  const ctx = useContext(CalculatorContext);
-  if (!ctx) throw new Error('useCalculator must be used within CalculatorProvider');
-  return ctx;
-}
+export { CalculatorContext };
+export { useCalculator } from './useCalculator';
