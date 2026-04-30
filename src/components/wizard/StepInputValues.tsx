@@ -288,35 +288,32 @@ export default function StepInputValues() {
       <div className="space-y-5">
         {/* Area fields */}
         {needsBuildingArea && (
-          <InputField
+          <AreaField
             label={getAreaLabel()}
             hint={getAreaHint()}
             value={wizardData.buildingArea}
-            onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
+            onChange={v => setWizardField('buildingArea', v)}
             placeholder="z. B. 500"
-            unit="m²"
           />
         )}
 
         {needsApartmentArea && (
-          <InputField
+          <AreaField
             label={getAreaLabel()}
             hint={getAreaHint()}
             value={wizardData.apartmentArea}
-            onChange={v => setWizardField('apartmentArea', v ? parseFloat(v) : undefined)}
+            onChange={v => setWizardField('apartmentArea', v)}
             placeholder="z. B. 80"
-            unit="m²"
           />
         )}
 
         {showOptionalBuildingArea && (
-          <InputField
+          <AreaField
             label="Gesamtwohnfläche des Gebäudes (optional)"
             hint="Gesamtwohnfläche des Gebäudes, falls bekannt"
             value={wizardData.buildingArea}
-            onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
+            onChange={v => setWizardField('buildingArea', v)}
             placeholder="z. B. 500"
-            unit="m²"
           />
         )}
 
