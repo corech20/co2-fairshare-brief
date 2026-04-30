@@ -10,7 +10,6 @@ type BaseFuel = 'erdgas' | 'heizoel' | 'fernwaerme' | 'fluessiggas' | 'pellets' 
 const BASE_FUELS: { value: BaseFuel; label: string; desc: string; icon: typeof Flame }[] = [
   { value: 'erdgas', label: 'Erdgas', desc: 'CO2-Emissionen und CO2-Kosten lt. Gasabrechnung.', icon: Flame },
   { value: 'heizoel', label: 'Heizöl', desc: 'CO2-Emissionen und CO2-Kosten lt. Liefer- oder Brennstoffabrechnung.', icon: Droplets },
-  { value: 'fernwaerme', label: 'Fernwärme / Nahwärme', desc: 'CO2-Emissionen und CO2-Kosten lt. Wärmeabrechnung.', icon: Thermometer },
   { value: 'fluessiggas', label: 'Flüssiggas (LPG)', desc: 'CO2-Emissionen und CO2-Kosten lt. Liefer- oder Brennstoffabrechnung.', icon: Zap },
   { value: 'pellets', label: 'Holzpellets', desc: 'Nicht BEHG-pflichtig – keine CO2-Kosten anzusetzen.', icon: Leaf },
   { value: 'kohle', label: 'Kohle', desc: 'CO2-Emissionen und CO2-Kosten lt. Liefer- oder Brennstoffabrechnung.', icon: Factory },
