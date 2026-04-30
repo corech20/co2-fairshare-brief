@@ -306,7 +306,7 @@ export default function StepInputValues() {
               <p className="text-xs text-muted-foreground">
                 {isPellets
                   ? 'Nur informatorisch; keine Grundlage der Kostenaufteilung.'
-                  : 'Wird auf ein Jahr normiert und für die Einstufung nach dem Stufenmodell verwendet.'}
+                  : 'Wird auf ein Jahr normiert und für die gesetzliche Einstufung des Gebäudes oder der gemieteten Einheit verwendet.'}
               </p>
             </div>
 
@@ -325,7 +325,7 @@ export default function StepInputValues() {
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Exakter Rechnungsbetrag der CO2-Kosten – wird anschließend nach dem Stufenmodell verteilt.
+                  Wird anschließend nach der gesetzlichen Verteilungsregel zwischen Mieter und Vermieter aufgeteilt.
                 </p>
               </div>
             )}
