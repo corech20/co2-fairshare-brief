@@ -239,7 +239,7 @@ export default function StepInputValues() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Berechnungsdaten</h2>
-        <p className="text-muted-foreground mt-2">Geben Sie die Verbrauchsdaten und Flächen ein. Die meisten Werte können direkt aus Ihrer Energieabrechnung übernommen werden.</p>
+        <p className="text-muted-foreground mt-2">Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die meisten Werte können direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernommen werden.</p>
       </div>
 
       <div className="space-y-5">
@@ -284,7 +284,7 @@ export default function StepInputValues() {
               <p className="text-xs text-muted-foreground mt-1">
                 {isPellets
                   ? 'Holzpellets sind ein Sonderfall: Es sind keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Eine Eingabe ist nicht erforderlich.'
-                  : 'Bitte tragen Sie beide Werte für den gesamten Rechnungszeitraum genau so ein, wie sie in Ihrer Wärmeliefer- oder Brennstoffabrechnung ausgewiesen sind.'}
+                  : 'Bitte tragen Sie beide Werte für den Abrechnungszeitraum ein. Bei einer einzelnen Rechnung übernehmen Sie die Werte direkt. Bei mehreren Lieferungen sind die Werte aus den jeweiligen Rechnungen zusammenzustellen.'}
               </p>
             </div>
 
@@ -306,7 +306,7 @@ export default function StepInputValues() {
               <p className="text-xs text-muted-foreground">
                 {isPellets
                   ? 'Nur informatorisch; keine Grundlage der Kostenaufteilung.'
-                  : 'Wird auf ein Jahr normiert und für die Einstufung nach dem Stufenmodell verwendet.'}
+                  : 'Wird auf ein Jahr normiert und für die gesetzliche Einstufung des Gebäudes oder der gemieteten Einheit verwendet.'}
               </p>
             </div>
 
@@ -325,7 +325,7 @@ export default function StepInputValues() {
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Exakter Rechnungsbetrag der CO2-Kosten – wird anschließend nach dem Stufenmodell verteilt.
+                  Wird anschließend nach der gesetzlichen Verteilungsregel zwischen Mieter und Vermieter aufgeteilt.
                 </p>
               </div>
             )}
