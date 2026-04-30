@@ -54,7 +54,7 @@ export default function StepBillingPeriod() {
 
       <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Bitte tragen Sie den Zeitraum genau so ein, wie er in Ihrer Brennstoff- oder Wärmelieferabrechnung angegeben ist. Im Standardmodus werden aktuell nur die Jahre 2024 und 2025 berücksichtigt, da frühere Zeiträume bei Erstattungsansprüchen in der Regel nicht mehr fristgerecht geltend gemacht werden können.
+            Bitte tragen Sie den Abrechnungszeitraum ein. Bei einer einzelnen Rechnung übernehmen Sie den Zeitraum direkt. Bei mehreren Lieferungen ist der Zeitraum maßgeblich, für den die CO2-Emissionen und CO2-Kosten aus den jeweiligen Rechnungen zusammenzustellen sind.
           </p>
 
           <div className="grid gap-4 sm:grid-cols-2">

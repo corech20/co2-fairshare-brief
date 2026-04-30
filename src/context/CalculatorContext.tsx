@@ -67,6 +67,14 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
       case 'buildingType': return !!wizardData.buildingType;
       case 'heatSupply': {
         if (!wizardData.heatSupplyType) return false;
+        // Sperrfall: Fernwärme/Nahwärme mit erstmaligem Anschluss ab 01.01.2023.
+        // CO2KostAufG ist nicht anwendbar – kein Weiter in den Rechenpfad.
+        if (
+          wizardData.heatSupplyType === 'fernwaerme' &&
+          wizardData.districtHeatingConnectedAfter2023
+        ) {
+          return false;
+        }
         // Mieter + Fernwärme/Nahwärme gilt verbindlich als Direktlieferungsfall –
         // keine zusätzliche Vertragspartner-Frage mehr erforderlich.
         return true;
