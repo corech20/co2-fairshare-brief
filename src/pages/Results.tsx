@@ -140,6 +140,19 @@ export default function ResultsPage() {
   // (works the same for Wohngebäude and Nichtwohngebäude). The previous
   // building-type-based suppression via docCase has been removed.
   const isTenantClaim = reimbursementEligible && result.landlordShare > 0;
+  // "Adressdaten wurden genutzt": any single field in tenant or landlord address has content.
+  const hasAnyAddressInput = (() => {
+    const a = wizardData.tenantAddress;
+    const b = wizardData.landlordAddress;
+    const anyVal = (o?: Record<string, unknown>) =>
+      !!o && Object.values(o).some(v => typeof v === 'string' && v.trim().length > 0);
+    return anyVal(a as any) || anyVal(b as any);
+  })();
+  const canIssueLetter = isTenantClaim && hasAnyAddressInput;
+  // Tenant + reimbursement-eligible heat supply: the address section is offered.
+  const addressSectionEligible =
+    isTenant && (wizardData.heatSupplyType === 'etage' || wizardData.heatSupplyType === 'fernwaerme')
+    && reimbursementEligible;
   const isTenant = wizardData.userRole === 'mieter';
   const isLandlord = wizardData.userRole === 'vermieter';
   const mixedVAT = getMixedVATInfo(wizardData, result.isCrossYear);
