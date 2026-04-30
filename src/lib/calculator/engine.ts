@@ -509,9 +509,15 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
     const fuelResults: FuelCalculationResult[] = [{
       fuelType: primaryFuelType,
       fuelLabel: getFuelLabel(primaryFuelType),
-      inputAmount: 0,
-      energyHeatingValueKwh: 0,
-      emissionFactor: getEmissionFactor(primaryFuelType, primaryEmissionFactor),
+      inputAmount: primaryFuelType === 'fernwaerme' && data.fernwaermeAmountKwh && data.fernwaermeAmountKwh > 0
+        ? data.fernwaermeAmountKwh
+        : 0,
+      energyHeatingValueKwh: primaryFuelType === 'fernwaerme' && data.fernwaermeAmountKwh && data.fernwaermeAmountKwh > 0
+        ? data.fernwaermeAmountKwh
+        : 0,
+      emissionFactor: primaryFuelType === 'fernwaerme' && data.fernwaermeAmountKwh && data.fernwaermeAmountKwh > 0 && co2Kg > 0
+        ? co2Kg / data.fernwaermeAmountKwh
+        : getEmissionFactor(primaryFuelType, primaryEmissionFactor),
       co2Kg,
       co2CostNet,
       co2CostGross,
