@@ -73,6 +73,45 @@ function InputField({ label, hint, value, onChange, type = 'number', placeholder
   );
 }
 
+/** Spezialisiertes Flächeneingabefeld mit Validierung > 0. */
+function AreaField({ label, hint, value, onChange, placeholder }: {
+  label: string; hint?: string; value: number | undefined;
+  onChange: (v: number | undefined) => void; placeholder?: string;
+}) {
+  const invalid = value != null && !(value > 0);
+  return (
+    <div className="space-y-1.5">
+      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
+      <div className="relative">
+        <input
+          type="number"
+          min={0}
+          step="any"
+          value={value ?? ''}
+          onChange={e => {
+            const raw = e.target.value;
+            if (raw === '') { onChange(undefined); return; }
+            const n = parseFloat(raw);
+            onChange(Number.isFinite(n) ? n : undefined);
+          }}
+          placeholder={placeholder}
+          aria-invalid={invalid || undefined}
+          className={`block w-full box-border h-12 rounded-lg border-2 bg-card px-4 py-3 text-base leading-tight text-foreground focus:outline-none transition-colors pr-16 ${
+            invalid ? 'border-destructive focus:border-destructive' : 'border-border focus:border-accent'
+          }`}
+        />
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+      </div>
+      {invalid && (
+        <p className="text-xs text-destructive font-medium" role="alert">
+          Bitte geben Sie eine Fläche größer als 0 m² ein.
+        </p>
+      )}
+      {!invalid && hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
 function AddressFields({ title, address, onChangeAddress, showApartment }: {
   title: string;
   address?: AddressData;
