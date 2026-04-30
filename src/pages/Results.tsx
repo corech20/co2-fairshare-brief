@@ -136,12 +136,25 @@ export default function ResultsPage() {
 
   const docCase = getDocumentCase(wizardData);
   const reimbursementEligible = isReimbursementEligible(wizardData);
+  const isTenant = wizardData.userRole === 'mieter';
+  const isLandlord = wizardData.userRole === 'vermieter';
   // Reimbursement-letter flow is unlocked solely by the central eligibility flag
   // (works the same for Wohngebäude and Nichtwohngebäude). The previous
   // building-type-based suppression via docCase has been removed.
   const isTenantClaim = reimbursementEligible && result.landlordShare > 0;
-  const isTenant = wizardData.userRole === 'mieter';
-  const isLandlord = wizardData.userRole === 'vermieter';
+  // "Adressdaten wurden genutzt": any single field in tenant or landlord address has content.
+  const hasAnyAddressInput = (() => {
+    const a = wizardData.tenantAddress;
+    const b = wizardData.landlordAddress;
+    const anyVal = (o?: Record<string, unknown>) =>
+      !!o && Object.values(o).some(v => typeof v === 'string' && v.trim().length > 0);
+    return anyVal(a as any) || anyVal(b as any);
+  })();
+  const canIssueLetter = isTenantClaim && hasAnyAddressInput;
+  // Tenant + reimbursement-eligible heat supply: the address section is offered.
+  const addressSectionEligible =
+    isTenant && (wizardData.heatSupplyType === 'etage' || wizardData.heatSupplyType === 'fernwaerme')
+    && reimbursementEligible;
   const mixedVAT = getMixedVATInfo(wizardData, result.isCrossYear);
 
   // Sonderfall Holzpellets / Hackschnitzel: keine Aufteilung, kein Stufenmodell
@@ -345,26 +358,36 @@ export default function ResultsPage() {
                 </p>
               </div>
 
-              {isTenantClaim ? (
+              {canIssueLetter ? (
                 <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
                   <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsgrundlage</p>
-                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO₂-Emissionen · Kostenaufteilung · Netto/Brutto</p>
+                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsnachweis</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO2-Emissionen · Kostenaufteilung · Netto/Brutto</p>
                   </div>
                   <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
-                    <FileText className="h-4 w-4" />Erstattungsschreiben erstellen
+                    <FileText className="h-4 w-4" />Erstattungsschreiben mit Berechnungsnachweis erstellen
                   </Button>
                 </div>
               ) : (
-                 <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
-                   <div className="space-y-0.5">
-                     <p className="text-sm font-medium text-foreground">Berechnungsnachweis</p>
-                     <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO₂-Emissionen · Kostenaufteilung · Netto/Brutto</p>
-                   </div>
-                   <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                     <FileText className="h-4 w-4" />Berechnungsnachweis erstellen
-                   </Button>
-                 </div>
+                <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                  {addressSectionEligible && !isTenantClaim && (
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Es wurde kein Erstattungsanspruch ermittelt. Daher kann kein Erstattungsschreiben erstellt werden.
+                    </p>
+                  )}
+                  {addressSectionEligible && isTenantClaim && !hasAnyAddressInput && (
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Es wurde ein Erstattungsanspruch ermittelt. Für die Erstellung eines Erstattungsschreibens sind Adressdaten erforderlich.
+                    </p>
+                  )}
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">Berechnungsnachweis</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Emissionen · Kostenaufteilung · Netto/Brutto</p>
+                  </div>
+                  <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                    <FileText className="h-4 w-4" />Berechnungsnachweis erstellen
+                  </Button>
+                </div>
               )}
             </div>
           )}
