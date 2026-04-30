@@ -249,7 +249,7 @@ export default function ResultsPage() {
                 <div className="rounded-md border border-primary/30 bg-background p-4 flex items-start gap-3">
                   <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <p className="text-xs text-foreground leading-relaxed">
-                    Für Holzpellets sind in dieser Pilotversion keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Etwaige Emissionsangaben werden nur informatorisch ausgewiesen.
+                    Für Holzpellets sind keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Etwaige Emissionsangaben werden nur informatorisch ausgewiesen.
                   </p>
                 </div>
               </div>
