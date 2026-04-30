@@ -106,10 +106,18 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
         const hasAnyEnergyInput = isPellets
           ? true
           : (hasDirectEmissions && hasDirectCost && hasCostTypeIfNeeded);
-        if (needsApartment) {
-          return !!(wizardData.apartmentArea && wizardData.apartmentArea > 0 && hasAnyEnergyInput);
+        // Fernwärme/Nahwärme: gelieferte Wärmemenge ist Pflichtfeld (> 0).
+        if (wizardData.fuelType === 'fernwaerme') {
+          if (!(wizardData.fernwaermeAmountKwh && wizardData.fernwaermeAmountKwh > 0)) {
+            return false;
+          }
         }
-        return !!(wizardData.buildingArea && wizardData.buildingArea > 0 && hasAnyEnergyInput);
+        if (needsApartment) {
+          if (!(wizardData.apartmentArea && wizardData.apartmentArea > 0)) return false;
+          return hasAnyEnergyInput;
+        }
+        if (!(wizardData.buildingArea && wizardData.buildingArea > 0)) return false;
+        return hasAnyEnergyInput;
       }
       default: return false;
     }
