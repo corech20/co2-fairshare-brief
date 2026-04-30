@@ -101,6 +101,8 @@ export interface WizardData {
   yearlySegments?: YearlySegment[];
   /** Fernwärme-Sonderfall: Erstmaliger Anschluss ab dem 1. Januar 2023 → CO2KostAufG nicht anwendbar */
   districtHeatingConnectedAfter2023?: boolean;
+  /** Fernwärme/Nahwärme: gelieferte Wärmemenge lt. Abrechnung in kWh (Pflichtfeld bei Fernwärme). */
+  fernwaermeAmountKwh?: number;
   /**
    * Whitelist-Trigger für den Erstattungs-/Brief-Flow:
    * true  = Mieter ist selbst Vertragspartner des Brennstoff-/Wärmelieferanten
