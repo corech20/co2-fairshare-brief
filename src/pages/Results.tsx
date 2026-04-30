@@ -358,26 +358,36 @@ export default function ResultsPage() {
                 </p>
               </div>
 
-              {isTenantClaim ? (
+              {canIssueLetter ? (
                 <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
                   <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsgrundlage</p>
-                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO₂-Emissionen · Kostenaufteilung · Netto/Brutto</p>
+                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsnachweis</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO2-Emissionen · Kostenaufteilung · Netto/Brutto</p>
                   </div>
                   <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
-                    <FileText className="h-4 w-4" />Erstattungsschreiben erstellen
+                    <FileText className="h-4 w-4" />Erstattungsschreiben mit Berechnungsnachweis erstellen
                   </Button>
                 </div>
               ) : (
-                 <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
-                   <div className="space-y-0.5">
-                     <p className="text-sm font-medium text-foreground">Berechnungsnachweis</p>
-                     <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO₂-Emissionen · Kostenaufteilung · Netto/Brutto</p>
-                   </div>
-                   <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                     <FileText className="h-4 w-4" />Berechnungsnachweis erstellen
-                   </Button>
-                 </div>
+                <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                  {addressSectionEligible && !isTenantClaim && (
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Es wurde kein Erstattungsanspruch ermittelt. Daher kann kein Erstattungsschreiben erstellt werden.
+                    </p>
+                  )}
+                  {addressSectionEligible && isTenantClaim && !hasAnyAddressInput && (
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Es wurde ein Erstattungsanspruch ermittelt. Für die Erstellung eines Erstattungsschreibens sind Adressdaten erforderlich.
+                    </p>
+                  )}
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">Berechnungsnachweis</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Emissionen · Kostenaufteilung · Netto/Brutto</p>
+                  </div>
+                  <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                    <FileText className="h-4 w-4" />Berechnungsnachweis erstellen
+                  </Button>
+                </div>
               )}
             </div>
           )}
