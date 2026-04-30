@@ -136,6 +136,8 @@ export default function ResultsPage() {
 
   const docCase = getDocumentCase(wizardData);
   const reimbursementEligible = isReimbursementEligible(wizardData);
+  const isTenant = wizardData.userRole === 'mieter';
+  const isLandlord = wizardData.userRole === 'vermieter';
   // Reimbursement-letter flow is unlocked solely by the central eligibility flag
   // (works the same for Wohngebäude and Nichtwohngebäude). The previous
   // building-type-based suppression via docCase has been removed.
@@ -153,8 +155,6 @@ export default function ResultsPage() {
   const addressSectionEligible =
     isTenant && (wizardData.heatSupplyType === 'etage' || wizardData.heatSupplyType === 'fernwaerme')
     && reimbursementEligible;
-  const isTenant = wizardData.userRole === 'mieter';
-  const isLandlord = wizardData.userRole === 'vermieter';
   const mixedVAT = getMixedVATInfo(wizardData, result.isCrossYear);
 
   // Sonderfall Holzpellets / Hackschnitzel: keine Aufteilung, kein Stufenmodell
