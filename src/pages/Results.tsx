@@ -325,18 +325,12 @@ export default function ResultsPage() {
                 </div>
               )}
 
-              {result.notes.length > 0 && (
-                <ul className="border-t border-primary/20 pt-3 space-y-1">
-                  {result.notes
-                    .filter(n => !(result.reimbursementReductionApplied && /Gasgerät/.test(n)))
-                    .map((note, i) => (
-                    <li key={i} className="text-xs text-muted-foreground flex gap-2">
-                      <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                      {note}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <ul className="border-t border-primary/20 pt-3 space-y-1">
+                <li className="text-xs text-muted-foreground flex gap-2">
+                  <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  Berechnung auf Basis der eingegebenen Abrechnungsdaten und der eingegebenen Fläche.
+                </li>
+              </ul>
             </div>
           </section>
           )}
