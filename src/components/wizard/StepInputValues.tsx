@@ -73,6 +73,45 @@ function InputField({ label, hint, value, onChange, type = 'number', placeholder
   );
 }
 
+/** Spezialisiertes Flächeneingabefeld mit Validierung > 0. */
+function AreaField({ label, hint, value, onChange, placeholder }: {
+  label: string; hint?: string; value: number | undefined;
+  onChange: (v: number | undefined) => void; placeholder?: string;
+}) {
+  const invalid = value != null && !(value > 0);
+  return (
+    <div className="space-y-1.5">
+      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
+      <div className="relative">
+        <input
+          type="number"
+          min={0}
+          step="any"
+          value={value ?? ''}
+          onChange={e => {
+            const raw = e.target.value;
+            if (raw === '') { onChange(undefined); return; }
+            const n = parseFloat(raw);
+            onChange(Number.isFinite(n) ? n : undefined);
+          }}
+          placeholder={placeholder}
+          aria-invalid={invalid || undefined}
+          className={`block w-full box-border h-12 rounded-lg border-2 bg-card px-4 py-3 text-base leading-tight text-foreground focus:outline-none transition-colors pr-16 ${
+            invalid ? 'border-destructive focus:border-destructive' : 'border-border focus:border-accent'
+          }`}
+        />
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+      </div>
+      {invalid && (
+        <p className="text-xs text-destructive font-medium" role="alert">
+          Bitte geben Sie eine Fläche größer als 0 m² ein.
+        </p>
+      )}
+      {!invalid && hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
 function AddressFields({ title, address, onChangeAddress, showApartment }: {
   title: string;
   address?: AddressData;
@@ -227,6 +266,10 @@ export default function StepInputValues() {
   const hasDirectCost = wizardData.co2CostDirect != null && wizardData.co2CostDirect > 0;
   const hasDirectEmissions = wizardData.co2EmissionsDirect != null && wizardData.co2EmissionsDirect > 0;
   const isPellets = wizardData.fuelType === 'pellets';
+  const isFernwaerme = wizardData.fuelType === 'fernwaerme';
+  const fernwaermeInvalid = isFernwaerme &&
+    wizardData.fernwaermeAmountKwh != null &&
+    !(wizardData.fernwaermeAmountKwh > 0);
 
   // Expertenmodus dauerhaft deaktiviert: Multi-Fuel-Einträge auf Single-Fuel zurückführen
   // und etwaige Expertenmodus-Flags zurücksetzen.
@@ -249,36 +292,71 @@ export default function StepInputValues() {
       <div className="space-y-5">
         {/* Area fields */}
         {needsBuildingArea && (
-          <InputField
+          <AreaField
             label={getAreaLabel()}
             hint={getAreaHint()}
             value={wizardData.buildingArea}
-            onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
+            onChange={v => setWizardField('buildingArea', v)}
             placeholder="z. B. 500"
-            unit="m²"
           />
         )}
 
         {needsApartmentArea && (
-          <InputField
+          <AreaField
             label={getAreaLabel()}
             hint={getAreaHint()}
             value={wizardData.apartmentArea}
-            onChange={v => setWizardField('apartmentArea', v ? parseFloat(v) : undefined)}
+            onChange={v => setWizardField('apartmentArea', v)}
             placeholder="z. B. 80"
-            unit="m²"
           />
         )}
 
         {showOptionalBuildingArea && (
-          <InputField
+          <AreaField
             label="Gesamtwohnfläche des Gebäudes (optional)"
             hint="Gesamtwohnfläche des Gebäudes, falls bekannt"
             value={wizardData.buildingArea}
-            onChange={v => setWizardField('buildingArea', v ? parseFloat(v) : undefined)}
+            onChange={v => setWizardField('buildingArea', v)}
             placeholder="z. B. 500"
-            unit="m²"
           />
+        )}
+
+        {/* Fernwärme/Nahwärme: gelieferte Wärmemenge (Pflichtfeld) */}
+        {isFernwaerme && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">
+              Gelieferte Wärmemenge lt. Abrechnung
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step="any"
+                value={wizardData.fernwaermeAmountKwh ?? ''}
+                onChange={e => {
+                  const raw = e.target.value;
+                  if (raw === '') { setWizardField('fernwaermeAmountKwh', undefined); return; }
+                  const n = parseFloat(raw);
+                  setWizardField('fernwaermeAmountKwh', Number.isFinite(n) ? n : undefined);
+                }}
+                placeholder="z. B. 12000"
+                aria-invalid={fernwaermeInvalid || undefined}
+                className={`block w-full box-border h-12 rounded-lg border-2 bg-card px-4 py-3 text-base leading-tight text-foreground focus:outline-none transition-colors pr-16 ${
+                  fernwaermeInvalid ? 'border-destructive focus:border-destructive' : 'border-border focus:border-accent'
+                }`}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kWh</span>
+            </div>
+            {fernwaermeInvalid ? (
+              <p className="text-xs text-destructive font-medium" role="alert">
+                Bitte geben Sie eine Wärmemenge größer als 0 kWh ein.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Gelieferte Wärmemenge in kWh lt. Abrechnung des Wärmelieferanten.
+              </p>
+            )}
+          </div>
         )}
 
         {/* ── Werte aus der Abrechnung: CO2-Emissionen + CO2-Kosten ───────── */}

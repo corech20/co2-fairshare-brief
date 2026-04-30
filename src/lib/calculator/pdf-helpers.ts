@@ -292,8 +292,15 @@ export function getFuelCalculationSteps(fr: FuelCalculationResult): string[] {
   const energyKwh = (fr.energyHeatingValueKwh && fr.energyHeatingValueKwh > 0)
     ? fr.energyHeatingValueKwh
     : (fr.emissionFactor > 0 ? fr.co2Kg / fr.emissionFactor : 0);
-  steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(energyKwh, 2)} kWh`);
-  steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
+  // Bei Fernwärme/Nahwärme keine künstlichen Null-Platzhalter ausgeben –
+  // nur echte Werte anzeigen.
+  const isFernwaerme = fr.fuelType === 'fernwaerme';
+  if (!isFernwaerme || energyKwh > 0) {
+    steps.push(`${getEnergyHeatingValueLabel(fr.fuelType)}: ${fmt.number(energyKwh, 2)} kWh`);
+  }
+  if (!isFernwaerme || fr.emissionFactor > 0) {
+    steps.push(`Emissionsfaktor: ${fmt.number(fr.emissionFactor, 5)} kg CO2/kWh`);
+  }
   steps.push(`CO2-Emissionen (aus Brennstoff-/Wärmeabrechnung): ${fmt.number(fr.co2Kg, 4)} kg`);
   if (fr.usedDirectCost) {
     steps.push(`CO2-Kosten (aus Brennstoff-/Wärmeabrechnung): ${fmt.currency(fr.co2CostGross)} brutto`);
