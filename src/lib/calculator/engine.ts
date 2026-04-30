@@ -518,7 +518,7 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
       usedDirectCost,
       usedDirectEmissions: true,
     }];
-    notes.push('Berechnung auf Basis der direkt eingegebenen CO2-Emissionen lt. Abrechnung.');
+    notes.push('Berechnung auf Basis der eingegebenen Abrechnungsdaten und der eingegebenen Fläche.');
     return buildResult(data, fuelResults, co2PricePerTon, billingYear, notes, crossYear, undefined);
   }
 
