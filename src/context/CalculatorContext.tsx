@@ -165,3 +165,4 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
 }
 
 export { CalculatorContext };
+export { useCalculator } from './useCalculator';
