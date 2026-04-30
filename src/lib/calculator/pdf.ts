@@ -305,7 +305,7 @@ export function generatePDF(
     y += 8;
 
     // ═══ 4. SUBJECT LINE ═══
-    const subjectText = getSubjectLine(data, result);
+    const subjectText = 'Berechnung der CO2-Kostenaufteilung und Geltendmachung eines Erstattungsanspruchs nach dem CO2KostAufG';
     doc.setFontSize(11.5);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(20, 40, 70);
@@ -318,30 +318,47 @@ export function generatePDF(
     y += 8;
 
     // ═══ 5. SALUTATION + INTRO ═══
-    const salutation = getSalutation(data);
+    let salutation = getSalutation(data);
+    // Fallback if no proper personalised salutation can be built.
+    if (!salutation || salutation === 'Sehr geehrte Damen und Herren,') {
+      salutation = 'Guten Tag,';
+    }
     doc.setFontSize(9.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
     doc.text(salutation, mL, y);
     y += 6;
 
-    const introText = getIntroText(data, result);
-    justifiedLetterBody(introText);
-    y += 6;
+    // Body — neutraler Standardtext für alle Mieter-Erstattungsfälle (Blocksatz)
+    justifiedLetterBody(
+      `anbei erhalten Sie die Berechnung der CO2-Kostenaufteilung für den Abrechnungszeitraum ${period}.`,
+    );
+    y += 2;
+    justifiedLetterBody(
+      'Auf Grundlage des Kohlendioxidkostenaufteilungsgesetzes (CO2KostAufG) ergibt sich für mich ein Erstattungsanspruch gegenüber dem Vermieter in Höhe des im Berechnungsnachweis ausgewiesenen Vermieteranteils der CO2-Kosten.',
+    );
+    y += 2;
+    justifiedLetterBody('Die Berechnung ergibt folgende Werte:');
+    y += 2;
 
-    // ═══ COMPACT RESULT SUMMARY on letter page ═══
-    ensureSpace(30);
+    // Werteblock
+    ensureSpace(20);
     detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
     detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 2, true);
     detailRow(`Anteil Mieter (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 2, true);
     y += 4;
 
-    // Closing on letter page
-    const closingText = getClosingText(data);
-    const closingParagraphs = closingText.split('\n\n');
-    for (const para of closingParagraphs) {
-      if (para.trim()) { justifiedLetterBody(para.trim()); y += 2; }
-    }
+    justifiedLetterBody(
+      `Hiermit mache ich den Erstattungsanspruch in Höhe von ${fmt.currency(result.landlordShare)} geltend.`,
+    );
+    y += 2;
+    justifiedLetterBody(
+      'Die Berechnung wurde auf Grundlage der eingegebenen Abrechnungsdaten und der eingegebenen Fläche erstellt. Den Berechnungsnachweis füge ich diesem Schreiben bei.',
+    );
+    y += 2;
+    justifiedLetterBody('Für Rückfragen stehe ich gerne zur Verfügung.');
+    y += 4;
+    justifiedLetterBody('Mit freundlichen Grüßen');
     y += 4;
     if (senderName2) {
       doc.setFontSize(9.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40);
@@ -355,7 +372,7 @@ export function generatePDF(
 
     // Calculation page title
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 40, 70);
-    doc.text('Berechnungsgrundlage', mL, y);
+    doc.text('Berechnungsnachweis', mL, y);
     y += 3;
     doc.setDrawColor(20, 40, 70); doc.setLineWidth(0.5);
     doc.line(mL, y, pw - mR, y);
