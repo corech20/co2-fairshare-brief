@@ -170,10 +170,14 @@ export default function StepInputValues() {
     (wizardData.fuelType === 'erdgas' || wizardData.fuelType === 'erdgas_kwk');
   const isTenant = wizardData.userRole === 'mieter';
   const isNonResidential = wizardData.buildingType === 'nichtwohngebaeude';
-  // Adressdaten-Sektion: bei Mietern nur, wenn ein echter Erstattungsfall vorliegt.
-  // Bei Vermietern: weiterhin optional für personalisierte Dokumente.
+  // Adressdatenbereich nur sichtbar bei:
+  //   Rolle = Mieter UND Wärmeversorgung = eigene Heizungsanlage (etage)
+  //                                        ODER Fernwärme/Nahwärme.
+  // Bei Vermieter-Rolle nie. Bei Mieter ohne diese Wärmeversorgung nie.
   const reimbursementEligible = isReimbursementEligible(wizardData);
-  const showAddressSection = isTenant ? reimbursementEligible : true;
+  const showAddressSection =
+    isTenant && (wizardData.heatSupplyType === 'etage' || wizardData.heatSupplyType === 'fernwaerme')
+    && reimbursementEligible;
 
   // Cross-year: fuel amount is entered per segment on billing period step
   const crossYear = wizardData.billingPeriodStart && wizardData.billingPeriodEnd
@@ -403,12 +407,10 @@ export default function StepInputValues() {
             <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showPdfSection ? 'rotate-180' : ''}`} />
             <div>
               <h3 className="text-lg font-semibold text-foreground">
-                {isTenant ? 'Adressdaten für ein Erstattungsschreiben (optional)' : 'Adressdaten für ein personalisiertes Dokument (optional)'}
+                Adressdaten für ein Erstattungsschreiben (optional)
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                 {isTenant
-                   ? 'Nur erforderlich, wenn Sie ein Erstattungsschreiben an den Vermieter erstellen möchten. Für den reinen Berechnungsnachweis sind keine Adressdaten nötig.'
-                   : 'Nur erforderlich, wenn ein personalisiertes Dokument gewünscht ist. Für den Berechnungsnachweis sind keine Adressdaten nötig.'}
+                Nur erforderlich, wenn ein Erstattungsschreiben erstellt werden soll. Für den Berechnungsnachweis sind keine Adressdaten nötig.
               </p>
             </div>
           </button>
@@ -417,18 +419,18 @@ export default function StepInputValues() {
             <div className="space-y-6 pt-2">
               {/* Sender = current user role */}
               <AddressFields
-                title={isTenant ? 'Ihre Daten (Mieter/in)' : 'Ihre Daten (Vermieter/in)'}
-                address={isTenant ? wizardData.tenantAddress : wizardData.landlordAddress}
-                onChangeAddress={a => setWizardField(isTenant ? 'tenantAddress' : 'landlordAddress', a)}
-                showApartment={isTenant}
+                title="Ihre Daten (Mieter/in)"
+                address={wizardData.tenantAddress}
+                onChangeAddress={a => setWizardField('tenantAddress', a)}
+                showApartment={true}
               />
 
               {/* Recipient = opposite role */}
               <AddressFields
-                title={isTenant ? 'Vermieter/in (Empfänger)' : 'Mieter/in (Empfänger)'}
-                address={isTenant ? wizardData.landlordAddress : wizardData.tenantAddress}
-                onChangeAddress={a => setWizardField(isTenant ? 'landlordAddress' : 'tenantAddress', a)}
-                showApartment={!isTenant}
+                title="Vermieter/in (Empfänger)"
+                address={wizardData.landlordAddress}
+                onChangeAddress={a => setWizardField('landlordAddress', a)}
+                showApartment={false}
               />
             </div>
           )}
