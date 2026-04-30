@@ -333,7 +333,7 @@ export default function StepInputValues() {
             {/* Brutto/Netto-Schalter direkt im Block (nicht für Pellets) */}
             {!isPellets && hasDirectCost && (
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Art des eingegebenen Betrags</label>
+            <label className="text-sm font-medium text-foreground">Ist der CO2-Kostenbetrag in der Abrechnung netto oder brutto?</label>
                 <div className="flex gap-3">
                   {([
                     { value: 'brutto' as CostInputType, label: 'Brutto (inkl. USt.)' },
