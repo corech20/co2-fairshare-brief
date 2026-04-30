@@ -518,7 +518,7 @@ export function calculateCO2Allocation(data: WizardData): CalculationResult {
       usedDirectCost,
       usedDirectEmissions: true,
     }];
-    notes.push('Berechnung auf Basis der direkt eingegebenen CO2-Emissionen (kg) lt. Abrechnung.');
+    notes.push('Berechnung auf Basis der direkt eingegebenen CO2-Emissionen lt. Abrechnung.');
     return buildResult(data, fuelResults, co2PricePerTon, billingYear, notes, crossYear, undefined);
   }
 
@@ -653,7 +653,7 @@ function buildResult(
   // Determine relevant area
   const { area: relevantArea, source: areaSource } = determineRelevantArea(data);
   if (areaSource === 'apartment') {
-    notes.push('Berechnung basiert auf der Wohnungsfläche.');
+    notes.push('Berechnung basiert auf der eingegebenen Fläche.');
   }
 
   // Calculate actual emissions per m² (based on real consumption)

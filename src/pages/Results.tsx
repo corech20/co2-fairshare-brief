@@ -347,7 +347,7 @@ export default function ResultsPage() {
               <div className="space-y-1">
                 <h3 className="text-sm font-semibold text-foreground">Dokument erstellen</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Die vollständige Berechnungsgrundlage wird als druckfertiges PDF bereitgestellt.
+                  Der vollständige Berechnungsnachweis wird als druckfertiges PDF bereitgestellt.
                 </p>
               </div>
 
@@ -355,7 +355,7 @@ export default function ResultsPage() {
                 <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsgrundlage</p>
-                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
+                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO₂-Emissionen · Kostenaufteilung · Netto/Brutto</p>
                   </div>
                   <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
                     <FileText className="h-4 w-4" />Erstattungsschreiben erstellen
@@ -365,7 +365,7 @@ export default function ResultsPage() {
                  <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
                    <div className="space-y-0.5">
                      <p className="text-sm font-medium text-foreground">Berechnungsnachweis</p>
-                     <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Ausstoß · Kostenaufteilung · Netto/Brutto</p>
+                     <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO₂-Emissionen · Kostenaufteilung · Netto/Brutto</p>
                    </div>
                    <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
                      <FileText className="h-4 w-4" />Berechnungsnachweis erstellen
@@ -408,8 +408,7 @@ export default function ResultsPage() {
 
           {/* Legal note */}
           <div className="rounded-lg bg-muted/50 border border-border p-4 text-xs text-muted-foreground">
-            <strong className="text-foreground">Hinweis:</strong> Diese Berechnung dient der unverbindlichen Information.
-            Für rechtsverbindliche Auskünfte konsultieren Sie bitte einen Rechtsanwalt oder Steuerberater.
+            <strong className="text-foreground">Hinweis:</strong> Diese Berechnung dient der unverbindlichen Information und ersetzt keine Rechts- oder Steuerberatung.
           </div>
         </div>
       </main>
