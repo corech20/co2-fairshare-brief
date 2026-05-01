@@ -286,9 +286,11 @@ export default function StepInputValues() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Berechnungsdaten</h2>
-        <p className="text-muted-foreground mt-2">{isFernwaerme
-          ? 'Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die Werte zur Wärmemenge, zu den CO2-Emissionen und zu den CO2-Kosten können Sie direkt aus Ihrer Wärmelieferabrechnung übernehmen.'
-          : 'Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die meisten Werte können direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernehmen werden.'}</p>
+        <p className="text-muted-foreground mt-2 text-sm">
+          {isFernwaerme
+            ? 'Werte aus der Wärmelieferabrechnung sowie die Fläche eintragen.'
+            : 'Werte aus der Abrechnung sowie die Fläche eintragen.'}
+        </p>
       </div>
 
       <div className="space-y-5">
