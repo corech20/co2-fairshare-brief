@@ -394,7 +394,7 @@ export default function StepInputValues() {
               <p className="text-xs text-muted-foreground">
                 {isPellets
                   ? 'Nur informatorisch; keine Grundlage der Kostenaufteilung.'
-                  : 'Wird auf ein Jahr normiert und für die gesetzliche Einstufung des Gebäudes oder der gemieteten Einheit verwendet.'}
+                  : ''}
               </p>
             </div>
 
