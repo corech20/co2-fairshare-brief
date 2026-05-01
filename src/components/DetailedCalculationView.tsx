@@ -208,7 +208,7 @@ export function DetailedCalculationView({ data, result }: Props) {
                 label="Hochgerechneter Jahreswert (nur für Einstufung):"
                 value={`${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`}
               />
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-[10px] text-muted-foreground leading-[1.5] -mt-1">
                 Hochrechnung: {fmt.number(result.emissionsPerSqmYear, 2)} × {fmt.number(result.annualizationFactor, 4)} ={' '}
                 {fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im
                 Stufenmodell verwendet, nicht für die Kostenberechnung.
