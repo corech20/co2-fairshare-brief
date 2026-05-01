@@ -567,18 +567,20 @@ export function generatePDF(
   // Annualized value – clearly labeled as classification-only
   if (result.annualizationFactor && result.emissionsPerSqmAnnualized) {
     detailRow('Hochgerechneter Jahreswert (nur für Einstufung):', `${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`, 2);
-    y += 1;
-    doc.setFontSize(8);
+    // Tighten gap so the note reads as a footnote attached to the row above
+    y -= 1.5;
+    doc.setFontSize(7);
     doc.setTextColor(100, 100, 100);
     const annNote = doc.splitTextToSize(
       `Hochrechnung: ${fmt.number(result.emissionsPerSqmYear, 2)} × ${fmt.number(result.annualizationFactor, 4)} = ${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2/m²/a. Dieser Wert wird ausschließlich für die Einstufung im Stufenmodell verwendet, nicht für die Kostenberechnung.`,
       cw - 6,
     );
     for (const line of annNote) {
-      ensureSpace(4);
+      ensureSpace(3);
       doc.text(line, mL + 2, y);
-      y += 3.5;
+      y += 2.8;
     }
+    y += 1.5;
   }
 
   // Stufenmodell display
