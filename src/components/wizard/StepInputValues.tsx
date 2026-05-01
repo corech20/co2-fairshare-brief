@@ -286,9 +286,11 @@ export default function StepInputValues() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Berechnungsdaten</h2>
-        <p className="text-muted-foreground mt-2">{isFernwaerme
-          ? 'Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die Werte zur Wärmemenge, zu den CO2-Emissionen und zu den CO2-Kosten können Sie direkt aus Ihrer Wärmelieferabrechnung übernehmen.'
-          : 'Geben Sie die benötigten Abrechnungsdaten sowie die Fläche Ihrer Wohnung, Ihrer Einheit oder des Gebäudes ein. Die meisten Werte können direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernehmen werden.'}</p>
+        <p className="text-muted-foreground mt-2 text-sm">
+          {isFernwaerme
+            ? 'Werte aus der Wärmelieferabrechnung sowie die Fläche eintragen.'
+            : 'Werte aus der Abrechnung sowie die Fläche eintragen.'}
+        </p>
       </div>
 
       <div className="space-y-5">
@@ -392,7 +394,7 @@ export default function StepInputValues() {
               <p className="text-xs text-muted-foreground">
                 {isPellets
                   ? 'Nur informatorisch; keine Grundlage der Kostenaufteilung.'
-                  : 'Wird auf ein Jahr normiert und für die gesetzliche Einstufung des Gebäudes oder der gemieteten Einheit verwendet.'}
+                  : ''}
               </p>
             </div>
 
@@ -410,16 +412,15 @@ export default function StepInputValues() {
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Wird anschließend nach der gesetzlichen Verteilungsregel zwischen Mieter und Vermieter aufgeteilt.
-                </p>
               </div>
             )}
 
             {/* Brutto/Netto-Schalter direkt im Block (nicht für Pellets) */}
             {!isPellets && hasDirectCost && (
               <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Ist der CO2-Kostenbetrag in der Abrechnung netto oder brutto?</label>
+                <label className="text-sm font-medium text-foreground">
+                  Betrag ausgewiesen als <span className="text-destructive">*</span>
+                </label>
                 <div className="flex gap-3">
                   {([
                     { value: 'brutto' as CostInputType, label: 'Brutto (inkl. USt.)' },
@@ -430,7 +431,7 @@ export default function StepInputValues() {
                       onClick={() => setWizardField('co2CostDirectType', opt.value)}
                       className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all ${
                           wizardData.co2CostDirectType === opt.value
-                          ? 'border-accent bg-accent/5 text-foreground'
+                          ? 'border-accent bg-accent/10 text-foreground shadow-sm'
                           : 'border-border bg-card text-muted-foreground hover:border-primary/30'
                       }`}
                     >
@@ -438,11 +439,6 @@ export default function StepInputValues() {
                     </button>
                   ))}
                 </div>
-                {!wizardData.co2CostDirectType && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400">
-                    Bitte geben Sie an, ob der CO2-Kostenbetrag netto oder brutto ausgewiesen ist.
-                  </p>
-                )}
               </div>
             )}
           </div>

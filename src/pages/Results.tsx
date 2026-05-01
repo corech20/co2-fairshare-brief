@@ -260,6 +260,21 @@ export default function ResultsPage() {
               <h2 className="text-sm font-semibold text-foreground">Ergebnis</h2>
             </header>
             <div className="px-5 py-5 space-y-4">
+              {isTenantClaim && (
+                <div className="space-y-1">
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground">Möglicher Erstattungsanspruch</div>
+                  <div className="text-4xl sm:text-5xl font-bold text-primary tabular-nums leading-tight">
+                    {formatCurrency(result.landlordShare)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Anteil Mieter: <span className="text-foreground font-medium tabular-nums">{formatCurrency(result.tenantShare)}</span>
+                    <span className="text-muted-foreground"> · {result.tenantPercent}&nbsp;%</span>
+                  </div>
+                </div>
+              )}
+
+              {!isTenantClaim && (
+              <>
               <dl className="space-y-1.5 text-sm">
                 <div className="flex items-baseline gap-2">
                   <dt className="text-muted-foreground shrink-0">Gesamte CO2-Kosten (brutto):</dt>
@@ -310,15 +325,7 @@ export default function ResultsPage() {
                   )}
                 </div>
               </div>
-
-              {isTenantClaim && (
-                <div className="rounded-md border border-primary/30 bg-primary/5 p-3 flex items-start gap-3">
-                  <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <p className="text-xs text-foreground leading-relaxed flex-1 flex items-baseline gap-2">
-                    <span className="font-semibold">Möglicher Erstattungsanspruch gegenüber dem Vermieter:</span>
-                    <span className="ml-auto text-right text-primary tabular-nums font-semibold">{formatCurrency(result.landlordShare)}</span>
-                  </p>
-                </div>
+              </>
               )}
 
               {result.reimbursementReductionApplied && (
@@ -338,56 +345,33 @@ export default function ResultsPage() {
                 </div>
               )}
 
-              <ul className="border-t border-primary/20 pt-3 space-y-1">
-                <li className="text-xs text-muted-foreground flex gap-2">
-                  <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                  Berechnung auf Basis der eingegebenen Abrechnungsdaten und der eingegebenen Fläche.
-                </li>
-              </ul>
             </div>
           </section>
           )}
 
           {/* Document section — opens payment dialog directly */}
           {!purchased && (
-            <div className="rounded-lg border border-border bg-card p-5 space-y-4">
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">Dokument erstellen</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Der vollständige Berechnungsnachweis wird als druckfertiges PDF bereitgestellt.
-                </p>
-              </div>
-
+            <div className="space-y-3">
               {canIssueLetter ? (
-                <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">Erstattungsschreiben mit Berechnungsnachweis</p>
-                    <p className="text-xs text-muted-foreground">Inhalt: Schreiben · Abrechnungszeitraum · Brennstoff · CO2-Emissionen · Kostenaufteilung · Netto/Brutto</p>
-                  </div>
-                  <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
-                    <FileText className="h-4 w-4" />Erstattungsschreiben mit Berechnungsnachweis erstellen
-                  </Button>
-                </div>
+                <Button variant="cta" size="lg" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
+                  <FileText className="h-4 w-4" />Erstattungsschreiben als PDF erstellen
+                </Button>
               ) : (
-                <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                <>
                   {addressSectionEligible && !isTenantClaim && (
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <p className="text-xs text-muted-foreground leading-relaxed text-center">
                       Es wurde kein Erstattungsanspruch ermittelt. Daher kann kein Erstattungsschreiben erstellt werden.
                     </p>
                   )}
                   {addressSectionEligible && isTenantClaim && !hasAnyAddressInput && (
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Es wurde ein Erstattungsanspruch ermittelt. Für die Erstellung eines Erstattungsschreibens sind Adressdaten erforderlich.
+                    <p className="text-xs text-muted-foreground leading-relaxed text-center">
+                      Für ein Erstattungsschreiben sind zusätzlich Adressdaten erforderlich.
                     </p>
                   )}
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">Berechnungsnachweis</p>
-                    <p className="text-xs text-muted-foreground">Inhalt: Abrechnungszeitraum · Brennstoff · CO2-Emissionen · Kostenaufteilung · Netto/Brutto</p>
-                  </div>
-                  <Button variant="cta" size="default" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                    <FileText className="h-4 w-4" />Berechnungsnachweis erstellen
+                  <Button variant="cta" size="lg" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                    <FileText className="h-4 w-4" />Nachweis als PDF erstellen
                   </Button>
-                </div>
+                </>
               )}
             </div>
           )}
