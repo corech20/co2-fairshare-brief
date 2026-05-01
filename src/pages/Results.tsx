@@ -225,153 +225,46 @@ export default function ResultsPage() {
             )}
           </div>
 
-          {/* ═══════════ Compact result summary ═══════════ */}
-          {isPelletsSpecialCase ? (
-            <section className="rounded-lg border-2 border-primary bg-primary/5">
-              <header className="border-b border-primary/20 px-5 py-3">
-                <h2 className="text-sm font-semibold text-foreground">Ergebnis – Sonderfall Holzpellets</h2>
-              </header>
-              <div className="px-5 py-5 space-y-4">
-                <dl className="space-y-1.5 text-sm">
-                  <div className="flex items-baseline gap-2">
-                    <dt className="text-muted-foreground shrink-0">Brennstoff:</dt>
-                    <dd className="ml-auto text-right text-foreground font-semibold">Holzpellets</dd>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <dt className="text-muted-foreground shrink-0">CO2-Kosten:</dt>
-                    <dd className="ml-auto text-right text-foreground font-semibold tabular-nums">{formatCurrency(0)}</dd>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <dt className="text-muted-foreground shrink-0">Aufteilung:</dt>
-                    <dd className="ml-auto text-right text-foreground font-medium">keine Aufteilung erforderlich</dd>
-                  </div>
-                </dl>
-                <div className="rounded-md border border-primary/30 bg-background p-4 flex items-start gap-3">
-                  <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <p className="text-xs text-foreground leading-relaxed">
-                    Für Holzpellets sind keine nach dem CO2KostAufG zu verteilenden CO2-Kosten anzusetzen. Etwaige Emissionsangaben werden nur informatorisch ausgewiesen.
-                  </p>
-                </div>
-              </div>
-            </section>
-          ) : (
+          {/* ═══════════ Unified result summary ═══════════ */}
           <section className="rounded-lg border-2 border-primary bg-primary/5">
             <header className="border-b border-primary/20 px-5 py-3">
-              <h2 className="text-sm font-semibold text-foreground">Ergebnis</h2>
+              <h2 className="text-sm font-semibold text-foreground">Ergebnis der CO2-Kostenaufteilung</h2>
             </header>
-            <div className="px-5 py-5 space-y-4">
-              {isTenantClaim && (
-                <div className="space-y-1">
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground">Möglicher Erstattungsanspruch</div>
-                  <div className="text-4xl sm:text-5xl font-bold text-primary tabular-nums leading-tight">
-                    {formatCurrency(result.landlordShare)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Anteil Mieter: <span className="text-foreground font-medium tabular-nums">{formatCurrency(result.tenantShare)}</span>
-                    <span className="text-muted-foreground"> · {result.tenantPercent}&nbsp;%</span>
-                  </div>
-                </div>
-              )}
-
-              {!isTenantClaim && (
-              <>
-              <dl className="space-y-1.5 text-sm">
-                <div className="flex items-baseline gap-2">
-                  <dt className="text-muted-foreground shrink-0">Gesamte CO2-Kosten (brutto):</dt>
-                  <dd className="ml-auto text-right text-foreground font-semibold tabular-nums">{formatCurrency(result.totalCO2Cost)}</dd>
-                </div>
-                {allocationExplanation && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="text-muted-foreground shrink-0">Einstufung:</dt>
-                    <dd className="text-foreground font-medium text-left">{allocationExplanation}</dd>
-                  </div>
-                )}
-              </dl>
-
-              <div className="grid gap-3 sm:grid-cols-2 pt-1">
-                <div className="rounded-md border border-primary/30 bg-background p-4">
-                  <div className="text-xs text-muted-foreground mb-1">Anteil Vermieter</div>
-                  <div className="text-2xl font-bold text-primary tabular-nums">{formatCurrency(result.landlordShare)}</div>
-                  {result.reimbursementReductionApplied ? (
-                    <>
-                      <div className="text-xs text-primary font-medium mt-1 tabular-nums">
-                        {result.baseLandlordPercent}&nbsp;% Ausgangsanteil
-                      </div>
-                      <div className="text-xs text-primary font-medium tabular-nums">
-                        abzgl. {result.reimbursementReductionPercent}&nbsp;% Kürzung
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        wegen zusätzlichem Gasgerät ohne eigenen Zähler
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-xs text-primary font-medium mt-1 tabular-nums">{result.landlordPercent}&nbsp;%</div>
-                  )}
-                </div>
-                <div className="rounded-md border border-accent/30 bg-background p-4">
-                  <div className="text-xs text-muted-foreground mb-1">Anteil Mieter</div>
-                  <div className="text-2xl font-bold text-accent tabular-nums">{formatCurrency(result.tenantShare)}</div>
-                  {result.reimbursementReductionApplied ? (
-                    <>
-                      <div className="text-xs text-accent font-medium mt-1 tabular-nums">
-                        {result.baseTenantPercent}&nbsp;% Ausgangsanteil
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        erhöht um den beim Vermieter abgezogenen Betrag
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-xs text-accent font-medium mt-1 tabular-nums">{result.tenantPercent}&nbsp;%</div>
-                  )}
+            <div className="px-5 py-5 space-y-5">
+              <div className="space-y-1">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Möglicher Erstattungsanspruch</div>
+                <div className="text-4xl sm:text-5xl font-bold text-primary tabular-nums leading-tight">
+                  {formatCurrency(isPelletsSpecialCase ? 0 : result.landlordShare)}
                 </div>
               </div>
-              </>
-              )}
-
-              {result.reimbursementReductionApplied && (
-                <p className="text-xs text-muted-foreground leading-relaxed border-t border-primary/20 pt-3">
-                  Vermieteranteil pauschal um {result.reimbursementReductionPercent}&nbsp;% gekürzt
-                  (zusätzliches Gasgerät ohne eigenen Zähler).
-                </p>
-              )}
-
-              {isTenant && !reimbursementEligible && (
-                <div className="rounded-md border border-border bg-muted/30 p-3 flex items-start gap-3">
-                  <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Die CO2-Kostenaufteilung wird in diesem Fall über die Heizkosten-/Betriebskostenabrechnung
-                    berücksichtigt. Es ist kein separates Erstattungsschreiben erforderlich.
-                  </p>
+              <div className="space-y-1">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Anteil Mieter</div>
+                <div className="text-2xl font-semibold text-foreground tabular-nums">
+                  {formatCurrency(isPelletsSpecialCase ? 0 : result.tenantShare)}
+                  <span className="ml-2 text-sm text-muted-foreground font-normal tabular-nums">
+                    · {isPelletsSpecialCase ? 0 : result.tenantPercent}&nbsp;%
+                  </span>
                 </div>
-              )}
-
+              </div>
             </div>
           </section>
-          )}
 
-          {/* Document section — opens payment dialog directly */}
+          {/* Primary action — always the PDF button, in the same position */}
           {!purchased && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {canIssueLetter ? (
                 <Button variant="cta" size="lg" className="w-full" onClick={() => handleRequestDocument('letter_tenant_reimbursement')}>
                   <FileText className="h-4 w-4" />Erstattungsschreiben als PDF erstellen
                 </Button>
               ) : (
-                <>
-                  {addressSectionEligible && !isTenantClaim && (
-                    <p className="text-xs text-muted-foreground leading-relaxed text-center">
-                      Es wurde kein Erstattungsanspruch ermittelt. Daher kann kein Erstattungsschreiben erstellt werden.
-                    </p>
-                  )}
-                  {addressSectionEligible && isTenantClaim && !hasAnyAddressInput && (
-                    <p className="text-xs text-muted-foreground leading-relaxed text-center">
-                      Für ein Erstattungsschreiben sind zusätzlich Adressdaten erforderlich.
-                    </p>
-                  )}
-                  <Button variant="cta" size="lg" className="w-full" onClick={() => handleRequestDocument('calculation')}>
-                    <FileText className="h-4 w-4" />Nachweis als PDF erstellen
-                  </Button>
-                </>
+                <Button variant="cta" size="lg" className="w-full" onClick={() => handleRequestDocument('calculation')}>
+                  <FileText className="h-4 w-4" />Nachweis als PDF erstellen
+                </Button>
+              )}
+              {addressSectionEligible && isTenantClaim && !hasAnyAddressInput && (
+                <p className="text-xs text-muted-foreground leading-relaxed text-center">
+                  Für ein Erstattungsschreiben sind zusätzlich Adressdaten erforderlich.
+                </p>
               )}
             </div>
           )}
