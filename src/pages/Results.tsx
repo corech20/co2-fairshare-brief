@@ -225,27 +225,57 @@ export default function ResultsPage() {
             )}
           </div>
 
-          {/* ═══════════ Unified result summary ═══════════ */}
+          {/* ═══════════ Result summary ═══════════ */}
           <section className="rounded-lg border-2 border-primary bg-primary/5">
             <header className="border-b border-primary/20 px-5 py-3">
-              <h2 className="text-sm font-semibold text-foreground">Ergebnis der CO2-Kostenaufteilung</h2>
+              <h2 className="text-sm font-semibold text-foreground">Ergebnis</h2>
             </header>
-            <div className="px-5 py-5 space-y-5">
-              <div className="space-y-1">
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">Möglicher Erstattungsanspruch</div>
-                <div className="text-4xl sm:text-5xl font-bold text-primary tabular-nums leading-tight">
-                  {formatCurrency(isPelletsSpecialCase ? 0 : result.landlordShare)}
+            <div className="px-5 py-5 space-y-4">
+              <dl className="space-y-1.5 text-sm">
+                <div className="flex items-baseline gap-2">
+                  <dt className="text-muted-foreground shrink-0">Gesamte CO2-Kosten (brutto):</dt>
+                  <dd className="ml-auto text-right text-foreground font-semibold tabular-nums">
+                    {formatCurrency(isPelletsSpecialCase ? 0 : result.totalCO2Cost)}
+                  </dd>
+                </div>
+                {allocationExplanation && (
+                  <div className="flex items-baseline gap-2">
+                    <dt className="text-muted-foreground shrink-0">Einstufung:</dt>
+                    <dd className="text-foreground font-medium text-left">{allocationExplanation}</dd>
+                  </div>
+                )}
+              </dl>
+
+              <div className="grid gap-3 sm:grid-cols-2 pt-1">
+                <div className="rounded-md border border-primary/30 bg-background p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Anteil Vermieter</div>
+                  <div className="text-2xl font-bold text-primary tabular-nums">
+                    {formatCurrency(isPelletsSpecialCase ? 0 : result.landlordShare)}
+                  </div>
+                  <div className="text-xs text-primary font-medium mt-1 tabular-nums">
+                    {isPelletsSpecialCase ? 0 : result.landlordPercent}&nbsp;%
+                  </div>
+                </div>
+                <div className="rounded-md border border-accent/30 bg-background p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Anteil Mieter</div>
+                  <div className="text-2xl font-bold text-accent tabular-nums">
+                    {formatCurrency(isPelletsSpecialCase ? 0 : result.tenantShare)}
+                  </div>
+                  <div className="text-xs text-accent font-medium mt-1 tabular-nums">
+                    {isPelletsSpecialCase ? 0 : result.tenantPercent}&nbsp;%
+                  </div>
                 </div>
               </div>
-              <div className="space-y-1">
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">Anteil Mieter</div>
-                <div className="text-2xl font-semibold text-foreground tabular-nums">
-                  {formatCurrency(isPelletsSpecialCase ? 0 : result.tenantShare)}
-                  <span className="ml-2 text-sm text-muted-foreground font-normal tabular-nums">
-                    · {isPelletsSpecialCase ? 0 : result.tenantPercent}&nbsp;%
-                  </span>
+
+              {isTenantClaim && (
+                <div className="rounded-md border border-primary/30 bg-primary/5 p-3 flex items-start gap-3">
+                  <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground leading-relaxed flex-1 flex items-baseline gap-2">
+                    <span className="font-semibold">Möglicher Erstattungsanspruch gegenüber dem Vermieter:</span>
+                    <span className="ml-auto text-right text-primary tabular-nums font-semibold">{formatCurrency(result.landlordShare)}</span>
+                  </p>
                 </div>
-              </div>
+              )}
             </div>
           </section>
 
