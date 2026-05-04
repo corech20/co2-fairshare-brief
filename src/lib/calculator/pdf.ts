@@ -70,11 +70,7 @@ export function generatePDF(
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(30, 55, 90);
     doc.text(title, mL, y);
-    y += 2;
-    doc.setDrawColor(30, 55, 90);
-    doc.setLineWidth(0.5);
-    doc.line(mL, y, pw - mR, y);
-    y += 7;
+    y += 6;
   };
 
   const bodyText = (text: string, indent = 0) => {
@@ -311,11 +307,7 @@ export function generatePDF(
     doc.setTextColor(20, 40, 70);
     const subjLines = doc.splitTextToSize(subjectText, cw);
     doc.text(subjLines, mL, y);
-    y += subjLines.length * 5 + 2;
-    doc.setDrawColor(20, 40, 70);
-    doc.setLineWidth(0.5);
-    doc.line(mL, y, pw - mR, y);
-    y += 8;
+    y += subjLines.length * 5 + 8;
 
     // ═══ 5. SALUTATION + INTRO ═══
     let salutation = getSalutation(data);
@@ -374,7 +366,7 @@ export function generatePDF(
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 40, 70);
     doc.text('Berechnungsnachweis', mL, y);
     y += 3;
-    doc.setDrawColor(20, 40, 70); doc.setLineWidth(0.5);
+    doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.5);
     doc.line(mL, y, pw - mR, y);
     y += 8;
 
@@ -390,7 +382,7 @@ export function generatePDF(
     doc.setTextColor(20, 40, 70);
     doc.text('CO2-Kostenaufteilung – Berechnungsnachweis', mL, y);
     y += 3;
-    doc.setDrawColor(20, 40, 70);
+    doc.setDrawColor(180, 180, 180);
     doc.setLineWidth(0.5);
     doc.line(mL, y, pw - mR, y);
     y += 7;
