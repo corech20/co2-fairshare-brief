@@ -416,7 +416,7 @@ export default function StepInputValues() {
             )}
 
             {/* Brutto/Netto-Schalter direkt im Block (nicht für Pellets) */}
-            {!isPellets && hasDirectCost && (
+            {!isPellets && (
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">
                   Betrag ausgewiesen als <span className="text-destructive">*</span>
