@@ -439,6 +439,11 @@ export default function StepInputValues() {
                     </button>
                   ))}
                 </div>
+                {!wizardData.co2CostDirectType && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Bitte geben Sie an, ob der CO2-Kostenbetrag netto oder brutto ausgewiesen ist.
+                  </p>
+                )}
               </div>
             )}
           </div>
