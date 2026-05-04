@@ -549,7 +549,7 @@ export function generatePDF(
       detailRow(totalLabel, `${fmt.number(data.buildingArea, 0)} m²`, 2);
     }
     detailRow(`${areaLabel}:`, `${fmt.number(data.apartmentArea || result.relevantArea, 0)} m²`, 2);
-    detailRow('Berechnungsnachweis:', `${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`, 2);
+    detailRow('Berechnungsgrundlage:', `${fmt.number(result.relevantArea, 0)} m² (${areaLabel})`, 2);
   } else {
     detailRow(`${areaLabel}:`, `${fmt.number(result.relevantArea, 0)} m²`, 2);
   }
