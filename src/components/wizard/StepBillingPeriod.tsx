@@ -1,7 +1,7 @@
 import { useCalculator } from '@/context/CalculatorContext';
 import { validateBillingPeriod } from '@/lib/calculator/engine';
 import { AlertTriangle } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 /** Hard date bounds for the inputs. Pilotversion: nur Zeiträume innerhalb
  *  der Jahre 2024–2026 zulässig (z. B. 01.02.2025 – 31.01.2026). */
@@ -42,6 +42,10 @@ export default function StepBillingPeriod() {
 
   const start = wizardData.billingPeriodStart;
   const end = wizardData.billingPeriodEnd;
+  const [startTouched, setStartTouched] = useState(false);
+  const [endTouched, setEndTouched] = useState(false);
+  const [startNativeInvalid, setStartNativeInvalid] = useState(false);
+  const [endNativeInvalid, setEndNativeInvalid] = useState(false);
 
   const startValid = isValidDateString(start);
   const endValid = isValidDateString(end);
@@ -49,11 +53,15 @@ export default function StepBillingPeriod() {
   let startError: string | null = null;
   let endError: string | null = null;
 
-  if (start && !startValid) {
+  if (startNativeInvalid || (start && !startValid)) {
     startError = 'Bitte geben Sie ein gültiges Startdatum ein.';
+  } else if (startTouched && !start) {
+    startError = 'Bitte geben Sie ein Startdatum ein.';
   }
-  if (end && !endValid) {
+  if (endNativeInvalid || (end && !endValid)) {
     endError = 'Bitte geben Sie ein gültiges Enddatum ein, z. B. 30.11.2024.';
+  } else if (endTouched && !end) {
+    endError = 'Bitte geben Sie ein Enddatum ein.';
   }
   if (startValid && endValid && start! > end!) {
     endError = 'Das Enddatum darf nicht vor dem Startdatum liegen.';
@@ -102,7 +110,18 @@ export default function StepBillingPeriod() {
                 min={startMin}
                 max={startMax}
                 value={start ?? ''}
-                onChange={e => setWizardField('billingPeriodStart', e.target.value)}
+                onInput={e => {
+                  setStartTouched(true);
+                  setStartNativeInvalid(e.currentTarget.validity.badInput);
+                }}
+                onBlur={e => {
+                  setStartTouched(true);
+                  setStartNativeInvalid(e.currentTarget.validity.badInput);
+                }}
+                onChange={e => {
+                  setStartNativeInvalid(e.currentTarget.validity.badInput);
+                  setWizardField('billingPeriodStart', e.target.value);
+                }}
                 aria-invalid={!!startError}
                 className={`w-full rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
                   startError
@@ -121,7 +140,18 @@ export default function StepBillingPeriod() {
                 min={endMin}
                 max={endMaxBounded}
                 value={end ?? ''}
-                onChange={e => setWizardField('billingPeriodEnd', e.target.value)}
+                onInput={e => {
+                  setEndTouched(true);
+                  setEndNativeInvalid(e.currentTarget.validity.badInput);
+                }}
+                onBlur={e => {
+                  setEndTouched(true);
+                  setEndNativeInvalid(e.currentTarget.validity.badInput);
+                }}
+                onChange={e => {
+                  setEndNativeInvalid(e.currentTarget.validity.badInput);
+                  setWizardField('billingPeriodEnd', e.target.value);
+                }}
                 aria-invalid={!!endError}
                 className={`w-full rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
                   endError
