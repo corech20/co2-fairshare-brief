@@ -383,7 +383,7 @@ export function generatePDF(
     doc.text('CO2-Kostenaufteilung – Berechnungsnachweis', mL, y);
     y += 3;
     doc.setDrawColor(180, 180, 180);
-    doc.setLineWidth(0.5);
+    doc.setLineWidth(0.3);
     doc.line(mL, y, pw - mR, y);
     y += 7;
 
