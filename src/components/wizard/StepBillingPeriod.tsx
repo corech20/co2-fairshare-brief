@@ -19,12 +19,49 @@ function subDays(dateStr: string, days: number): string {
   return addDays(dateStr, -days);
 }
 
+/** Validate that a string is a real calendar date in YYYY-MM-DD format. */
+function isValidDateString(value: string | undefined | null): boolean {
+  if (!value) return false;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) return false;
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const d = new Date(value);
+  return (
+    !Number.isNaN(d.getTime()) &&
+    d.getUTCFullYear() === year &&
+    d.getUTCMonth() + 1 === month &&
+    d.getUTCDate() === day
+  );
+}
+
 export default function StepBillingPeriod() {
   const { wizardData, setWizardField } = useCalculator();
 
   const start = wizardData.billingPeriodStart;
   const end = wizardData.billingPeriodEnd;
-  const validationError = start && end ? validateBillingPeriod(start, end) : null;
+
+  const startValid = isValidDateString(start);
+  const endValid = isValidDateString(end);
+
+  let startError: string | null = null;
+  let endError: string | null = null;
+
+  if (start && !startValid) {
+    startError = 'Bitte geben Sie ein gültiges Startdatum ein.';
+  }
+  if (end && !endValid) {
+    endError = 'Bitte geben Sie ein gültiges Enddatum ein, z. B. 30.11.2024.';
+  }
+  if (startValid && endValid && start! > end!) {
+    endError = 'Das Enddatum darf nicht vor dem Startdatum liegen.';
+  }
+
+  const rangeError =
+    startValid && endValid && !endError ? validateBillingPeriod(start!, end!) : null;
+  const validationError = rangeError;
 
   // Cleanup: legacy yearly segment data is no longer used in the standard flow.
   useEffect(() => {
@@ -66,8 +103,16 @@ export default function StepBillingPeriod() {
                 max={startMax}
                 value={start ?? ''}
                 onChange={e => setWizardField('billingPeriodStart', e.target.value)}
-                className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
+                aria-invalid={!!startError}
+                className={`w-full rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
+                  startError
+                    ? 'border-destructive focus:border-destructive'
+                    : 'border-border focus:border-accent'
+                }`}
               />
+              {startError && (
+                <p className="text-xs text-destructive font-medium">{startError}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">Bis</label>
@@ -77,8 +122,16 @@ export default function StepBillingPeriod() {
                 max={endMaxBounded}
                 value={end ?? ''}
                 onChange={e => setWizardField('billingPeriodEnd', e.target.value)}
-                className="w-full rounded-lg border-2 border-border bg-card px-4 py-3 text-foreground focus:border-accent focus:outline-none transition-colors"
+                aria-invalid={!!endError}
+                className={`w-full rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
+                  endError
+                    ? 'border-destructive focus:border-destructive'
+                    : 'border-border focus:border-accent'
+                }`}
               />
+              {endError && (
+                <p className="text-xs text-destructive font-medium">{endError}</p>
+              )}
             </div>
           </div>
 
