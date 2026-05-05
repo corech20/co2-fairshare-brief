@@ -675,10 +675,6 @@ export function generatePDF(
   if ((docCase === 'C' || docCase === 'D') && result.landlordShare > 0) {
     y += 4;
     ensureSpace(8);
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.2);
-    doc.line(mL + 2, y, pw - mR, y);
-    y += 4.5;
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(50, 50, 50);
