@@ -366,7 +366,7 @@ export function generatePDF(
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 40, 70);
     doc.text('Berechnungsnachweis', mL, y);
     y += 3;
-    doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
+    doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.2);
     doc.line(mL, y, pw - mR, y);
     y += 8;
 
@@ -568,8 +568,6 @@ export function generatePDF(
   // Annualized value – clearly labeled as classification-only
   if (result.annualizationFactor && result.emissionsPerSqmAnnualized) {
     detailRow('Hochgerechneter Jahreswert (nur für Einstufung):', `${fmt.number(result.emissionsPerSqmAnnualized, 2)} kg CO2 / m² / a`, 2);
-    // Tighten gap so the note reads as a footnote attached to the row above
-    y -= 1.5;
     doc.setFontSize(7);
     doc.setTextColor(100, 100, 100);
     const annNote = doc.splitTextToSize(
@@ -683,7 +681,7 @@ export function generatePDF(
     y += 5;
   }
 
-  y += 4;
+  y += 8;
 
   // ═══════════════════════════════════════════════════════════════════════
   // CLOSING
