@@ -226,7 +226,7 @@ export default function ResultsPage() {
           </div>
 
           {/* ═══════════ Result summary ═══════════ */}
-          <section className="rounded-lg border-2 border-primary bg-primary/5">
+          <section className="rounded-lg border-2 border-border bg-primary/5">
             <header className="border-b border-primary/20 px-5 py-3">
               <h2 className="text-sm font-semibold text-foreground">Ergebnis</h2>
             </header>
