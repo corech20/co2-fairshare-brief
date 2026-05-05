@@ -627,13 +627,13 @@ export function generatePDF(
 
   sectionHeading('4. Aufteilung der CO2-Kosten unter Berücksichtigung der vorgenannten Besonderheiten');
 
-  detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2, true);
+  detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2);
 
-  y += 2;
+  y += 1;
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.2);
   doc.line(mL + 2, y, pw - mR, y);
-  y += 4;
+  y += 2.5;
 
   // Show base vs final reference if they differ (residential only)
   const baseDiffersFromFinal = result.isResidential
@@ -653,8 +653,8 @@ export function generatePDF(
     y += 5;
   }
 
-  detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 2, true);
-  detailRow(`Anteil Mieter (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 2, true);
+  detailRow(`Anteil Vermieter (${result.landlordPercent} %):`, fmt.currency(result.landlordShare), 2);
+  detailRow(`Anteil Mieter (${result.tenantPercent} %):`, fmt.currency(result.tenantShare), 2);
 
   if (result.reimbursementReductionApplied && result.landlordShareBeforeReduction != null) {
     y += 2;
@@ -668,12 +668,12 @@ export function generatePDF(
 
   // Erstattungsanspruch — same typography as the rest, no colored box
   if ((docCase === 'C' || docCase === 'D') && result.landlordShare > 0) {
-    y += 3;
+    y += 4;
     ensureSpace(8);
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.2);
     doc.line(mL + 2, y, pw - mR, y);
-    y += 5;
+    y += 4.5;
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(50, 50, 50);
@@ -682,14 +682,14 @@ export function generatePDF(
     y += 5;
   }
 
-  y += 8;
+  y += 2;
 
   // ═══════════════════════════════════════════════════════════════════════
   // CLOSING
   // ═══════════════════════════════════════════════════════════════════════
 
   ensureSpace(25);
-  y += 2;
+  y += 0;
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(90, 90, 90);
