@@ -490,22 +490,31 @@ export function generatePDF(
     const pdfMixedVAT = pdfPrimaryFuel && gasFuelsSet.has(pdfPrimaryFuel) &&
       pdfPStart && pdfPEnd && pdfPStart < pdfVatBoundary && pdfPEnd >= pdfVatBoundary;
 
-    detailRow('CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet), 2);
-    
+    // Aligned cost block: labels share the same left axis (mL + 2),
+    // amounts share the same right axis (pw - mR).
+    const costRow = (label: string, value: string, bold = false) => {
+      ensureSpace(5);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setTextColor(50, 50, 50);
+      doc.text(label, mL + 2, y);
+      doc.text(value, pw - mR, y, { align: 'right' });
+      y += 4.5;
+    };
+    costRow('CO2-Kosten netto:', fmt.currency(result.totalCO2CostNet));
     if (pdfMixedVAT) {
       const dayMs = 1000 * 60 * 60 * 24;
       const pdfTotalDays = Math.round((pdfPEnd!.getTime() - pdfPStart!.getTime()) / dayMs) + 1;
       const pdfReducedDays = Math.round((pdfVatBoundary.getTime() - pdfPStart!.getTime()) / dayMs);
       const pdfStandardDays = pdfTotalDays - pdfReducedDays;
-      detailRow(
+      costRow(
         `USt. anteilig 7 % (${pdfReducedDays} Tage) / 19 % (${pdfStandardDays} Tage):`,
-        fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2,
+        fmt.currency(result.totalCO2Cost - result.totalCO2CostNet),
       );
     } else {
-      detailRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO2Cost - result.totalCO2CostNet), 2);
+      costRow(`USt. (${result.vatPercent} %):`, fmt.currency(result.totalCO2Cost - result.totalCO2CostNet));
     }
-    
-    detailRow('CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), 2, true);
+    costRow('CO2-Kosten brutto:', fmt.currency(result.totalCO2Cost), true);
   }
 
   // Pellets / biomass note
@@ -629,11 +638,7 @@ export function generatePDF(
 
   detailRow('Gesamte CO2-Kosten (brutto):', fmt.currency(result.totalCO2Cost), 2);
 
-  y += 1;
-  doc.setDrawColor(200, 200, 200);
-  doc.setLineWidth(0.2);
-  doc.line(mL + 2, y, pw - mR, y);
-  y += 2.5;
+  y += 2;
 
   // Show base vs final reference if they differ (residential only)
   const baseDiffersFromFinal = result.isResidential
