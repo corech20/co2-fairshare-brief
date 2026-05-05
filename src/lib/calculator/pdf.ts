@@ -382,7 +382,7 @@ export function generatePDF(
     doc.setTextColor(20, 40, 70);
     doc.text('CO2-Kostenaufteilung – Berechnungsnachweis', mL, y);
     y += 5;
-    doc.setDrawColor(180, 180, 180);
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.1);
     doc.line(mL, y, pw - mR, y);
     y += 7;
@@ -606,7 +606,7 @@ export function generatePDF(
       bodyText('Für Nichtwohngebäude erfolgt im Regelfall eine hälftige Aufteilung der CO2-Kosten zwischen Vermieter und Mieter.', 2);
     }
   }
-  y += 6;
+  y += 6.4;
 
   // ═══════════════════════════════════════════════════════════════════════
   // PART IV — SPECIAL CIRCUMSTANCES
@@ -617,7 +617,7 @@ export function generatePDF(
   const specialParagraphs = specialText.split('\n\n').filter(p => p.trim());
 
   if (specialParagraphs.length > 0) {
-    y += 1.6;
+    y += 0;
     const section3Title = isNonResidential
       ? '3. Besonderheiten zur Aufteilung der CO2-Kosten'
       : '3. Besonderheiten zur Aufteilung der CO2-Kosten / Abweichungen vom Stufenmodell';
@@ -627,7 +627,7 @@ export function generatePDF(
       bodyText(para, 2);
       y += 2;
     }
-    y += 3.2;
+    y += 6.4;
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -687,7 +687,7 @@ export function generatePDF(
     y += 5;
   }
 
-  y += 2;
+  y += 4;
 
   // ═══════════════════════════════════════════════════════════════════════
   // CLOSING
