@@ -315,7 +315,7 @@ export function generatePDF(
     if (!salutation || salutation === 'Sehr geehrte Damen und Herren,') {
       salutation = 'Guten Tag,';
     }
-    doc.setFontSize(9.5);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
     doc.text(salutation, mL, y);
@@ -353,7 +353,7 @@ export function generatePDF(
     justifiedLetterBody('Mit freundlichen Grüßen');
     y += 4;
     if (senderName2) {
-      doc.setFontSize(9.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40);
+      doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40);
       doc.text(senderName2, mL, y); y += 6;
     }
 
