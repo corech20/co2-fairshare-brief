@@ -66,6 +66,11 @@ export default function ResultsPage() {
     const isTenant = wizardData.userRole === 'mieter';
     return (
       <div className="min-h-screen bg-background">
+        <SEO
+          title="Ergebnis — CO2-Kostenaufteilung"
+          description="Ergebnis der CO2-Kostenaufteilung nach CO2KostAufG: Einstufung, Verteilung und ggf. Erstattungsanspruch."
+          path="/ergebnis"
+        />
         <header className="border-b border-border bg-background sticky top-0 z-50">
           <div className="container-narrow flex h-14 items-center px-4">
             <span className="text-sm font-semibold text-foreground">Hinweis zur Anwendbarkeit</span>
