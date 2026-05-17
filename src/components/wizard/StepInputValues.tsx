@@ -130,6 +130,7 @@ function AddressFields({ title, address, onChangeAddress, showApartment }: {
         <div className="space-y-1.5">
           <div className="relative">
             <select
+              aria-label="Anrede"
               value={addr.salutation || ''}
               onChange={e => set('salutation', e.target.value)}
               className="block w-full box-border h-12 appearance-none rounded-lg border-2 border-border bg-card px-4 py-3 pr-10 text-base leading-tight text-foreground focus:border-accent focus:outline-none transition-colors"

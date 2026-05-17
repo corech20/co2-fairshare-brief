@@ -10,6 +10,7 @@ import StepBillingPeriod from '@/components/wizard/StepBillingPeriod';
 import StepFuelSource from '@/components/wizard/StepFuelSource';
 import StepInputValues from '@/components/wizard/StepInputValues';
 import SiteFooter from '@/components/SiteFooter';
+import SEO from '@/components/SEO';
 
 const STEP_LABELS = [
   'Rolle',
@@ -102,6 +103,7 @@ function WizardContent() {
       {/* Content */}
       <main className="flex-1 px-4 py-8 md:py-12">
         <div className="container-narrow px-4 animate-fade-in">
+          <h1 className="sr-only">CO2-Kostenaufteilung berechnen</h1>
           {renderStep()}
         </div>
       </main>
@@ -136,6 +138,11 @@ function WizardContent() {
 export default function CalculatorPage() {
   return (
     <>
+      <SEO
+        title="CO2-Rechner — Berechnung starten"
+        description="Schrittweise CO2-Kostenaufteilung nach CO2KostAufG ermitteln: Rolle, Gebäude, Zeitraum, Brennstoff und Verbrauchswerte eingeben."
+        path="/rechner"
+      />
       <WizardContent />
       <SiteFooter />
     </>

@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 
 import type { OutputType } from '@/lib/calculator/types';
 import SiteFooter from '@/components/SiteFooter';
+import SEO from '@/components/SEO';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
   const isTenant = wizardData.userRole === 'mieter';
@@ -65,6 +66,11 @@ export default function ResultsPage() {
     const isTenant = wizardData.userRole === 'mieter';
     return (
       <div className="min-h-screen bg-background">
+        <SEO
+          title="Ergebnis — CO2-Kostenaufteilung"
+          description="Ergebnis der CO2-Kostenaufteilung nach CO2KostAufG: Einstufung, Verteilung und ggf. Erstattungsanspruch."
+          path="/ergebnis"
+        />
         <header className="border-b border-border bg-background sticky top-0 z-50">
           <div className="container-narrow flex h-14 items-center px-4">
             <span className="text-sm font-semibold text-foreground">Hinweis zur Anwendbarkeit</span>
@@ -72,6 +78,7 @@ export default function ResultsPage() {
         </header>
         <main className="px-4 py-8 md:py-10">
           <div className="container-narrow space-y-5 animate-fade-in">
+            <h1 className="sr-only">Ergebnis der CO2-Kostenaufteilung</h1>
             <div className="rounded-lg border-2 border-border bg-muted/30 p-6 space-y-3">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
@@ -188,6 +195,11 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Ergebnis — CO2-Kostenaufteilung"
+        description="Ergebnis der CO2-Kostenaufteilung nach CO2KostAufG: Einstufung, Verteilung und ggf. Erstattungsanspruch."
+        path="/ergebnis"
+      />
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="container-narrow flex h-14 items-center px-4">
           <span className="text-sm font-semibold text-foreground">Ergebnis der CO2-Kostenaufteilung</span>
@@ -207,6 +219,7 @@ export default function ResultsPage() {
 
       <main className="px-4 py-8 md:py-10">
         <div className="container-narrow space-y-4 animate-fade-in">
+          <h1 className="sr-only">Ergebnis der CO2-Kostenaufteilung</h1>
           {/* Context chips */}
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">

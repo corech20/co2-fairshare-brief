@@ -6,6 +6,7 @@ import { listHistory, deleteHistoryEntry, clearHistory, type HistoryEntry } from
 import { fmt, getBuildingTypeLabel } from '@/lib/calculator/pdf-helpers';
 import { useCalculator } from '@/context/CalculatorContext';
 import SiteFooter from '@/components/SiteFooter';
+import SEO from '@/components/SEO';
 
 const FUEL_LABELS: Record<string, string> = {
   erdgas: 'Erdgas', heizoel: 'Heizöl', fernwaerme: 'Fernwärme', fluessiggas: 'Flüssiggas',
@@ -60,6 +61,11 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Berechnungsverlauf — CO2-Rechner"
+        description="Lokal gespeicherte CO2-Kostenaufteilungs-Berechnungen einsehen, erneut öffnen oder löschen."
+        path="/verlauf"
+      />
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="container-narrow flex h-14 items-center px-4 gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>

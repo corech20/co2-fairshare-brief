@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
+import SEO from '@/components/SEO';
 
 export default function ImpressumPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="Impressum — co2kostenberechnung.de"
+        description="Anbieterkennzeichnung und rechtliche Angaben zum CO2-Kostenaufteilungsrechner."
+        path="/impressum"
+      />
       <header className="border-b border-border bg-background/95 backdrop-blur sticky top-0 z-50">
         <div className="container-wide flex h-14 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
