@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronDown, Scale, BarChart3, FileText, Building2, Flame, ListChecks, FileDown, Users } from 'lucide-react';
 import { useState } from 'react';
 import SiteFooter from '@/components/SiteFooter';
+import SEO from '@/components/SEO';
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
@@ -27,8 +28,31 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 export default function Index() {
   const navigate = useNavigate();
 
+  const faqs = [
+    { q: 'Was ist das CO2KostAufG?', a: 'Das Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) regelt seit dem 1. Januar 2023 die Aufteilung der CO2-Kosten zwischen Vermieter und Mieter. Ziel ist es, Anreize für klimafreundliches Verhalten und energetische Sanierung zu schaffen.' },
+    { q: 'Wie funktioniert das 10-Stufen-Modell?', a: 'Bei Wohngebäuden werden die CO2-Emissionen pro Quadratmeter und Jahr berechnet. Je höher die Emissionen, desto größer ist der Anteil des Vermieters an den CO2-Kosten – von 0 % bei unter 12 kg CO2/m²/a bis zu 95 % bei über 52 kg CO2/m²/a.' },
+    { q: 'Welche Unterlagen brauche ich?', a: 'Sie benötigen Ihre Wärmeliefer- oder Brennstoffabrechnung mit Angaben zum Abrechnungszeitraum, den CO2-Emissionen (in kg) und den CO2-Kosten (in Euro). Außerdem die Wohn- bzw. Gebäudefläche.' },
+    { q: 'Gilt das auch bei Fernwärme?', a: 'Ja. Bei Fernwärme benötigen Sie die CO2-Emissionen der Wärmelieferung sowie die in der Rechnung ausgewiesenen CO2-Kosten des Wärmeversorgers.' },
+    { q: 'Wie wird bei Nichtwohngebäuden gerechnet?', a: 'Bei Nichtwohngebäuden gilt im Regelfall eine hälftige Aufteilung (50/50) der CO2-Kosten. Liegen bestimmte öffentlich-rechtliche Einschränkungen vor, kann die Aufteilung abweichen.' },
+  ];
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="CO2-Kostenaufteilung berechnen — CO2-Rechner"
+        description="CO2-Kosten zwischen Mieter und Vermieter nach CO2KostAufG berechnen und als Berechnungsnachweis (PDF) dokumentieren."
+        path="/"
+        jsonLd={faqJsonLd}
+      />
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container-wide flex h-14 items-center justify-between px-4">
@@ -73,6 +97,7 @@ export default function Index() {
       {/* Feature cards */}
       <section id="info" className="px-4 py-12 md:py-16 bg-secondary/40">
         <div className="container-wide">
+          <h2 className="sr-only">Funktionen im Überblick</h2>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
