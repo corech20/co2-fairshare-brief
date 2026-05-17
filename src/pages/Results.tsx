@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 
 import type { OutputType } from '@/lib/calculator/types';
 import SiteFooter from '@/components/SiteFooter';
+import SEO from '@/components/SEO';
 
 function getAreaLabel(wizardData: { buildingType?: string; heatSupplyType?: string; userRole?: string }): string {
   const isTenant = wizardData.userRole === 'mieter';
@@ -72,6 +73,7 @@ export default function ResultsPage() {
         </header>
         <main className="px-4 py-8 md:py-10">
           <div className="container-narrow space-y-5 animate-fade-in">
+            <h1 className="sr-only">Ergebnis der CO2-Kostenaufteilung</h1>
             <div className="rounded-lg border-2 border-border bg-muted/30 p-6 space-y-3">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
@@ -207,6 +209,7 @@ export default function ResultsPage() {
 
       <main className="px-4 py-8 md:py-10">
         <div className="container-narrow space-y-4 animate-fade-in">
+          <h1 className="sr-only">Ergebnis der CO2-Kostenaufteilung</h1>
           {/* Context chips */}
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-muted-foreground">
