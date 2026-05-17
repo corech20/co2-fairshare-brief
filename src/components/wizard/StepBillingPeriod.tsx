@@ -102,8 +102,8 @@ export default function StepBillingPeriod() {
             Bitte tragen Sie den Abrechnungszeitraum ein. Bei einer einzelnen Rechnung übernehmen Sie den Zeitraum direkt. Bei mehreren Lieferungen ist der Zeitraum maßgeblich, für den die CO2-Emissionen und CO2-Kosten aus den jeweiligen Rechnungen zusammenzustellen sind.
           </p>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
+          <div className="grid gap-4 sm:grid-cols-2 w-full">
+            <div className="space-y-1.5 min-w-0">
               <label className="text-sm font-medium text-foreground">Von</label>
               <input
                 type="date"
@@ -123,7 +123,7 @@ export default function StepBillingPeriod() {
                   setWizardField('billingPeriodStart', e.target.value);
                 }}
                 aria-invalid={!!startError}
-                className={`w-full rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
+                className={`block w-full min-w-0 max-w-full box-border appearance-none rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
                   startError
                     ? 'border-destructive focus:border-destructive'
                     : 'border-border focus:border-accent'
@@ -133,7 +133,7 @@ export default function StepBillingPeriod() {
                 <p className="text-xs text-destructive font-medium">{startError}</p>
               )}
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-w-0">
               <label className="text-sm font-medium text-foreground">Bis</label>
               <input
                 type="date"
@@ -153,7 +153,7 @@ export default function StepBillingPeriod() {
                   setWizardField('billingPeriodEnd', e.target.value);
                 }}
                 aria-invalid={!!endError}
-                className={`w-full rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
+                className={`block w-full min-w-0 max-w-full box-border appearance-none rounded-lg border-2 bg-card px-4 py-3 text-foreground focus:outline-none transition-colors ${
                   endError
                     ? 'border-destructive focus:border-destructive'
                     : 'border-border focus:border-accent'
