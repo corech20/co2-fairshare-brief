@@ -37,7 +37,12 @@ export default function ImpressumPage() {
 
             <div>
               <h2 className="font-semibold mb-2">E-Mail</h2>
-              <p>PaulHansen@mein.gmx</p>
+              <p>kontakt@co2kostenberechnung.de</p>
+            </div>
+
+            <div>
+              <h2 className="font-semibold mb-2">Telefon</h2>
+              <p>0611-79063837</p>
             </div>
 
             <div>
