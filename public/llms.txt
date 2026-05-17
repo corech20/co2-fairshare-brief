@@ -1,0 +1,15 @@
+# CO2-Kostenaufteilungsrechner
+
+> Rechner zur Aufteilung der CO2-Kosten zwischen Mieter und Vermieter nach dem deutschen CO2-Kostenaufteilungsgesetz (CO2KostAufG). Erzeugt einen druckfähigen Berechnungsnachweis als PDF.
+
+## Pages
+
+- [Startseite](/): Überblick, Funktionsweise und häufige Fragen zum CO2KostAufG.
+- [Rechner](/rechner): Schrittweise Eingabe von Rolle, Gebäude, Heizung, Zeitraum, Brennstoff und Verbrauchswerten.
+- [Ergebnis](/ergebnis): Einstufung nach Stufenmodell, Kostenverteilung und ggf. Erstattungsanspruch.
+- [Verlauf](/verlauf): Lokal gespeicherte Berechnungen einsehen und erneut öffnen.
+
+## Optional
+
+- [Impressum](/impressum): Anbieterkennzeichnung.
+- [Datenschutz](/datenschutz): Hinweise zur Datenverarbeitung.
