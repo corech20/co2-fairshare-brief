@@ -12,7 +12,7 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
         Luxemburgplatz 5<br />
         65185 Wiesbaden<br />
         Deutschland<br />
-        E-Mail: PaulHansen@mein.gmx
+        E-Mail: kontakt@co2kostenberechnung.de
       </p>
     ),
   },
