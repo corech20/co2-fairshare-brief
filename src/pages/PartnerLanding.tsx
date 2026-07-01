@@ -17,8 +17,7 @@ export default function PartnerLanding() {
       <SEO
         title={`${partner.name} – CO2-Kostenberechnung (Mitgliederzugang)`}
         description={`Mitgliederzugang des ${partner.name}: CO2-Kosten nach CO2KostAufG berechnen und Erstattungsschreiben vorbereiten.`}
-        canonical={`https://co2kostenberechnung.de/${partner.slug}`}
-        noindex
+        path={`https://co2kostenberechnung.de/${partner.slug}`}
       />
 
       {/* Entwurfs-Banner */}
