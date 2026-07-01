@@ -10,6 +10,7 @@ import ResultsPage from "./pages/Results.tsx";
 import HistoryPage from "./pages/History.tsx";
 import ImpressumPage from "./pages/Impressum.tsx";
 import DatenschutzPage from "./pages/Datenschutz.tsx";
+import PartnerLanding from "./pages/PartnerLanding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/verlauf" element={<HistoryPage />} />
             <Route path="/impressum" element={<ImpressumPage />} />
             <Route path="/datenschutz" element={<DatenschutzPage />} />
+            <Route path="/:slug" element={<PartnerLanding />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </CalculatorProvider>
