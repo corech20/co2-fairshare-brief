@@ -40,12 +40,14 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     body: (
       <>
         <p>
-          Die in den Rechner eingegebenen Angaben werden zur Durchführung der Berechnung und zur
-          Erstellung der PDF verarbeitet.
+          Die in den Rechner eingegebenen Angaben werden ausschließlich in Ihrem Browser
+          verarbeitet. Eine Übermittlung an einen Server findet nicht statt.
         </p>
         <p>
-          Nach aktuellem Stand erfolgt keine dauerhafte Speicherung der vom Nutzer in den Rechner
-          eingegebenen Daten.
+          Abgeschlossene Berechnungen werden im lokalen Speicher (Local Storage) Ihres Browsers
+          abgelegt, damit Sie sie unter „Verlauf“ erneut aufrufen können. Es werden maximal 100
+          Berechnungen aufbewahrt; ältere Einträge werden automatisch überschrieben. Sie können
+          einzelne Einträge oder den gesamten Verlauf jederzeit selbst löschen.
         </p>
       </>
     ),
@@ -55,10 +57,9 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     body: (
       <>
         <p>
-          Wenn der Nutzer ein PDF erstellt, werden die eingegebenen Daten ausschließlich zur
-          Erstellung des angeforderten Dokuments verarbeitet.
+          Das PDF wird vollständig in Ihrem Browser erzeugt. Die eingegebenen Daten werden dabei
+          nicht an einen Server übermittelt.
         </p>
-        <p>Nach aktuellem Stand erfolgt keine dauerhafte Speicherung dieser Eingaben.</p>
       </>
     ),
   },
@@ -75,14 +76,15 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     title: '7. Cookies / Tracking / lokale Speicherung',
     body: (
       <>
-        <p>Nach aktuellem Stand werden keine Analyse- oder Trackingdienste eingesetzt.</p>
+        <p>Es werden keine Analyse- oder Trackingdienste eingesetzt.</p>
         <p>
-          Es werden keine nicht erforderlichen Cookies zu Analyse- oder Marketingzwecken
-          eingesetzt.
+          Es werden keine Cookies zu Analyse- oder Marketingzwecken eingesetzt.
         </p>
         <p>
-          Es wird nach aktuellem Stand kein Local Storage oder Session Storage für Nutzereingaben
-          verwendet.
+          Für die Verlauf-Funktion wird der lokale Speicher (Local Storage) Ihres Browsers
+          genutzt. Dort werden Ihre abgeschlossenen Berechnungen gespeichert. Diese Daten
+          verbleiben ausschließlich auf Ihrem Gerät. Sie können sie über „Alle löschen“ auf der
+          Verlauf-Seite oder über die Einstellungen Ihres Browsers jederzeit entfernen.
         </p>
       </>
     ),
@@ -111,12 +113,13 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     body: (
       <>
         <p>
-          Personenbezogene Daten werden nur so lange verarbeitet bzw. gespeichert, wie dies für
-          den jeweiligen Zweck erforderlich ist.
+          Personenbezogene Daten werden nur so lange verarbeitet, wie dies für den jeweiligen
+          Zweck erforderlich ist.
         </p>
         <p>
-          Nach aktuellem Stand werden die in den Rechner eingegebenen Daten nicht dauerhaft
-          gespeichert.
+          Die im Verlauf gespeicherten Berechnungen verbleiben in Ihrem Browser, bis Sie sie
+          löschen oder der Browser-Speicher geleert wird. Eine serverseitige Speicherung findet
+          nicht statt.
         </p>
       </>
     ),
