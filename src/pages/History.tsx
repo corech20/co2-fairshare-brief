@@ -65,6 +65,7 @@ export default function HistoryPage() {
         title="Berechnungsverlauf — CO2-Rechner"
         description="Lokal gespeicherte CO2-Kostenaufteilungs-Berechnungen einsehen, erneut öffnen oder löschen."
         path="/verlauf"
+        noIndex={true}
       />
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="container-narrow flex h-14 items-center px-4 gap-3">
