@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
-import { hyphenateSync } from 'hyphen/de';
+import hyphenDe from 'hyphen/de';
+const { hyphenateSync } = hyphenDe as unknown as { hyphenateSync: (text: string, opts: { hyphenChar: string }) => string };
 import type { WizardData, CalculationResult } from './types';
 import {
   fmt,

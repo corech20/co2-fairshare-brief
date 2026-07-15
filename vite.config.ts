@@ -17,6 +17,16 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "react-helmet-async"],
   },
-}));
+  ssgOptions: {
+    entry: "src/main.tsx",
+    script: "async",
+    formatting: "none",
+    dirStyle: "nested",
+    includedRoutes(paths: string[]) {
+      const allowed = new Set(["/", "rechner", "impressum", "datenschutz"]);
+      return paths.filter((p: string) => allowed.has(p));
+    },
+  },
+} as any));
