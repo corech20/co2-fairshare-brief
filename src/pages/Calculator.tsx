@@ -11,7 +11,7 @@ import StepFuelSource from '@/components/wizard/StepFuelSource';
 import StepInputValues from '@/components/wizard/StepInputValues';
 import SiteFooter from '@/components/SiteFooter';
 import SEO from '@/components/SEO';
-import RechnerContent from '@/components/RechnerContent';
+import { Link } from 'react-router-dom';
 
 const STEP_LABELS = [
   'Rolle',
@@ -145,7 +145,17 @@ export default function CalculatorPage() {
         path="/rechner"
       />
       <WizardContent />
-      <RechnerContent />
+      <aside className="border-t border-border bg-background px-4 py-6">
+        <div className="container-narrow">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Wie die CO2-Kosten zwischen Mieter und Vermieter aufgeteilt werden, erklärt unser{' '}
+            <Link to="/ratgeber" className="underline hover:text-foreground transition-colors">
+              Ratgeber
+            </Link>
+            .
+          </p>
+        </div>
+      </aside>
       <SiteFooter />
     </>
   );
