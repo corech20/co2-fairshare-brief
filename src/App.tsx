@@ -12,6 +12,7 @@ import HistoryPage from "./pages/History.tsx";
 import ImpressumPage from "./pages/Impressum.tsx";
 import DatenschutzPage from "./pages/Datenschutz.tsx";
 import PartnerLanding from "./pages/PartnerLanding.tsx";
+import RatgeberPage from "./pages/Ratgeber.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ export const routes: RouteRecord[] = [
       { path: "rechner", element: <CalculatorPage />, entry: "src/pages/Calculator.tsx" },
       { path: "impressum", element: <ImpressumPage />, entry: "src/pages/Impressum.tsx" },
       { path: "datenschutz", element: <DatenschutzPage />, entry: "src/pages/Datenschutz.tsx" },
+      { path: "ratgeber", element: <RatgeberPage />, entry: "src/pages/Ratgeber.tsx" },
       { path: "ergebnis", element: <ResultsPage /> },
       { path: "verlauf", element: <HistoryPage /> },
       { path: ":slug", element: <PartnerLanding /> },

@@ -6,6 +6,9 @@ export default function SiteFooter() {
       <div className="container-wide px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
         <p>© {new Date().getFullYear()} CO2-Kostenaufteilungsrechner · Alle Angaben ohne Gewähr</p>
         <nav className="flex items-center gap-4">
+          <Link to="/ratgeber" className="hover:text-foreground transition-colors">
+            Ratgeber
+          </Link>
           <Link to="/impressum" className="hover:text-foreground transition-colors">
             Impressum
           </Link>

@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
     formatting: "none",
     dirStyle: "nested",
     includedRoutes(paths: string[]) {
-      const allowed = new Set(["/", "rechner", "impressum", "datenschutz"]);
+      const allowed = new Set(["/", "rechner", "impressum", "datenschutz", "ratgeber"]);
       return paths.filter((p: string) => allowed.has(p));
     },
   },

@@ -84,9 +84,7 @@ export default function Index() {
               <Button variant="cta" size="lg" onClick={() => navigate('/rechner')}>
                 Berechnung starten
               </Button>
-              <Button variant="ctaOutline" size="lg" onClick={() => {
-                document.getElementById('info')?.scrollIntoView({ behavior: 'smooth' });
-              }}>
+              <Button variant="ctaOutline" size="lg" onClick={() => navigate('/ratgeber')}>
                 Mehr erfahren
               </Button>
             </div>
