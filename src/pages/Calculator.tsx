@@ -11,6 +11,7 @@ import StepFuelSource from '@/components/wizard/StepFuelSource';
 import StepInputValues from '@/components/wizard/StepInputValues';
 import SiteFooter from '@/components/SiteFooter';
 import SEO from '@/components/SEO';
+import RechnerContent from '@/components/RechnerContent';
 
 const STEP_LABELS = [
   'Rolle',
@@ -144,6 +145,7 @@ export default function CalculatorPage() {
         path="/rechner"
       />
       <WizardContent />
+      <RechnerContent />
       <SiteFooter />
     </>
   );
