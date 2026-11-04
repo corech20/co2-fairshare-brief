@@ -11,7 +11,9 @@ interface SEOProps {
 }
 
 export default function SEO({ title, description, path, jsonLd, noIndex }: SEOProps) {
-  const absoluteUrl = `${SITE_URL}${path}`;
+  // Accept only site-relative paths; avoid malformed absolute canonical URLs.
+  const normalizedPath = `/${path.split("/").filter(Boolean).join("/")}`;
+  const absoluteUrl = `${SITE_URL}${normalizedPath}`;
   return (
     <Helmet>
       <title>{title}</title>
