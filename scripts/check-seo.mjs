@@ -19,25 +19,25 @@ for (const route of routes) {
 
   const html = readFileSync(file, "utf8");
   const expectedUrl = origin + route;
-  const title = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i)?.[1]?.trim();
+  const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
 
   if (!title || !/CO2|Datenschutz|Impressum/i.test(title)) {
     errors.push(`${route}: meaningful title missing`);
   }
-  if (!/<meta\\s+name=["']description["']\\s+content=["'][^"']+["']/i.test(html) &&
-      !/<meta\\s+content=["'][^"']+["']\\s+name=["']description["']/i.test(html)) {
+  if (!/<meta\s+name=["']description["']\s+content=["'][^"']+["']/i.test(html) &&
+      !/<meta\s+content=["'][^"']+["']\s+name=["']description["']/i.test(html)) {
     errors.push(`${route}: meta description missing`);
   }
   if (!html.includes(`href="${expectedUrl}"`) &&
       !html.includes(`href='${expectedUrl}'`)) {
     errors.push(`${route}: canonical URL missing or mismatched (${expectedUrl})`);
   }
-  if (!/<h1\\b[^>]*>/i.test(html)) {
+  if (!/<h1\b[^>]*>/i.test(html)) {
     errors.push(`${route}: no server-rendered h1 (possible client-only output)`);
   }
-  const visibleText = html.replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script>/gi, "")
-    .replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style>/gi, "")
-    .replace(/<[^>]+>/g, " ").replace(/\\s+/g, " ").trim();
+  const visibleText = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   if (visibleText.length < 350) {
     errors.push(`${route}: unexpectedly little rendered text (${visibleText.length} characters)`);
   }
