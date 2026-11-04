@@ -1,3 +1,4 @@
+/* GitHub → Lovable sync checkpoint (SEO development branch; no functional change). */
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Scale, FileText, ClipboardList, CheckCircle2 } from 'lucide-react';
