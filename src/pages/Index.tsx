@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Scale, BarChart3, FileText, Building2, Flame, ListChecks, FileDown, Users } from 'lucide-react';
 import { useState } from 'react';
@@ -48,8 +48,8 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="CO2-Kostenaufteilung berechnen — CO2-Rechner"
-        description="CO2-Kosten zwischen Mieter und Vermieter nach CO2KostAufG berechnen und als Berechnungsnachweis (PDF) dokumentieren."
+        title="CO2-Kostenberechnung – Rechner für Mieter und Vermieter"
+        description="CO2-Kosten nach CO2KostAufG berechnen: Mieter- und Vermieteranteil für Erdgas, Heizöl und Fernwärme ermitteln. PDF-Nachweis und Erstattungsschreiben erstellen."
         path="/"
         jsonLd={faqJsonLd}
       />
@@ -81,11 +81,11 @@ export default function Index() {
               nachvollziehbar, strukturiert und als druckfähiger Berechnungsnachweis.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button variant="cta" size="lg" onClick={() => navigate('/rechner')}>
-                Berechnung starten
+              <Button variant="cta" size="lg" asChild>
+                <Link to="/rechner">Berechnung starten</Link>
               </Button>
-              <Button variant="ctaOutline" size="lg" onClick={() => navigate('/ratgeber')}>
-                Mehr erfahren
+              <Button variant="ctaOutline" size="lg" asChild>
+                <Link to="/ratgeber">Mehr erfahren</Link>
               </Button>
             </div>
           </div>
