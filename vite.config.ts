@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { filterPrerenderRoutes } from "./src/lib/seo-routes";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -25,8 +26,7 @@ export default defineConfig(({ mode }) => ({
     formatting: "none",
     dirStyle: "nested",
     includedRoutes(paths: string[]) {
-      const allowed = new Set(["/", "rechner", "impressum", "datenschutz", "ratgeber"]);
-      return paths.filter((p: string) => allowed.has(p));
+      return filterPrerenderRoutes(paths);
     },
   },
 } as any));
