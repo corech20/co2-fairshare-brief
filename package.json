@@ -11,12 +11,13 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite-react-ssg build",
+    "build": "vite-react-ssg build && node scripts/check-seo.mjs",
     "build:dev": "vite-react-ssg build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seo:check": "node scripts/check-seo.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
