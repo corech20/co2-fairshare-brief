@@ -70,7 +70,6 @@ export default function ResultsPage() {
           title="Ergebnis — CO2-Kostenaufteilung"
           description="Ergebnis der CO2-Kostenaufteilung nach CO2KostAufG: Einstufung, Verteilung und ggf. Erstattungsanspruch."
           path="/ergebnis"
-        noIndex={true}
           noIndex={true}
         />
         <header className="border-b border-border bg-background sticky top-0 z-50">
@@ -201,6 +200,7 @@ export default function ResultsPage() {
         title="Ergebnis — CO2-Kostenaufteilung"
         description="Ergebnis der CO2-Kostenaufteilung nach CO2KostAufG: Einstufung, Verteilung und ggf. Erstattungsanspruch."
         path="/ergebnis"
+        noIndex={true}
       />
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="container-narrow flex h-14 items-center px-4">
