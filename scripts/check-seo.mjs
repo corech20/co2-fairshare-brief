@@ -43,6 +43,18 @@ for (const route of routes) {
   console.log(`SEO check ${route}: ${title || "(title missing)"}`);
 }
 
+// The homepage's distinctive invoice-based positioning must be present in
+// the raw HTML, not merely in JavaScript bundles or metadata.
+const homepageHtml = readFileSync(resolve("dist", "index.html"), "utf8");
+for (const phrase of ["Lieferantenrechnung", "CO2-Emissionen", "CO2-Kosten", "So funktioniert die CO2-Kostenaufteilung"]) {
+  if (!homepageHtml.includes(phrase)) errors.push("Homepage: crawlable text missing: " + phrase);
+}
+for (const route of ["/rechner", "/ratgeber"]) {
+  if (!homepageHtml.includes('href="' + route + '"')) {
+    errors.push("Homepage: crawlable internal link missing: " + route);
+  }
+}
+
 const robotsPath = resolve("dist", "robots.txt");
 const sitemapPath = resolve("dist", "sitemap.xml");
 if (!existsSync(robotsPath)) errors.push("robots.txt missing");
