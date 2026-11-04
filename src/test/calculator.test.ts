@@ -479,20 +479,24 @@ describe('Direct CO2 cost input', () => {
 // ===================================================================
 
 describe('Billing period validation', () => {
+  it('excludes billing periods from 2023 as a deliberate product limitation', () => {
+    expect(validateBillingPeriod('2023-03-01', '2023-12-31')).toBe('Es werden nur Abrechnungszeiträume ab dem Jahr 2024 unterstützt.');
+  });
+
   it('rejects end before start', () => {
-    expect(validateBillingPeriod('2023-12-31', '2023-01-01')).toBe('Das Enddatum muss nach dem Startdatum liegen.');
+    expect(validateBillingPeriod('2024-12-31', '2024-01-01')).toBe('Das Enddatum muss nach dem Startdatum liegen.');
   });
 
   it('rejects period longer than 365 days', () => {
-    expect(validateBillingPeriod('2023-01-01', '2024-01-02')).toBe('Der angegebene Zeitraum darf nicht länger als 365 Tage sein.');
+    expect(validateBillingPeriod('2024-01-01', '2025-01-02')).toBe('Der angegebene Zeitraum darf nicht länger als 365 Tage sein.');
   });
 
   it('accepts exactly 365 days', () => {
-    expect(validateBillingPeriod('2023-01-01', '2024-01-01')).toBeNull();
+    expect(validateBillingPeriod('2025-01-01', '2025-12-31')).toBeNull();
   });
 
   it('accepts same-year period', () => {
-    expect(validateBillingPeriod('2023-03-01', '2023-09-30')).toBeNull();
+    expect(validateBillingPeriod('2024-03-01', '2024-09-30')).toBeNull();
   });
 });
 
@@ -832,7 +836,7 @@ describe('District heating apartment path (tenant)', () => {
     expect(r.relevantArea).toBe(65);
     expect(round2(r.totalEmissionsKg)).toBe(1200);
     expect(r.totalCO2Cost).toBeGreaterThan(0);
-    expect(r.notes.some(n => n.includes('Wohnungsfläche'))).toBe(true);
+    expect(r.notes.some(n => n.includes('Berechnung basiert auf der eingegebenen Fläche.'))).toBe(true);
   });
 });
 
