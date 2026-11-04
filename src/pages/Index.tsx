@@ -1,34 +1,24 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Scale, BarChart3, FileText, Building2, Flame, ListChecks, FileDown, Users } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, Scale, FileText, ClipboardList, CheckCircle2 } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import SEO from '@/components/SEO';
 
-const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-border">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between py-4 text-left font-medium text-foreground hover:text-primary transition-colors text-sm"
-      >
-        <span>{question}</span>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && (
-        <div className="pb-4 text-sm text-muted-foreground leading-relaxed animate-fade-in">
-          {answer}
-        </div>
-      )}
-    </div>
-  );
-};
+const FAQItem = ({ question, answer }: { question: string; answer: string }) => (
+  <details className="group border-b border-border">
+    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left text-sm font-medium text-foreground hover:text-primary [&::-webkit-details-marker]:hidden">
+      <span>{question}</span>
+      <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+    </summary>
+    <p className="pb-4 text-sm text-muted-foreground leading-relaxed">{answer}</p>
+  </details>
+);
 
 export default function Index() {
   const navigate = useNavigate();
 
   const faqs = [
+    { q: 'Warum nutzt der Rechner die Werte der Lieferantenrechnung?', a: 'Für die Aufteilung werden die auf der Brennstoff- oder Wärmelieferabrechnung ausgewiesenen CO2-Emissionen und CO2-Kosten übernommen. Eine erneute pauschale Berechnung aus dem Verbrauch ist im regulären Eingabeweg nicht nötig.' },
     { q: 'Was ist das CO2KostAufG?', a: 'Das Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) regelt seit dem 1. Januar 2023 die Aufteilung der CO2-Kosten zwischen Vermieter und Mieter. Ziel ist es, Anreize für klimafreundliches Verhalten und energetische Sanierung zu schaffen.' },
     { q: 'Wie funktioniert das 10-Stufen-Modell?', a: 'Bei Wohngebäuden werden die CO2-Emissionen pro Quadratmeter und Jahr berechnet. Je höher die Emissionen, desto größer ist der Anteil des Vermieters an den CO2-Kosten – von 0 % bei unter 12 kg CO2/m²/a bis zu 95 % bei über 52 kg CO2/m²/a.' },
     { q: 'Welche Unterlagen brauche ich?', a: 'Sie benötigen Ihre Wärmeliefer- oder Brennstoffabrechnung mit Angaben zum Abrechnungszeitraum, den CO2-Emissionen (in kg) und den CO2-Kosten (in Euro). Außerdem die Wohn- bzw. Gebäudefläche.' },
@@ -48,8 +38,8 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="CO2-Kostenberechnung – Rechner für Mieter und Vermieter"
-        description="CO2-Kosten nach CO2KostAufG berechnen: Mieter- und Vermieteranteil für Erdgas, Heizöl und Fernwärme ermitteln. PDF-Nachweis und Erstattungsschreiben erstellen."
+        title="CO2-Kostenaufteilung berechnen | Rechner nach CO2KostAufG"
+        description="CO2-Kostenaufteilung mit den CO2-Emissionen und CO2-Kosten aus Ihrer Lieferantenrechnung berechnen. Für Mieter und Vermieter – mit PDF-Nachweis."
         path="/"
         jsonLd={faqJsonLd}
       />
@@ -69,103 +59,147 @@ export default function Index() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="px-4 py-12 md:py-16 bg-background">
-        <div className="container-narrow">
+      {/* Hero: real supplier billing data is the key distinction */}
+      <main id="hauptinhalt">
+      <section className="border-b border-border bg-background px-4 py-12 md:py-16">
+        <div className="container-wide grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-14">
           <div className="space-y-5">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-foreground leading-tight">
-              CO2-Kostenaufteilung berechnen und dokumentieren
-            </h1>
-            <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-              Ermitteln Sie die gesetzliche Aufteilung der CO2-Kosten zwischen Mieter und Vermieter –
-              nachvollziehbar, strukturiert und als druckfähiger Berechnungsnachweis.
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+              CO2KostAufG · Für Mieter und Vermieter
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+              CO2-Kostenaufteilung berechnen – mit den Werten Ihrer Rechnung
+            </h1>
+            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Übernehmen Sie die ausgewiesenen CO2-Emissionen und CO2-Kosten aus Ihrer
+              Brennstoff- oder Wärmelieferabrechnung. Der Rechner ermittelt daraus die
+              gesetzliche Aufteilung zwischen Mieter und Vermieter – nachvollziehbar und mit PDF-Nachweis.
+            </p>
+            <p className="max-w-2xl text-sm leading-relaxed text-foreground">
+              <strong>Keine pauschale Rückrechnung aus Verbrauchsmengen:</strong> Entscheidend sind
+              die CO2-Angaben des Lieferanten für den maßgeblichen Abrechnungszeitraum.
+            </p>
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <Button variant="cta" size="lg" asChild>
-                <Link to="/rechner">Berechnung starten</Link>
+                <Link to="/rechner">CO2-Kosten berechnen</Link>
               </Button>
               <Button variant="ctaOutline" size="lg" asChild>
-                <Link to="/ratgeber">Mehr erfahren</Link>
+                <Link to="/ratgeber">Gesetzliche Aufteilung verstehen</Link>
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Wohn- und Nichtwohngebäude · Erdgas, Heizöl, Fernwärme und weitere Brennstoffe
+            </p>
           </div>
+          <aside aria-label="Benötigte Angaben aus der Abrechnung" className="rounded-xl border border-border bg-secondary/40 p-6 sm:p-7">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-primary">
+                <ClipboardList className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Das benötigen Sie</h2>
+                <p className="text-sm text-muted-foreground">Aus Ihrer Abrechnung und den Gebäudedaten</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: 'CO2-Emissionen', detail: 'in kg laut Lieferantenrechnung' },
+                { label: 'CO2-Kosten', detail: 'in Euro laut Lieferantenrechnung' },
+                { label: 'Abrechnungszeitraum und Fläche', detail: 'für die gesetzliche Zuordnung' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-start gap-3 rounded-lg border border-border bg-background p-3">
+                  <CheckCircle2 aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+              Bei mehreren Brennstofflieferungen sind die Angaben für den maßgeblichen
+              Abrechnungszeitraum zusammenzustellen.
+            </p>
+          </aside>
         </div>
       </section>
 
-      {/* Feature cards */}
-      <section id="info" className="px-4 py-12 md:py-16 bg-secondary/40">
+      {/* Practical benefits */}
+      <section id="info" className="bg-secondary/30 px-4 py-12 md:py-16">
         <div className="container-wide">
-          <h2 className="sr-only">Funktionen im Überblick</h2>
-          <div className="grid gap-6 md:grid-cols-3">
+          <h2 className="mb-7 text-xl font-bold text-foreground">Was den CO2-Rechner auszeichnet</h2>
+          <div className="grid gap-5 md:grid-cols-3">
             {[
               {
-                icon: BarChart3,
-                title: 'Gesetzliche Aufteilung',
-                desc: 'Für Wohngebäude nach dem Stufenmodell, für Nichtwohngebäude nach den gesetzlichen Verteilungsregeln.',
+                icon: ClipboardList,
+                title: 'Rechnungswerte als Grundlage',
+                desc: 'CO2-Emissionen und CO2-Kosten werden aus der Abrechnung übernommen – ohne pauschale Schätzung anhand der Brennstoffmenge.',
               },
               {
-                icon: Users,
-                title: 'Für Mieter und Vermieter',
-                desc: 'Nutzbar aus beiden Perspektiven: Mieter prüfen ihren CO2-Kostenanteil sowie mögliche Erstattungsansprüche. Vermieter erstellen einen strukturierten Berechnungsnachweis.',
+                icon: Scale,
+                title: 'Gesetzliche Kostenaufteilung',
+                desc: 'Wohngebäude werden nach dem Stufenmodell des CO2KostAufG eingestuft. Für Nichtwohngebäude gelten eigene Aufteilungsregeln.',
               },
               {
                 icon: FileText,
-                 title: 'Berechnungsnachweis als PDF',
-                 desc: 'Erstellen Sie einen strukturierten Berechnungsnachweis als PDF – zur Dokumentation, Weitergabe oder als Anlage zur Abrechnung.',
+                title: 'Nachweis und Anschreiben als PDF',
+                desc: 'Dokumentieren Sie das Ergebnis als PDF. Je nach Fall kann auch ein Erstattungsschreiben erstellt werden.',
               },
-            ].map((item, i) => (
-              <div key={i} className="rounded-lg border border-border bg-card p-6 shadow-sm">
-                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
-                  <item.icon className="h-5 w-5 text-primary" />
+            ].map((item) => (
+              <div key={item.title} className="rounded-lg border border-border bg-card p-6">
+                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-secondary">
+                  <item.icon className="h-5 w-5 text-primary" aria-hidden="true" />
                 </div>
-                <h3 className="mb-1.5 text-base font-semibold text-card-foreground">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                <h3 className="mb-2 text-base font-semibold text-card-foreground">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* What the tool provides */}
-      <section className="px-4 py-12 md:py-16 bg-background">
+      {/* Explain the calculation without hiding content behind clicks */}
+      <section className="bg-background px-4 py-12 md:py-16">
         <div className="container-narrow">
-          <h2 className="text-xl font-bold text-foreground mb-6">Was dieses Tool kann</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <h2 className="mb-3 text-xl font-bold text-foreground">So funktioniert die CO2-Kostenaufteilung</h2>
+          <p className="mb-7 text-sm leading-relaxed text-muted-foreground">
+            Die Berechnung berücksichtigt den Abrechnungszeitraum, die CO2-Emissionen,
+            die ausgewiesenen CO2-Kosten und die relevante Wohn- beziehungsweise Gebäudefläche.
+          </p>
+          <ol className="grid gap-5 md:grid-cols-3">
             {[
-              { icon: Scale, label: 'CO2-Einstufung und Kostenverteilung' },
-              { icon: BarChart3, label: 'Nachvollziehbare Berechnung' },
-              { icon: FileDown, label: 'Druckfähiges PDF' },
-              { icon: Building2, label: 'Wohn- & Nichtwohngebäude' },
-            ].map((item, i) => (
-              <div key={i} className="text-center space-y-2">
-                <item.icon className="h-5 w-5 text-primary mx-auto" />
-                <div className="text-sm font-medium text-foreground">{item.label}</div>
-              </div>
+              { title: 'Abrechnung bereithalten', detail: 'CO2-Emissionen und CO2-Kosten sowie den Zeitraum aus der Abrechnung übernehmen.' },
+              { title: 'Gebäude und Fläche angeben', detail: 'Je nach Gebäudeart und Versorgung die gesetzlich erforderlichen Angaben ergänzen.' },
+              { title: 'Aufteilung und PDF erhalten', detail: 'Mieter- und Vermieteranteil ermitteln und als PDF dokumentieren.' },
+            ].map((step, i) => (
+              <li key={step.title} className="rounded-lg border border-border p-5">
+                <span className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-primary">
+                  {i + 1}
+                </span>
+                <h3 className="mb-2 text-sm font-semibold text-foreground">{step.title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{step.detail}</p>
+              </li>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Data hint */}
-      <section className="px-4 py-8 bg-secondary/40">
-        <div className="container-narrow">
-          <div className="rounded-lg border border-border bg-card p-5 flex gap-4">
-            <Flame className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-1">Daten aus Ihrer Abrechnung</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Die meisten Eingaben, insbesondere CO2-Emissionen, CO2-Kosten und der Abrechnungszeitraum,
-                können in der Regel direkt aus Ihrer Brennstoff- oder Wärmelieferabrechnung übernommen werden.
-              </p>
-            </div>
-          </div>
+          </ol>
+          <p className="mt-6 text-sm text-muted-foreground">
+            Mehr zur gesetzlichen Grundlage und zu Sonderfällen im{' '}
+            <Link to="/ratgeber" className="font-medium text-primary underline underline-offset-4 hover:no-underline">
+              Ratgeber zur CO2-Kostenaufteilung
+            </Link>.
+          </p>
         </div>
       </section>
 
       {/* FAQ */}
       <section className="px-4 py-12 md:py-16 bg-background">
         <div className="container-narrow">
-          <h2 className="text-xl font-bold mb-8">Häufige Fragen</h2>
+          <h2 className="text-xl font-bold mb-8">Häufige Fragen zur CO2-Kostenaufteilung</h2>
+          <div>
+            <FAQItem
+              question="Warum werden die Werte der Lieferantenrechnung verwendet?"
+              answer="Der Rechner übernimmt im regulären Eingabeweg die auf Ihrer Brennstoff- oder Wärmelieferabrechnung angegebenen CO2-Emissionen und CO2-Kosten. So ist keine pauschale Neuberechnung aus dem Verbrauch erforderlich."
+            />
+          </div>
           <div>
             <FAQItem
               question="Was ist das CO2KostAufG?"
@@ -218,6 +252,7 @@ export default function Index() {
         </div>
       </section>
 
+      </main>
       <SiteFooter />
     </div>
   );
