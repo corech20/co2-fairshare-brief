@@ -24,9 +24,8 @@ for (const route of routes) {
   if (!title || !/CO2|Datenschutz|Impressum/i.test(title)) {
     errors.push(`${route}: meaningful title missing`);
   }
-  if (!/<meta\s+name=["']description["']\s+content=["'][^"']+["']/i.test(html) &&
-      !/<meta\s+content=["'][^"']+["']\s+name=["']description["']/i.test(html)) {
-    errors.push(`${route}: meta description missing`);
+  if (!/<meta\b(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["'][^"']+["'])[^>]*>/i.test(html)) {
+    errors.push(route + ": meta description missing");
   }
   if (!html.includes(`href="${expectedUrl}"`) &&
       !html.includes(`href='${expectedUrl}'`)) {
