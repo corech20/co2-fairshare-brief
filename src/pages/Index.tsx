@@ -68,7 +68,7 @@ export default function Index() {
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">
               CO2KostAufG · Für Mieter und Vermieter
             </p>
-            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-[2.125rem] lg:text-[2.5rem]">
               CO2-Kostenaufteilung berechnen – mit den Werten Ihrer Rechnung
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
