@@ -19,7 +19,7 @@ export default function Index() {
   const navigate = useNavigate();
 
   const faqs = [
-    { q: 'Warum nutzt der Rechner die Werte der Lieferantenrechnung?', a: 'Für die Aufteilung werden die auf der Brennstoff- oder Wärmelieferabrechnung ausgewiesenen CO2-Emissionen und CO2-Kosten übernommen. Eine erneute pauschale Berechnung aus dem Verbrauch ist im regulären Eingabeweg nicht nötig.' },
+    { q: 'Warum nutzt der Rechner die Werte der Lieferantenrechnung?', a: 'Für die Aufteilung werden die auf der Brennstoff- oder Wärmelieferabrechnung ausgewiesenen CO2-Emissionen und CO2-Kosten übernommen. Damit basiert die Kostenaufteilung auf den Angaben Ihrer Rechnung.' },
     { q: 'Was ist das CO2KostAufG?', a: 'Das Kohlendioxidkostenaufteilungsgesetz (CO2KostAufG) regelt seit dem 1. Januar 2023 die Aufteilung der CO2-Kosten zwischen Vermieter und Mieter. Ziel ist es, Anreize für klimafreundliches Verhalten und energetische Sanierung zu schaffen.' },
     { q: 'Wie funktioniert das 10-Stufen-Modell?', a: 'Bei Wohngebäuden werden die CO2-Emissionen pro Quadratmeter und Jahr berechnet. Je höher die Emissionen, desto größer ist der Anteil des Vermieters an den CO2-Kosten – von 0 % bei unter 12 kg CO2/m²/a bis zu 95 % bei über 52 kg CO2/m²/a.' },
     { q: 'Welche Unterlagen brauche ich?', a: 'Sie benötigen Ihre Wärmeliefer- oder Brennstoffabrechnung mit Angaben zum Abrechnungszeitraum, den CO2-Emissionen (in kg) und den CO2-Kosten (in Euro). Außerdem die Wohn- bzw. Gebäudefläche.' },
@@ -76,10 +76,6 @@ export default function Index() {
               Brennstoff- oder Wärmelieferabrechnung. Der Rechner ermittelt daraus die
               gesetzliche Aufteilung zwischen Mieter und Vermieter – nachvollziehbar und mit PDF-Nachweis.
             </p>
-            <p className="max-w-2xl text-sm leading-relaxed text-foreground">
-              <strong>Keine pauschale Rückrechnung aus Verbrauchsmengen:</strong> Entscheidend sind
-              die CO2-Angaben des Lieferanten für den maßgeblichen Abrechnungszeitraum.
-            </p>
             <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <Button variant="cta" size="lg" asChild>
                 <Link to="/rechner">CO2-Kosten berechnen</Link>
@@ -134,7 +130,7 @@ export default function Index() {
               {
                 icon: ClipboardList,
                 title: 'Rechnungswerte als Grundlage',
-                desc: 'CO2-Emissionen und CO2-Kosten werden aus der Abrechnung übernommen – ohne pauschale Schätzung anhand der Brennstoffmenge.',
+                desc: 'Wir übernehmen die CO2-Emissionen und CO2-Kosten aus Ihrer Brennstoff- oder Wärmelieferabrechnung.'
               },
               {
                 icon: Scale,
@@ -198,7 +194,7 @@ export default function Index() {
           <div>
             <FAQItem
               question="Warum werden die Werte der Lieferantenrechnung verwendet?"
-              answer="Der Rechner übernimmt im regulären Eingabeweg die auf Ihrer Brennstoff- oder Wärmelieferabrechnung angegebenen CO2-Emissionen und CO2-Kosten. So ist keine pauschale Neuberechnung aus dem Verbrauch erforderlich."
+              answer="Der Rechner übernimmt im regulären Eingabeweg die auf Ihrer Brennstoff- oder Wärmelieferabrechnung angegebenen CO2-Emissionen und CO2-Kosten. So können Sie die Kostenaufteilung anhand Ihrer Rechnung nachvollziehen."
             />
           </div>
           <div>
