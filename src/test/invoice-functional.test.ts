@@ -1,5 +1,24 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import jsPDF from 'jspdf';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const pdfCapture = vi.hoisted(() => ({ bytes: null as ArrayBuffer | null, filename: '', saveCalls: 0 }));
+
+// Use the real jsPDF layout/serialization engine; only intercept the browser download.
+vi.mock('jspdf', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('jspdf')>();
+  return {
+    ...actual,
+    default: function MockJsPDF(...args: ConstructorParameters<typeof actual.default>) {
+      const doc = new actual.default(...args);
+      doc.save = ((filename: string) => {
+        pdfCapture.bytes = doc.output('arraybuffer');
+        pdfCapture.filename = filename;
+        pdfCapture.saveCalls++;
+        return doc;
+      }) as typeof doc.save;
+      return doc;
+    },
+  };
+});
 import { calculateCO2Allocation, validateBillingPeriod } from '../lib/calculator/engine';
 import { generatePDF } from '../lib/calculator/pdf';
 import type { WizardData } from '../lib/calculator/types';
@@ -25,7 +44,7 @@ describe('Invoice-based calculation - independent reference cases', () => {
     expect(result.fuelResults[0].usedDirectEmissions).toBe(true);
     expect(result.totalEmissionsKg).toBe(20_000);
     expect(result.totalCO2Cost).toBe(1_000);
-    expect(result.emissionsPerSqmAnnualized).toBe(40);
+    expect(result.emissionsPerSqmYear).toBe(40);
     expect(result.landlordPercent).toBe(60);
     expect(result.tenantPercent).toBe(40);
     expect(result.landlordShare).toBe(600);
@@ -103,6 +122,11 @@ describe('Invoice-based calculation - independent reference cases', () => {
 });
 
 describe('PDF creation - real jsPDF engine smoke checks', () => {
+  beforeEach(() => {
+    pdfCapture.bytes = null;
+    pdfCapture.filename = '';
+    pdfCapture.saveCalls = 0;
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it.each([
@@ -110,12 +134,6 @@ describe('PDF creation - real jsPDF engine smoke checks', () => {
     'letter_tenant_reimbursement',
     'letter_landlord_info',
   ] as const)('generates a valid PDF for %s and uses the provided calculation ID', (kind) => {
-    let pdfBytes: ArrayBuffer | undefined;
-    const save = vi.spyOn(jsPDF.API, 'save').mockImplementation(function (this: jsPDF) {
-      pdfBytes = this.output('arraybuffer');
-      return this;
-    });
-
     const data: WizardData = {
       ...sample,
       userRole: kind === 'calculation' ? 'vermieter' : 'mieter',
@@ -128,11 +146,12 @@ describe('PDF creation - real jsPDF engine smoke checks', () => {
     const result = calculateCO2Allocation(data);
     generatePDF(data, result, kind, 'QA-2026-TEST');
 
-    expect(save).toHaveBeenCalledOnce();
-    expect(save.mock.calls[0][0]).toBe('CO2-Kostenaufteilung_QA-2026-TEST.pdf');
-    expect(pdfBytes).toBeInstanceOf(ArrayBuffer);
-    const header = String.fromCharCode(...new Uint8Array(pdfBytes!).slice(0, 8));
+    expect(pdfCapture.saveCalls).toBe(1);
+    expect(pdfCapture.filename).toBe('CO2-Kostenaufteilung_QA-2026-TEST.pdf');
+    expect(pdfCapture.bytes).toBeInstanceOf(ArrayBuffer);
+    const bytes = pdfCapture.bytes!;
+    const header = String.fromCharCode(...new Uint8Array(bytes).slice(0, 8));
     expect(header.startsWith('%PDF-')).toBe(true);
-    expect(pdfBytes!.byteLength).toBeGreaterThan(2_000);
+    expect(bytes.byteLength).toBeGreaterThan(2_000);
   });
 });
