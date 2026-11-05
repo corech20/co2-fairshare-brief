@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import SEO from '@/components/SEO';
@@ -18,8 +18,6 @@ const STUFEN: { stufe: number; range: string; mieter: string; vermieter: string 
 ];
 
 export default function RatgeberPage() {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
@@ -131,19 +129,22 @@ export default function RatgeberPage() {
             <p className="text-sm leading-relaxed">
               Für Erdgas und Fernwärme galt vom 1. Oktober 2022 bis 31. März 2024 ein ermäßigter
               Umsatzsteuersatz von 7 %. Seit dem 1. April 2024 gilt wieder der reguläre Satz von
-              19 %. Erstreckt sich ein Abrechnungszeitraum über den 1. April 2024 hinaus, teilt der
-              Rechner die CO2-Kosten taggenau auf beide Zeiträume auf. Für alle anderen Brennstoffe
-              gilt durchgehend 19 %.
+              19 %. Die auf der Rechnung ausgewiesenen Brutto-CO2-Kosten übernimmt der Rechner
+              unverändert. Bei Eingabe eines Nettobetrags wird die Umsatzsteuer ergänzt;
+              bei einem Zeitraum über den 1. April 2024 hinaus berücksichtigt der Rechner
+              die unterschiedlichen Steuersätze anteilig. Für andere Brennstoffe gilt 19 %.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-xl font-bold">Jahresübergreifende Abrechnungszeiträume</h2>
             <p className="text-sm leading-relaxed">
-              Erstreckt sich der Abrechnungszeitraum über einen Jahreswechsel, gilt für jedes
-              Kalenderjahr der jeweils gültige CO2-Preis. Für die Einstufung ins Stufenmodell
-              werden die Emissionen auf ein volles Jahr normiert; die CO2-Kosten werden auf Basis
-              des tatsächlichen Verbrauchs angesetzt und nicht hochgerechnet.
+              Bei Erdgas und Fernwärme können Sie die CO2-Emissionen und CO2-Kosten für den
+              gesamten Abrechnungszeitraum so übernehmen, wie sie in Ihrer Rechnung angegeben
+              sind. Eine Aufteilung der Rechnungswerte nach Kalenderjahren ist im regulären
+              Eingabeweg nicht erforderlich. Für die Einstufung ins Stufenmodell werden die
+              Emissionen bei kürzeren Zeiträumen auf ein Jahr umgerechnet; die tatsächlich
+              ausgewiesenen CO2-Kosten werden nicht hochgerechnet.
             </p>
           </section>
 
@@ -192,15 +193,16 @@ export default function RatgeberPage() {
               .
             </p>
             <p className="text-sm leading-relaxed">
-              Ab 2027 wird der nationale CO2-Preis voraussichtlich durch den europäischen
-              Emissionshandel (EU-ETS 2) abgelöst; die Aufteilung nach dem Stufenmodell bleibt
-              bestehen.
+              Der Start des europäischen Emissionshandels für Gebäude und Verkehr (EU-ETS 2)
+              ist für 2028 vorgesehen. Bis dahin gilt in Deutschland weiterhin der nationale
+              Brennstoffemissionshandel. Für die Kostenaufteilung sind die Angaben der
+              jeweiligen Brennstoff- oder Wärmelieferabrechnung maßgeblich.
             </p>
           </section>
 
           <section className="pt-4">
-            <Button variant="cta" size="lg" onClick={() => navigate('/rechner')}>
-              Jetzt CO2-Kosten berechnen
+            <Button variant="cta" size="lg" asChild>
+              <Link to="/rechner">Jetzt CO2-Kosten berechnen</Link>
             </Button>
           </section>
 
