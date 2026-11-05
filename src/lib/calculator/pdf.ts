@@ -293,12 +293,6 @@ export function generatePDF(
     doc.setFontSize(9);
     doc.setTextColor(60, 60, 60);
     doc.text(`Abrechnungszeitraum: ${period}`, mL, y);
-    if (result.isCrossYear) {
-      y += 4;
-      doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
-    }
     y += 8;
 
     // ═══ 4. SUBJECT LINE ═══
@@ -397,12 +391,6 @@ export function generatePDF(
     y += 4;
     doc.setTextColor(60, 60, 60);
     doc.text(`Abrechnungszeitraum: ${period}`, mL, y);
-    if (result.isCrossYear) {
-      y += 4;
-      doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text('(jahresübergreifend – Berechnung mit getrennten CO2-Preisen pro Kalenderjahr)', mL, y);
-    }
     y += 6.4;
   }
 
