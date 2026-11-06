@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { filterPrerenderRoutes } from "./src/lib/seo-routes";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode, command }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  // The tagger runtime accesses window and must not enter prerender builds.
+  plugins: [react(), mode === "development" && command === "serve" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
