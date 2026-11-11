@@ -122,7 +122,7 @@ ${drawer(ctx)}
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </div>`;
   if (fragment) {
-    return `<title>${esc(SITE.name)}</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n<style>\n${ctx.cssInline}\n</style>\n${body}\n<script>\n${ctx.js}\n</script>\n`;
+    return `<title>${esc(SITE.name)} V2</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n<style>\n${ctx.cssInline}\n</style>\n${body}\n<script>\n${ctx.js}\n</script>\n`;
   }
   const head = `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
