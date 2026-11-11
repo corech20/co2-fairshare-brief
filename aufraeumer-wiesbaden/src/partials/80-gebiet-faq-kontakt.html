@@ -1,0 +1,179 @@
+<section class="sec sec--tint" id="einsatzgebiet" aria-labelledby="gebiet-h">
+  <div class="wrap area">
+    <div class="area__text">
+      <header class="sec__head">
+        <p class="eyebrow">Einsatzgebiet</p>
+        <h2 id="gebiet-h">Wiesbaden und {{RADIUS}} Kilometer drumherum.</h2>
+        <p class="sec__lead">Vom Rheingau bis Frankfurt, vom Taunus bis Rheinhessen. Prüfen Sie Ihren Ort in zwei Sekunden.</p>
+      </header>
+
+      <form class="areacheck" id="areacheck" novalidate autocomplete="off">
+        <label class="field" for="area-input"><span class="field__l">PLZ oder Ort</span>
+          <span class="areacheck__row">
+            <input type="text" id="area-input" name="q" placeholder="z. B. 55116 oder Idstein" aria-describedby="area-result" inputmode="text">
+            <button class="btn btn--ink" type="submit">Prüfen</button>
+          </span>
+        </label>
+        <p class="areacheck__result" id="area-result" aria-live="polite" data-state="in">
+          <svg class="i" aria-hidden="true"><use href="#i-check"/></svg>
+          <span><strong>Mainz</strong> liegt im Einsatzgebiet, rund 9 km Luftlinie vom Luxemburgplatz. <em>Beispiel</em></span>
+        </p>
+      </form>
+
+      <dl class="area__dirs">
+        <div><dt>Wiesbaden</dt><dd>Alle Stadtteile von Biebrich bis Naurod, dazu Mainz-Kastel und Kostheim</dd></div>
+        <div><dt>Rheingau &amp; Taunus</dt><dd>Eltville, Rüdesheim, Taunusstein, Idstein, Bad Schwalbach, Limburg</dd></div>
+        <div><dt>Main-Taunus &amp; Frankfurt</dt><dd>Hofheim, Kelkheim, Königstein, Bad Homburg, Frankfurt, Offenbach</dd></div>
+        <div><dt>Links des Rheins</dt><dd>Mainz, Ingelheim, Bingen, Nieder-Olm, Alzey, Bad Kreuznach</dd></div>
+        <div><dt>Süden</dt><dd>Rüsselsheim, Groß-Gerau, Darmstadt, Oppenheim</dd></div>
+      </dl>
+    </div>
+
+    <figure class="map">
+      {{MAP}}
+      <figcaption>Schematische Karte. Entfernungen als Luftlinie ab Luxemburgplatz 5.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="b2bteaser" aria-labelledby="b2bt-h">
+  <div class="wrap b2bteaser__in">
+    <div>
+      <p class="eyebrow">Für Makler &amp; Hausverwaltungen</p>
+      <h2 id="b2bt-h">Objekt leer bis zum Übergabetermin. Mit Protokoll und Fotos für Ihre Akte.</h2>
+    </div>
+    <ul class="b2bteaser__list">
+      <li><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Verbindlicher Räumungstermin</li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-key"/></svg>Schlüsselübergabe ohne Ihre Anwesenheit</li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-camera"/></svg>Dokumentation vorher und nachher</li>
+    </ul>
+    <a class="btn btn--ink btn--lg" href="#geschaeftskunden">Zur Seite für Geschäftskunden<svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </div>
+</section>
+
+<section class="sec" id="fragen" aria-labelledby="fragen-h">
+  <div class="wrap faq">
+    <header class="sec__head faq__head">
+      <p class="eyebrow">Häufige Fragen</p>
+      <h2 id="fragen-h">Ehrliche Antworten, bevor Sie fragen müssen.</h2>
+      <p class="sec__lead">Ihre Frage fehlt? Paul Hansen beantwortet sie am Telefon.</p>
+      <a class="btn btn--line-ink" href="#kontakt">Rückruf vereinbaren</a>
+    </header>
+
+    <div class="faq__list">
+      <details class="faq__item" name="faq" open>
+        <summary>Was kostet eine Entrümpelung?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Das hängt vor allem von der Menge ab, dann von Etage, Laufwegen und Zusatzarbeiten. Öffentliche Ratgeber nennen für normal möblierte Wohnungen grob 20 bis 50 Euro pro Quadratmeter. Der <a href="#festpreis">Rechner</a> zeigt Ihnen einen Rahmen für Ihren Fall. Verbindlich wird der Preis nach der Besichtigung, und dann bleibt er es auch.</p></div>
+      </details>
+      <details class="faq__item" name="faq">
+        <summary>Muss ich bei der Räumung dabei sein?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Nein. Viele Auftraggeber wohnen nicht in der Nähe. Sie übergeben den Schlüssel, legen fest, was bleiben soll, und erhalten am Ende Fotos und das Übergabeprotokoll. Wer dabei sein möchte, ist willkommen.</p></div>
+      </details>
+      <details class="faq__item" name="faq">
+        <summary>Was passiert mit wertvollen Gegenständen?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Verwertbares schätzen wir bei der Besichtigung. Der Betrag steht als Wertanrechnung im Angebot und wird vom Preis abgezogen. Persönliche Funde wie Dokumente, Schmuck oder Bargeld übergeben wir Ihnen.</p></div>
+      </details>
+      <details class="faq__item" name="faq">
+        <summary>Wie schnell bekomme ich einen Termin?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Das hängt von der Auslastung ab. Nennen Sie uns Ihre Frist gleich bei der Anfrage. Wir sagen Ihnen offen, ob wir sie halten können, statt etwas zuzusagen, das nicht klappt.</p></div>
+      </details>
+      <details class="faq__item" name="faq">
+        <summary>Kann ich die Kosten von der Steuer absetzen?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Für privat genutzten Wohnraum oft ja. Als haushaltsnahe Dienstleistung mindern 20 Prozent der Arbeitskosten Ihre Einkommensteuer, höchstens 4.000 Euro im Jahr (§ 35a EStG). Voraussetzung sind eine Rechnung und die Zahlung per Überweisung. Ob das in Ihrem Fall gilt, klärt Ihre Steuerberatung.</p></div>
+      </details>
+      <details class="faq__item" name="faq">
+        <summary>Reicht nicht auch der Sperrmüll der Stadt?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Für einzelne Möbelstücke ist die städtische Sperrmüllabfuhr oft die günstigste Lösung, und das sagen wir Ihnen auch. Sie holt allerdings nur ab, was an der Straße steht, und nimmt nicht alles mit. Tragen, Demontieren, Sortieren und die besenreine Übergabe bleiben bei Ihnen.</p></div>
+      </details>
+      <details class="faq__item" name="faq">
+        <summary>Was bedeutet besenrein genau?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Alle Räume sind leer und grob gereinigt, also gefegt und frei von Müll. Eine Grundreinigung mit Fenstern, Bad und Küche ist das nicht. Die können Sie zusätzlich beauftragen.</p></div>
+      </details>
+      <details class="faq__item" name="faq">
+        <summary>Räumen Sie auch stark vermüllte Wohnungen?<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="faq__a"><p>Ja, diskret und ohne Wertung. Der Aufwand ist höher, deshalb sehen wir uns solche Objekte immer vor Ort an, bevor wir einen Preis nennen.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="finale band" id="kontakt" aria-labelledby="kontakt-h">
+  <div class="room">
+    <div class="room__wall" aria-hidden="true"></div>
+    <div class="room__window" aria-hidden="true"><i></i><i></i></div>
+    <svg class="room__broom" viewBox="0 0 40 150" aria-hidden="true"><path d="M27 6 15 118" stroke="#CDA57C" stroke-width="4" stroke-linecap="round"/><path d="M4 148 9 120q7-5 14 0l6 28z" fill="#B9853C"/><path d="M9 120q7-5 14 0" fill="none" stroke="#F4F7FC" stroke-width="3" stroke-linecap="round"/></svg>
+    <div class="room__base" aria-hidden="true"></div>
+    <div class="room__floor" aria-hidden="true"><div class="room__sun"></div></div>
+    <div class="wrap room__title">
+      <p class="eyebrow eyebrow--band">Kontakt</p>
+      <h2 id="kontakt-h">Platz für das, was kommt.</h2>
+    </div>
+  </div>
+  <div class="wrap finale__in">
+    <div class="finale__copy">
+      <p class="finale__lead">Erzählen Sie kurz, worum es geht. Sie bekommen eine ehrliche Einschätzung und auf Wunsch einen Besichtigungstermin.</p>
+      <ul class="contact">
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-phone"/></svg>
+          <div><span class="contact__l">Telefon</span><a class="contact__v" href="#kontakt" data-call><span data-phone>0611 000 000</span></a> <span class="demo">Demo</span><button type="button" class="copybtn" data-copy-phone><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="sr-only">Nummer kopieren</span></button></div>
+        </li>
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-chat"/></svg>
+          <div><span class="contact__l">WhatsApp</span><span class="contact__v">Fotos schicken, Einschätzung bekommen</span> <span class="demo">Demo</span></div>
+        </li>
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-pin"/></svg>
+          <div><span class="contact__l">Anschrift</span><span class="contact__v">Luxemburgplatz 5, 65185 Wiesbaden</span></div>
+        </li>
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-clock"/></svg>
+          <div><span class="contact__l">Erreichbar</span><span class="contact__v">Mo bis Sa, 8 bis 19 Uhr</span> <span class="demo">Demo</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="callback">
+      <form id="callback-form" novalidate>
+        <h3>Rückruf vereinbaren</h3>
+        <p>Drei Angaben, und Paul Hansen meldet sich bei Ihnen.</p>
+        <label class="field" for="cb-name"><span class="field__l">Ihr Name</span>
+          <input type="text" id="cb-name" name="name" autocomplete="name" required>
+          <span class="field__err" data-err="name"></span>
+        </label>
+        <label class="field" for="cb-tel"><span class="field__l">Telefon</span>
+          <input type="tel" id="cb-tel" name="tel" autocomplete="tel" inputmode="tel" required>
+          <span class="field__err" data-err="tel"></span>
+        </label>
+        <label class="field" for="cb-thema"><span class="field__l">Worum geht es?</span>
+          <select id="cb-thema" name="thema">
+            <option>Haushaltsauflösung</option>
+            <option>Wohnungsauflösung</option>
+            <option>Hausräumung</option>
+            <option>Keller, Dachboden oder Garage</option>
+            <option>Rückbau oder Transport</option>
+            <option>Anfrage als Makler oder Hausverwaltung</option>
+            <option>Etwas anderes</option>
+          </select>
+        </label>
+        <div class="field">
+          <span class="field__l" id="cb-zeit-l">Wann passt es Ihnen?</span>
+          <div class="chips" role="group" aria-labelledby="cb-zeit-l">
+            <label class="chip"><input type="radio" name="zeit" value="heute" id="cb-heute" checked><span>Heute noch</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="vormittags" id="cb-vm"><span>Vormittags</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="nachmittags" id="cb-nm"><span>Nachmittags</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="abends" id="cb-ab"><span>Abends</span></label>
+          </div>
+        </div>
+        <button class="btn btn--gold btn--block btn--lg" type="submit">Rückruf anfordern</button>
+        <p class="callback__fine">Mit dem Absenden stimmen Sie der Verwendung Ihrer Angaben für den Rückruf zu. <a href="#datenschutz">Datenschutz</a></p>
+      </form>
+      <div class="callback__done" id="callback-done" hidden tabindex="-1">
+        <span class="lead__donemark" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span>
+        <h3 id="callback-done-h">Danke. Der Rückruf ist notiert.</h3>
+        <p><span class="demo">Demo</span> In dieser Vorschau wird nichts versendet. Auf der Live-Seite erhält Paul Hansen jetzt Ihre Rückrufbitte.</p>
+        <button class="textlink" type="button" id="callback-again">Weitere Anfrage stellen</button>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- /view start -->

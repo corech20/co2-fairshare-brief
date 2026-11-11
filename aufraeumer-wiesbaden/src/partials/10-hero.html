@@ -1,0 +1,60 @@
+<section class="hero band" id="start" aria-labelledby="hero-h1">
+  <div class="wrap hero__grid">
+    <div class="hero__copy">
+      <h1 class="hero__h1" id="hero-h1">
+        <span class="eyebrow eyebrow--band">Entrümpelung &amp; Haushaltsauflösung in Wiesbaden</span>
+        <span class="hero__claim" data-tidy>Wir räumen.<br>Sie atmen auf.</span>
+      </h1>
+      <p class="hero__lead">Wohnung, Haus, Keller oder ein ganzer Nachlass. Wir räumen vollständig aus, rechnen Verwertbares an und übergeben besenrein. Den Preis kennen Sie vorher, schriftlich und fest.</p>
+      <div class="hero__actions">
+        <a class="btn btn--gold btn--lg" href="#festpreis">Festpreis berechnen<svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn--line btn--lg" href="#kontakt">Rückruf vereinbaren</a>
+      </div>
+      <p class="hero__note">Dauert zwei Minuten. Ohne Anmeldung, ohne Verpflichtung.</p>
+    </div>
+
+    <div class="hero__stage">
+      <figure class="house" id="house">
+        {{HOUSE}}
+      </figure>
+      <div class="clear">
+        <div class="clear__row">
+          <span class="clear__end">voll</span>
+          <input class="clear__range" type="range" id="clear-range" min="0" max="100" step="1" value="{{REST}}" aria-label="Räumungsfortschritt im Haus: von voll bis frei">
+          <span class="clear__end clear__end--free">frei</span>
+        </div>
+        <ol class="clear__zones" aria-label="Bereiche im Haus">{{ZONE_BUTTONS}}</ol>
+        <p class="clear__hint"><span class="clear__cta">Ziehen Sie den Regler und räumen Sie das Haus leer.</span> <output id="clear-status" for="clear-range">2 von 6 Bereichen geräumt</output></p>
+      </div>
+    </div>
+
+    <div class="owner-chip">
+      <span class="owner-chip__av" aria-hidden="true">PH</span>
+      <span><strong>Paul Hansen</strong>, Inhaber<br><span class="owner-chip__adr">Luxemburgplatz 5 · 65185 Wiesbaden</span></span>
+    </div>
+  </div>
+</section>
+
+<section class="pledge" aria-label="Das gilt bei jedem Auftrag">
+  <div class="wrap">
+    <ul class="pledge__list">
+      <li>
+        <svg class="i i--lg" aria-hidden="true"><use href="#i-eye"/></svg>
+        <div><h2 class="pledge__t">Besichtigung kostenlos</h2><p>Vor Ort oder per Video-Rundgang. Danach wissen Sie, woran Sie sind.</p></div>
+      </li>
+      <li>
+        <svg class="i i--lg" aria-hidden="true"><use href="#i-doc"/></svg>
+        <div><h2 class="pledge__t">Festpreis schriftlich</h2><p>Was im Angebot steht, zahlen Sie. Nachforderungen gibt es nicht.</p></div>
+      </li>
+      <li>
+        <svg class="i i--lg" aria-hidden="true"><use href="#i-coin"/></svg>
+        <div><h2 class="pledge__t">Wertanrechnung</h2><p>Verwertbare Möbel und Gegenstände senken Ihren Preis.</p></div>
+      </li>
+      <li>
+        <svg class="i i--lg" aria-hidden="true"><use href="#i-broom"/></svg>
+        <div><h2 class="pledge__t">Übergabe besenrein</h2><p>Mit Fotos und Protokoll, auf Wunsch direkt an Vermieter oder Makler.</p></div>
+      </li>
+    </ul>
+    <p class="pledge__demo"><span class="demo">Demo</span> Vier Zusagen als Vorschlag. Bitte vor dem Livegang bestätigen.</p>
+  </div>
+</section>
