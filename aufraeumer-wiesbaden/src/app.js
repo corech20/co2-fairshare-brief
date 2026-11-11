@@ -145,6 +145,7 @@
         out.appendChild(w);
       });
     });
+    var original = el.innerHTML;
     var holder = document.createElement('span');
     holder.setAttribute('aria-hidden', 'true');
     holder.appendChild(out);
@@ -153,6 +154,8 @@
     el.appendChild(sr); el.appendChild(holder);
     el.classList.add('tidy', 'is-messy');
     requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.remove('is-messy'); }); });
+    // Danach wieder der schlichte Text: gleiche Laufweite wie ohne Bewegung, weniger Elemente
+    setTimeout(function () { el.innerHTML = original; el.classList.remove('tidy'); }, 950 + d * 26 + 200);
   })();
 
   /* ---------- Haus: Regler von voll zu frei ---------- */

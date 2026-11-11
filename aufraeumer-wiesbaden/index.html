@@ -222,9 +222,10 @@ code { font-family: var(--f-mono); font-size: .9em; }
 
 .hero { position: relative; overflow: hidden; background: radial-gradient(90% 80% at 76% 38%, var(--band-2) 0%, var(--band) 62%); }
 .hero__grid { display: grid; gap: 28px; padding-top: clamp(32px, 5vw, 64px); align-items: center; }
-.hero__copy { min-width: 0; }
+.hero__copy { min-width: 0; container-type: inline-size; }
 .hero__h1 { display: grid; gap: 20px; }
-.hero__claim { font: 800 clamp(3.1rem, 1.3rem + 7.4vw, 6.1rem)/.9 var(--f-display); font-stretch: 84%; letter-spacing: -.02em; }
+.hero__claim { font: 800 clamp(3rem, 1.3rem + 6vw, 5.4rem)/.9 var(--f-display); font-stretch: 84%; letter-spacing: -.02em; }
+@supports (font-size: 1cqi) { .hero__claim { font-size: clamp(2.8rem, 18.4cqi, 5.9rem); } }
 .hero__lead { font-size: clamp(1.08rem, 1rem + .42vw, 1.26rem); line-height: 1.55; color: var(--band-ink-2); max-width: 33em; margin-top: 24px; }
 .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
 .hero__note { font-size: .9rem; color: var(--band-ink-2); margin-top: 14px; }
@@ -2026,6 +2027,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px
         out.appendChild(w);
       });
     });
+    var original = el.innerHTML;
     var holder = document.createElement('span');
     holder.setAttribute('aria-hidden', 'true');
     holder.appendChild(out);
@@ -2034,6 +2036,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px
     el.appendChild(sr); el.appendChild(holder);
     el.classList.add('tidy', 'is-messy');
     requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.remove('is-messy'); }); });
+    // Danach wieder der schlichte Text: gleiche Laufweite wie ohne Bewegung, weniger Elemente
+    setTimeout(function () { el.innerHTML = original; el.classList.remove('tidy'); }, 950 + d * 26 + 200);
   })();
 
   /* ---------- Haus: Regler von voll zu frei ---------- */
