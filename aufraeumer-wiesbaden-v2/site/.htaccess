@@ -1,0 +1,48 @@
+# dieaufraeumer.com – Regeln für Apache. Bei anderem Server siehe docs/MIGRATION.md.
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Eine Adresse: https ohne www
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} ^www\. [NC]
+RewriteRule ^ https://dieaufraeumer.com%{REQUEST_URI} [L,R=301]
+RewriteRule ^index\.html$ / [L,R=301]
+</IfModule>
+
+# Weiterleitungen von der bisherigen WordPress-Website
+RedirectMatch 301 ^/leistungen-in-wiesbaden-die-aufraeumer/?$ /leistungen/
+RedirectMatch 301 ^/(sitemap_index|page-sitemap|post-sitemap|wp-sitemap)\.xml$ /sitemap.xml
+RedirectMatch 301 ^/datenschutz/?$ /datenschutzerklaerung/
+# Gelöschte Inhalte ohne Nachfolger: 410 sagt Suchmaschinen, dass sie dauerhaft entfernt sind
+RedirectMatch 410 ^/hello-world/?$
+RedirectMatch 410 ^/(author|category|tag|comments)/
+RedirectMatch 410 ^/(feed|wp-json|wp-admin|wp-login\.php|xmlrpc\.php|wp-cron\.php)
+
+# Einstellungen und Daten des Formulars sind nicht abrufbar
+<FilesMatch "^anfrage-config(\.sample)?\.php$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+<FilesMatch "\.(woff2|webp|jpg|png)$">
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+<FilesMatch "\.(css|js)$">
+  Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
+<FilesMatch "\.html$">
+  Header set Cache-Control "public, max-age=600"
+</FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml text/plain application/xml
+</IfModule>

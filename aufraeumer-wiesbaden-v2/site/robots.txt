@@ -1,0 +1,6 @@
+# Alle Suchmaschinen und KI-Assistenten dürfen die Website lesen.
+User-agent: *
+Allow: /
+Disallow: /anfrage.php
+
+Sitemap: https://dieaufraeumer.com/sitemap.xml

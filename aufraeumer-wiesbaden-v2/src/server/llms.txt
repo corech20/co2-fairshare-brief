@@ -1,0 +1,31 @@
+# {{NAME}}
+
+> Entrümpelung, Haushaltsauflösung, Rückbau und Umzüge in Wiesbaden und rund {{RADIUS}} km Umkreis. Inhabergeführt von {{OWNER}}.
+
+## Fakten
+
+- Anschrift: {{ADDRESS}}
+- Telefon: {{PHONE}}
+- E-Mail: {{EMAIL}}
+- Erreichbar: {{HOURS}}
+- Einsatzgebiet: Wiesbaden, Mainz, Rheingau, Taunusstein und Untertaunus, Main-Taunus-Kreis, insgesamt rund {{RADIUS}} km um Wiesbaden
+- Besichtigung: kostenlos und unverbindlich, vor Ort
+- Preis: Festpreis nach Besichtigung. Der Online-Rechner zeigt nur einen unverbindlichen Kostenrahmen. Die Anfahrt wird separat berechnet.
+- Wertanrechnung: wird nicht allgemein angeboten. Außergewöhnlich wertvolle Gegenstände werden im Einzelfall besprochen.
+- Zahlung: {{PAY}}
+
+## Leistungen
+
+{{LEISTUNGEN}}
+
+## Einsatzgebiet
+
+- [Entrümpelung Wiesbaden]({{DOMAIN}}/)
+{{ORTE}}
+
+## Weitere Seiten
+
+- [Kosten und Rechner]({{DOMAIN}}/entruempelung-kosten/)
+- [Für Makler und Hausverwaltungen]({{DOMAIN}}/makler-hausverwaltungen/)
+- [Über uns]({{DOMAIN}}/ueber-uns/)
+- [Kontakt]({{DOMAIN}}/kontakt/)

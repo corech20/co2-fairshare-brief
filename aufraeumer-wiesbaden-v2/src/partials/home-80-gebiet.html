@@ -1,0 +1,56 @@
+<section class="sec sec--tint" id="einsatzgebiet" aria-labelledby="gebiet-h">
+  <div class="wrap area">
+    <div class="area__text">
+      <header class="sec__head">
+        <p class="eyebrow">Einsatzgebiet</p>
+        <h2 id="gebiet-h">Wiesbaden und {{RADIUS}} Kilometer drumherum.</h2>
+        <p class="sec__lead">Vom Rheingau bis Frankfurt, vom Taunus bis Rheinhessen. Prüfen Sie Ihren Ort in zwei Sekunden.</p>
+      </header>
+
+      <form class="areacheck" id="areacheck" novalidate autocomplete="off">
+        <label class="field" for="area-input"><span class="field__l">PLZ oder Ort</span>
+          <span class="areacheck__row">
+            <input type="text" id="area-input" name="q" placeholder="z. B. 55116 oder Idstein" aria-describedby="area-result" inputmode="text">
+            <button class="btn btn--ink" type="submit">Prüfen</button>
+          </span>
+        </label>
+        <p class="areacheck__result" id="area-result" aria-live="polite" data-state="in">
+          <svg class="i" aria-hidden="true"><use href="#i-check"/></svg>
+          <span><strong>Mainz</strong> liegt im Einsatzgebiet, rund 9 km Luftlinie vom Luxemburgplatz. <em>Beispiel</em></span>
+        </p>
+      </form>
+
+      <dl class="area__dirs">
+        <div><dt>Wiesbaden</dt><dd>Alle Stadtteile von Biebrich bis Naurod, dazu Mainz-Kastel und Kostheim</dd></div>
+        <div><dt><a href="{{url:entruempelung-rheingau}}">Rheingau</a> &amp; <a href="{{url:entruempelung-taunusstein}}">Taunus</a></dt><dd>Eltville, Rüdesheim, Taunusstein, Idstein, Bad Schwalbach, Limburg</dd></div>
+        <div><dt><a href="{{url:entruempelung-main-taunus}}">Main-Taunus</a> &amp; Frankfurt</dt><dd>Hofheim, Kelkheim, Königstein, Bad Homburg, Frankfurt, Offenbach</dd></div>
+        <div><dt><a href="{{url:entruempelung-mainz}}">Mainz</a> &amp; Rheinhessen</dt><dd>Mainz, Ingelheim, Bingen, Nieder-Olm, Alzey, Bad Kreuznach</dd></div>
+        <div><dt>Süden</dt><dd>Rüsselsheim, Groß-Gerau, Darmstadt, Oppenheim</dd></div>
+      </dl>
+    </div>
+
+    <figure class="map">
+      {{MAP}}
+      <figcaption>Schematische Karte. Entfernungen als Luftlinie ab Luxemburgplatz 5.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="b2bteaser" aria-labelledby="b2bt-h">
+  <div class="wrap b2bteaser__in">
+    <div>
+      <p class="eyebrow">Für Makler &amp; Hausverwaltungen</p>
+      <h2 id="b2bt-h">Objekt leer bis zum Übergabetermin. Mit Fotodokumentation für Ihre Akte.</h2>
+    </div>
+    <ul class="b2bteaser__list">
+      <li><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Verbindlicher Räumungstermin</li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-key"/></svg>Räumung ohne Ihre Anwesenheit</li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-camera"/></svg>Dokumentation vorher und nachher</li>
+    </ul>
+    <a class="btn btn--ink btn--lg" href="{{url:makler-hausverwaltungen}}">Zur Seite für Geschäftskunden<svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </div>
+</section>
+
+{{FAQ_HOME}}
+
+{{KONTAKT_BAND}}

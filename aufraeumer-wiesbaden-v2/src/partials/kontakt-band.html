@@ -1,0 +1,73 @@
+<section class="finale band" id="kontakt" aria-labelledby="kontakt-h">
+  <div class="room">
+    <div class="room__wall" aria-hidden="true"></div>
+    <div class="room__window" aria-hidden="true"><i></i><i></i></div>
+    <svg class="room__broom" viewBox="0 0 40 150" aria-hidden="true"><path d="M27 6 15 118" stroke="#CDA57C" stroke-width="4" stroke-linecap="round"/><path d="M4 148 9 120q7-5 14 0l6 28z" fill="#B9853C"/><path d="M9 120q7-5 14 0" fill="none" stroke="#F4F7FC" stroke-width="3" stroke-linecap="round"/></svg>
+    <div class="room__base" aria-hidden="true"></div>
+    <div class="room__floor" aria-hidden="true"><div class="room__sun"></div></div>
+    <div class="wrap room__title">
+      <p class="eyebrow eyebrow--band">Kontakt</p>
+      <h2 id="kontakt-h">Platz für das, was kommt.</h2>
+    </div>
+  </div>
+  <div class="wrap finale__in">
+    <div class="finale__copy">
+      <p class="finale__lead">Erzählen Sie kurz, worum es geht. Sie bekommen eine ehrliche Einschätzung und auf Wunsch einen Termin für die kostenlose Besichtigung.</p>
+      <ul class="contact">
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-phone"/></svg>
+          <div><span class="contact__l">Telefon</span><a class="contact__v contact__v--big" href="tel:{{PHONE_INTL}}">{{PHONE}}</a><button type="button" class="copybtn" data-copy="{{PHONE}}" data-copied="Nummer kopiert"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="sr-only">Nummer kopieren</span></button></div>
+        </li>
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-mail"/></svg>
+          <div><span class="contact__l">E-Mail</span><a class="contact__v" href="mailto:{{EMAIL}}">{{EMAIL}}</a></div>
+        </li>
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-clock"/></svg>
+          <div><span class="contact__l">Erreichbar</span><span class="contact__v">{{HOURS_SHORT}}</span></div>
+        </li>
+        <li>
+          <svg class="i i--lg" aria-hidden="true"><use href="#i-pin"/></svg>
+          <div><span class="contact__l">Anschrift</span><span class="contact__v">{{STREET}}, {{ZIP}} {{CITY}}</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="callback">
+      <form id="callback-form" novalidate data-art="rueckruf">
+        <h3>Rückruf vereinbaren</h3>
+        <p>Drei Angaben, und wir rufen Sie zurück.</p>
+        <label class="field" for="cb-name"><span class="field__l">Ihr Name</span>
+          <input type="text" id="cb-name" name="name" autocomplete="name" required>
+          <span class="field__err" data-err="name"></span>
+        </label>
+        <label class="field" for="cb-tel"><span class="field__l">Telefon</span>
+          <input type="tel" id="cb-tel" name="tel" autocomplete="tel" inputmode="tel" required>
+          <span class="field__err" data-err="tel"></span>
+        </label>
+        <label class="field" for="cb-thema"><span class="field__l">Worum geht es?</span>
+          <select id="cb-thema" name="thema">{{THEMA_OPTIONS}}</select>
+        </label>
+        <div class="field">
+          <span class="field__l" id="cb-zeit-l">Wann passt es Ihnen?</span>
+          <div class="chips" role="group" aria-labelledby="cb-zeit-l">
+            <label class="chip"><input type="radio" name="zeit" value="jederzeit" id="cb-egal" checked><span>Jederzeit</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="vormittags" id="cb-vm"><span>Vormittags</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="nachmittags" id="cb-nm"><span>Nachmittags</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="abends" id="cb-ab"><span>Abends</span></label>
+          </div>
+        </div>
+        <div class="hp" aria-hidden="true"><label>Bitte leer lassen <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <button class="btn btn--gold btn--block btn--lg" type="submit">Rückruf anfordern</button>
+        <p class="form__status" role="status" data-status></p>
+        <p class="callback__fine">Mit dem Absenden stimmen Sie der Verwendung Ihrer Angaben für den Rückruf zu. <a href="{{url:datenschutzerklaerung}}">Datenschutz</a></p>
+      </form>
+      <div class="callback__done" id="callback-done" hidden tabindex="-1">
+        <span class="lead__donemark" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span>
+        <h3 id="callback-done-h">Danke. Der Rückruf ist notiert.</h3>
+        <p data-done-note>Wir melden uns schnellstmöglich bei Ihnen.</p>
+        <button class="textlink" type="button" data-again>Weitere Anfrage stellen</button>
+      </div>
+    </div>
+  </div>
+</section>

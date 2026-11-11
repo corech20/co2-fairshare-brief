@@ -1,0 +1,30 @@
+{
+  "_hinweis": "Paare für den Vorher-Nachher-Vergleich. Dateinamen ohne Endung. Neue Fotos in diesen Ordner legen und hier eintragen, dann `node build.mjs`.",
+  "og": "wohnzimmer-nachher.jpg",
+  "paare": {
+    "wohnzimmer": {
+      "vorher": "wohnzimmer-vorher",
+      "nachher": "wohnzimmer-nachher",
+      "label": "Wohnzimmer",
+      "altVorher": "Wohnzimmer mit Sofas, Regal und Hausrat vor der Entrümpelung",
+      "altNachher": "Dasselbe Wohnzimmer leer und besenrein nach der Entrümpelung",
+      "caption": "Wohnzimmer: komplett geräumt, Teppichboden entfernt."
+    },
+    "schlafzimmer": {
+      "vorher": "schlafzimmer-vorher",
+      "nachher": "schlafzimmer-nachher",
+      "label": "Schlafzimmer",
+      "altVorher": "Schlafzimmer mit Bett, Kleiderschrank und Kleidung vor der Wohnungsauflösung",
+      "altNachher": "Dasselbe Schlafzimmer leer geräumt nach der Wohnungsauflösung",
+      "caption": "Schlafzimmer: Möbel und Hausrat geräumt, Boden frei."
+    },
+    "arbeitszimmer": {
+      "vorher": "arbeitszimmer-vorher",
+      "nachher": "arbeitszimmer-nachher",
+      "label": "Arbeitszimmer",
+      "altVorher": "Vollgestelltes Zimmer mit Regalen, Kühlschrank und Bügelbrett vor der Räumung",
+      "altNachher": "Dasselbe Zimmer leer mit freiem Fenster und Heizkörper nach der Räumung",
+      "caption": "Arbeitszimmer: Regale und Geräte abgebaut und abtransportiert."
+    }
+  }
+}

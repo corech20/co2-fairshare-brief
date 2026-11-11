@@ -1,0 +1,196 @@
+<section class="sec sec--calc" id="kostenrechner" aria-labelledby="rechner-h">
+  <div class="wrap">
+    <header class="sec__head">
+      <p class="eyebrow">Kostenrechner</p>
+      <{{CALC_H}} id="rechner-h">Was kostet das? Rechnen Sie es durch.</{{CALC_H}}>
+      <p class="sec__lead">Wenige Angaben genügen für einen unverbindlichen Kostenrahmen. Den verbindlichen Festpreis nennen wir Ihnen nach der kostenlosen Besichtigung.</p>
+    </header>
+
+    <div class="calc">
+      <form class="calc__form" id="calc" novalidate>
+        <fieldset class="calc__fs">
+          <legend><span class="calc__no" aria-hidden="true">1</span>Was soll geräumt werden?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="typ" value="wohnung" id="typ-wohnung" checked><span>Wohnung</span></label>
+            <label class="chip"><input type="radio" name="typ" value="haus" id="typ-haus"><span>Haus</span></label>
+            <label class="chip"><input type="radio" name="typ" value="keller" id="typ-keller"><span>Nur Keller</span></label>
+            <label class="chip"><input type="radio" name="typ" value="dach" id="typ-dach"><span>Nur Dachboden</span></label>
+            <label class="chip"><input type="radio" name="typ" value="garage" id="typ-garage"><span>Garage / Schuppen</span></label>
+            <label class="chip"><input type="radio" name="typ" value="gewerbe" id="typ-gewerbe"><span>Büro / Gewerbe / Lager</span></label>
+          </div>
+          <div class="calc__addons" id="calc-addons">
+            <span class="calc__sub">Gehört dazu</span>
+            <label class="chip chip--check"><input type="checkbox" name="keller" id="add-keller"><span>Keller</span></label>
+            <label class="chip chip--check"><input type="checkbox" name="dach" id="add-dach"><span>Dachboden</span></label>
+            <label class="chip chip--check"><input type="checkbox" name="garage" id="add-garage"><span>Garage</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="calc__fs">
+          <legend><span class="calc__no" aria-hidden="true">2</span>Wie groß ist die Fläche?</legend>
+          <div class="range">
+            <input type="range" id="calc-flaeche" name="flaeche" min="20" max="200" step="5" value="70" aria-label="Fläche in Quadratmetern" aria-describedby="calc-flaeche-help">
+            <output class="range__out" id="calc-flaeche-out" for="calc-flaeche">70 m²</output>
+          </div>
+          <div class="stepper" aria-hidden="true">
+            <button type="button" data-step="-1" tabindex="-1">kleiner</button>
+            <button type="button" data-step="1" tabindex="-1">größer</button>
+          </div>
+          <p class="calc__help" id="calc-flaeche-help">Die Wohnfläche aus dem Mietvertrag genügt. Geschätzt ist völlig in Ordnung.</p>
+        </fieldset>
+
+        <fieldset class="calc__fs">
+          <legend><span class="calc__no" aria-hidden="true">3</span>Wie voll ist es?</legend>
+          <div class="fill">
+            <label class="fill__opt"><input type="radio" name="fuell" value="1" id="fuell-1">{{FILL_1}}<span class="fill__t">Fast leer</span><span class="fill__d">Einzelne Möbel, wenige Kartons</span></label>
+            <label class="fill__opt"><input type="radio" name="fuell" value="2" id="fuell-2" checked>{{FILL_2}}<span class="fill__t">Normal möbliert</span><span class="fill__d">Bewohnt, Schränke gefüllt</span></label>
+            <label class="fill__opt"><input type="radio" name="fuell" value="3" id="fuell-3">{{FILL_3}}<span class="fill__t">Sehr voll</span><span class="fill__d">Viel Hausrat, volle Abstellräume</span></label>
+            <label class="fill__opt"><input type="radio" name="fuell" value="4" id="fuell-4">{{FILL_4}}<span class="fill__t">Überfüllt</span><span class="fill__d">Kaum begehbar, bis unter die Decke</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="calc__fs">
+          <legend><span class="calc__no" aria-hidden="true">4</span>Wie kommen wir hin?</legend>
+          <div class="calc__row">
+            <label class="field field--inline" for="calc-etage"><span class="field__l">Etage</span>
+              <select id="calc-etage" name="etage">
+                <option value="0">Erdgeschoss</option>
+                <option value="1">1. Etage</option>
+                <option value="2" selected>2. Etage</option>
+                <option value="3">3. Etage</option>
+                <option value="4">4. Etage</option>
+                <option value="5">5. Etage oder höher</option>
+              </select>
+            </label>
+            <label class="switch"><input type="checkbox" name="aufzug" id="calc-aufzug"><span class="switch__ui" aria-hidden="true"></span><span>Aufzug vorhanden</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="calc__fs">
+          <legend><span class="calc__no" aria-hidden="true">5</span>Was soll außerdem erledigt werden?</legend>
+          <div class="chips">
+            <label class="chip chip--check"><input type="checkbox" name="kueche" id="ex-kueche"><span>Einbauküche abbauen</span></label>
+            <label class="chip chip--check"><input type="checkbox" name="boden" id="ex-boden"><span>Teppich oder Laminat entfernen</span></label>
+            <label class="chip chip--check"><input type="checkbox" name="tapete" id="ex-tapete"><span>Tapeten entfernen</span></label>
+          </div>
+          <p class="calc__help">Zusatzarbeiten sind im Kostenrahmen nicht enthalten. Sie stehen gesondert im Angebot.</p>
+          <div class="calc__addons">
+            <span class="calc__sub">Wann</span>
+            <label class="chip"><input type="radio" name="termin" value="flexibel" id="termin-flexibel" checked><span>Zeitlich flexibel</span></label>
+            <label class="chip"><input type="radio" name="termin" value="bald" id="termin-bald"><span>In den nächsten zwei Wochen</span></label>
+            <label class="chip"><input type="radio" name="termin" value="eilig" id="termin-eilig"><span>So schnell wie möglich</span></label>
+          </div>
+        </fieldset>
+      </form>
+
+      <aside class="quote" aria-label="Ihr unverbindlicher Kostenrahmen">
+        <div class="quote__paper">
+          <div class="quote__top">
+            <span class="quote__kicker">Kostenrahmen</span>
+            <span class="quote__flag">unverbindlich</span>
+          </div>
+          <p class="quote__title">Ihre Räumung</p>
+          <dl class="quote__lines">
+            <div><dt>Objekt</dt><dd id="q-objekt">Wohnung, 70 m²</dd></div>
+            <div><dt>Füllgrad</dt><dd id="q-fuell">normal möbliert</dd></div>
+            <div><dt>Zugang</dt><dd id="q-zugang">2. Etage, ohne Aufzug</dd></div>
+            <div><dt>Zusatzarbeiten</dt><dd id="q-extras">keine</dd></div>
+            <div><dt>Besenreine Übergabe</dt><dd>inklusive</dd></div>
+            <div><dt>Anfahrt</dt><dd>separat, je nach Entfernung</dd></div>
+          </dl>
+          <div class="quote__sum" aria-live="polite">
+            <span class="quote__sumlabel">Unverbindlicher Kostenrahmen</span>
+            <strong class="quote__price" id="q-preis">2.840 – 3.470 €</strong>
+            <span class="quote__incl">für Räumung und Entsorgung, zuzüglich Anfahrt</span>
+          </div>
+          <a class="btn btn--gold btn--block" href="#anfrage" id="q-cta">Besichtigung anfragen<svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <p class="quote__hint" id="q-hint">Kein Angebot. Verbindlich wird der Preis erst nach der kostenlosen Besichtigung.</p>
+        </div>
+        <p class="fineprint">So rechnen wir: Fläche mal Quadratmetersatz je nach Füllgrad, dazu 5 % je Etage ohne Aufzug. Das Ergebnis zeigen wir als Spanne, weil erst die Besichtigung den genauen Aufwand klärt.</p>
+      </aside>
+    </div>
+
+    <div class="lead" id="anfrage">
+      <div class="lead__intro">
+        <h3>Besichtigung anfragen</h3>
+        <p>Wir melden uns schnellstmöglich bei Ihnen, klären offene Fragen und vereinbaren die kostenlose Besichtigung. Erst danach entscheiden Sie.</p>
+        <ol class="lead__next">
+          <li><strong>Rückmeldung</strong> per Telefon oder E-Mail</li>
+          <li><strong>Besichtigung</strong> vor Ort, kostenlos</li>
+          <li><strong>Festpreis</strong> schriftlich, ohne Verpflichtung</li>
+        </ol>
+        <p class="lead__alt">Lieber gleich anrufen?<br><a href="tel:{{PHONE_INTL}}">{{PHONE}}</a></p>
+      </div>
+
+      <form class="lead__form" id="lead-form" novalidate data-art="kostenanfrage">
+        <div class="lead__grid">
+          <label class="field" for="lead-name"><span class="field__l">Ihr Name</span>
+            <input type="text" id="lead-name" name="name" autocomplete="name" required>
+            <span class="field__err" data-err="name"></span>
+          </label>
+          <label class="field" for="lead-tel"><span class="field__l">Telefon</span>
+            <input type="tel" id="lead-tel" name="tel" autocomplete="tel" inputmode="tel" required>
+            <span class="field__err" data-err="tel"></span>
+          </label>
+          <label class="field" for="lead-mail"><span class="field__l">E-Mail <em>freiwillig</em></span>
+            <input type="email" id="lead-mail" name="mail" autocomplete="email">
+            <span class="field__err" data-err="mail"></span>
+          </label>
+          <label class="field" for="lead-ort"><span class="field__l">PLZ oder Ort des Objekts</span>
+            <input type="text" id="lead-ort" name="ort" autocomplete="postal-code" required>
+            <span class="field__err" data-err="ort"></span>
+            <span class="field__ok" id="lead-ort-info"></span>
+          </label>
+        </div>
+
+        <div class="field">
+          <span class="field__l" id="lead-zeit-l">Wann erreichen wir Sie am besten?</span>
+          <div class="chips" role="group" aria-labelledby="lead-zeit-l">
+            <label class="chip"><input type="radio" name="zeit" value="jederzeit" id="zeit-egal" checked><span>Jederzeit</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="vormittags" id="zeit-vm"><span>Vormittags</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="nachmittags" id="zeit-nm"><span>Nachmittags</span></label>
+            <label class="chip"><input type="radio" name="zeit" value="abends" id="zeit-ab"><span>Abends</span></label>
+          </div>
+        </div>
+
+        <div class="lead__grid">
+          <label class="field" for="lead-msg"><span class="field__l">Was sollten wir wissen? <em>freiwillig</em></span>
+            <textarea id="lead-msg" name="nachricht" rows="4" maxlength="3000" placeholder="Zum Beispiel: Übergabetermin, Besonderheiten im Haus, was bleiben soll"></textarea>
+          </label>
+          <div class="field">
+            <span class="field__l" id="lead-fotos-l">Fotos <em>freiwillig, bis zu 8</em></span>
+            <label class="drop" for="lead-fotos">
+              <svg class="i i--lg" aria-hidden="true"><use href="#i-camera"/></svg>
+              <span>Fotos auswählen oder aufnehmen. Ein Bild pro Raum reicht meist.</span>
+              <input type="file" id="lead-fotos" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple aria-labelledby="lead-fotos-l" data-fotos>
+            </label>
+            <ul class="fotos" data-fotos-list aria-live="polite"></ul>
+            <span class="field__err" data-err="fotos"></span>
+          </div>
+        </div>
+
+        <div class="hp" aria-hidden="true"><label>Bitte leer lassen <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+        <label class="check" for="lead-ok"><input type="checkbox" id="lead-ok" name="ok" required><span>Ich bin einverstanden, dass meine Angaben und Fotos zur Bearbeitung der Anfrage verwendet werden. Mehr dazu im <a href="{{url:datenschutzerklaerung}}">Datenschutz</a>.</span></label>
+        <span class="field__err" data-err="ok"></span>
+
+        <div class="lead__send">
+          <button class="btn btn--gold btn--lg" type="submit">Anfrage senden</button>
+          <p>Kostenlos und unverbindlich.</p>
+        </div>
+        <p class="form__status" role="status" data-status></p>
+      </form>
+
+      <div class="lead__done" id="lead-done" hidden tabindex="-1">
+        <span class="lead__donemark" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span>
+        <h3 id="lead-done-h">Danke. Ihre Anfrage ist bei uns.</h3>
+        <p class="lead__demo" data-done-note>Wir melden uns schnellstmöglich bei Ihnen.</p>
+        <pre class="lead__summary" id="lead-summary"></pre>
+        <div class="lead__send">
+          <button class="btn btn--ink" type="button" data-copy-summary><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Zusammenfassung kopieren</button>
+          <button class="textlink" type="button" data-again>Weitere Anfrage stellen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

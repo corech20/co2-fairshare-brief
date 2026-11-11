@@ -1,0 +1,7 @@
+{
+  "name": "aufraeumer-wiesbaden",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build.mjs", "vorschau": "node build.mjs --preview" },
+  "devDependencies": { "sharp": "^0.33.5" }
+}

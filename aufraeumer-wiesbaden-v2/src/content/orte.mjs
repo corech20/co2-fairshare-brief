@@ -1,0 +1,87 @@
+// Standortseiten. Bewusst wenige Seiten für Teilräume mit eigener Nachfrage und eigenen Besonderheiten,
+// keine austauschbaren Stadtseiten. `km(name)` liefert die beim Build berechnete Luftlinie ab Luxemburgplatz.
+
+export const ORTE = (km) => [
+  {
+    slug: 'entruempelung-mainz',
+    nav: 'Mainz',
+    wo: 'in Mainz',
+    town: 'mainz',
+    title: 'Entrümpelung Mainz: von Wiesbaden über den Rhein',
+    description: `Entrümpelung und Haushaltsauflösung in Mainz. Unser Sitz in Wiesbaden liegt rund ${km('Mainz')} km entfernt. Kostenlose Besichtigung, Festpreis, besenreine Übergabe.`,
+    h1: 'Entrümpelung und Haushaltsauflösung in Mainz',
+    lead: `Mainz liegt direkt gegenüber: rund ${km('Mainz')} Kilometer Luftlinie von unserem Sitz am Luxemburgplatz. Wir räumen Wohnungen, Häuser und Keller in allen Mainzer Stadtteilen.`,
+    places: ['Altstadt', 'Neustadt', 'Oberstadt', 'Hartenberg-Münchfeld', 'Gonsenheim', 'Mombach', 'Bretzenheim', 'Finthen', 'Drais', 'Lerchenberg', 'Marienborn', 'Hechtsheim', 'Weisenau', 'Laubenheim', 'Ebersheim'],
+    placesLabel: 'Mainzer Stadtteile',
+    sections: [
+      { h: 'Kurze Wege über zwei Brücken', p: ['Über die Theodor-Heuss-Brücke und die Schiersteiner Brücke sind wir schnell auf der Mainzer Seite. Die Anfahrt ist kaum länger als in manchen Wiesbadener Vorort.'] },
+      { h: 'Altstadt und Neustadt: enge Straßen, wenig Stellplatz', p: ['In der Mainzer Altstadt und in Teilen der Neustadt ist das Parken für den Transporter die erste Frage. Bei der Besichtigung klären wir, wo wir laden können und wie lang die Tragewege sind. Beides fließt in den Festpreis ein, damit es am Räumungstag keine Überraschung gibt.'] },
+      { h: 'Kastel, Kostheim und Amöneburg', p: ['Die drei Stadtteile rechts des Rheins tragen Mainz im Namen, gehören aber zu Wiesbaden. Für uns macht das keinen Unterschied: Wir räumen auf beiden Seiten.'] },
+    ],
+    faq: [
+      { q: 'Berechnen Sie für Mainz einen Aufschlag?', a: 'Die Anfahrt berechnen wir je nach Entfernung separat. Für Mainz fällt sie wegen der kurzen Strecke gering aus und steht im Angebot.' },
+      { q: 'Räumen Sie auch im Mainzer Umland?', a: 'Ja, zum Beispiel in Budenheim, Bodenheim, Nieder-Olm und Ingelheim. Prüfen Sie Ihren Ort im Ortscheck auf der Startseite.' },
+    ],
+  },
+  {
+    slug: 'entruempelung-taunusstein',
+    nav: 'Taunusstein & Untertaunus',
+    wo: 'in Taunusstein und im Untertaunus',
+    town: 'taunusstein',
+    title: 'Entrümpelung Taunusstein, Idstein & Niedernhausen',
+    description: `Entrümpelung und Haushaltsauflösung in Taunusstein, Niedernhausen, Idstein und Bad Schwalbach. Rund ${km('Taunusstein')} km ab Wiesbaden, Festpreis nach Besichtigung.`,
+    h1: 'Entrümpelung in Taunusstein und im Untertaunus',
+    lead: `Taunusstein liegt rund ${km('Taunusstein')} Kilometer nördlich von unserem Sitz. Von dort ist es nicht weit nach Niedernhausen, Idstein und Bad Schwalbach.`,
+    places: ['Taunusstein-Hahn', 'Bleidenstadt', 'Wehen', 'Neuhof', 'Orlen', 'Wingsbach', 'Seitzenhahn', 'Niedernhausen', 'Idstein', 'Bad Schwalbach', 'Schlangenbad', 'Hohenstein', 'Hünstetten'],
+    placesLabel: 'Orte im Untertaunus',
+    sections: [
+      { h: 'Einfamilienhäuser mit Keller, Speicher und Garage', p: ['Im Untertaunus räumen wir häufiger ganze Häuser als einzelne Wohnungen. Zum Wohnraum kommen Keller, Dachboden, Garage und oft ein Gartenhaus. Wir nehmen alles in einen Auftrag und kalkulieren die Nebenräume mit.'] },
+      { h: 'Elternhaus auflösen, wenn man selbst weit weg wohnt', p: ['Viele Anfragen kommen von Kindern, die längst im Rhein-Main-Gebiet oder weiter entfernt leben. Nach der Besichtigung genügt die Schlüsselübergabe. Auf Wunsch dokumentieren wir das Ergebnis mit Fotos.'] },
+      { h: 'Idsteiner Altstadt', p: ['In den Fachwerkgassen der Idsteiner Altstadt sind Zufahrt und Treppen eng. Dort planen wir Tragewege und Ladezone bei der Besichtigung besonders genau.'] },
+    ],
+    faq: [
+      { q: `Wie weit ist Idstein für Sie?`, a: `Idstein liegt rund ${km('Idstein')} km Luftlinie von unserem Sitz entfernt und damit gut in unserem Einsatzgebiet.` },
+      { q: 'Räumen Sie auch Scheunen und Nebengebäude?', a: 'Ja. Scheunen, Schuppen und Werkstätten sehen wir uns bei der Besichtigung mit an.' },
+    ],
+  },
+  {
+    slug: 'entruempelung-rheingau',
+    nav: 'Rheingau',
+    wo: 'im Rheingau',
+    town: 'eltville-am-rhein',
+    title: 'Entrümpelung Rheingau: Eltville bis Rüdesheim',
+    description: `Entrümpelung und Haushaltsauflösung im Rheingau: Walluf, Eltville, Kiedrich, Oestrich-Winkel, Geisenheim, Rüdesheim. Ab Wiesbaden, Festpreis nach Besichtigung.`,
+    h1: 'Entrümpelung im Rheingau',
+    lead: `Von Walluf über Eltville bis Rüdesheim: Der Rheingau beginnt gleich hinter der Wiesbadener Stadtgrenze. Eltville liegt rund ${km('Eltville am Rhein')} Kilometer von unserem Sitz entfernt, Rüdesheim rund ${km('Rüdesheim am Rhein')}.`,
+    places: ['Walluf', 'Eltville', 'Erbach', 'Hattenheim', 'Martinsthal', 'Rauenthal', 'Kiedrich', 'Oestrich-Winkel', 'Hallgarten', 'Geisenheim', 'Johannisberg', 'Rüdesheim', 'Assmannshausen', 'Lorch'],
+    placesLabel: 'Orte im Rheingau',
+    sections: [
+      { h: 'Gewölbekeller, Winzerhöfe, enge Gassen', p: ['Rheingauer Häuser haben ihre Eigenheiten: tiefe Gewölbekeller mit steilen Treppen, verwinkelte Hofreiten, schmale Ortsdurchfahrten. Für die Räumung heißt das längere Tragewege und manchmal ein kleineres Fahrzeug. Wir sehen uns das vorher an und kalkulieren es ein.'] },
+      { h: 'Alte Weinkeller räumen', p: ['In vielen Kellern stehen noch Fässer, Regale, Flaschen und Gerät aus früheren Jahrzehnten. Wir tragen heraus, was weg soll, und trennen Holz, Metall und Glas für die Entsorgung.'] },
+    ],
+    faq: [
+      { q: 'Fahren Sie bis nach Lorch?', a: `Ja. Lorch liegt rund ${km('Lorch')} km von unserem Sitz entfernt und gehört zu unserem Einsatzgebiet.` },
+      { q: 'Räumen Sie auch auf der anderen Rheinseite?', a: 'Ja, zum Beispiel in Ingelheim und Bingen. Für Mainz gibt es eine eigene Seite.' },
+    ],
+  },
+  {
+    slug: 'entruempelung-main-taunus',
+    nav: 'Main-Taunus',
+    wo: 'im Main-Taunus-Kreis',
+    town: 'hofheim-am-taunus',
+    title: 'Entrümpelung Hofheim, Hochheim & Flörsheim',
+    description: `Entrümpelung und Haushaltsauflösung im Main-Taunus-Kreis: Hochheim, Flörsheim, Hofheim, Hattersheim, Kriftel, Eppstein, Kelkheim. Ab Wiesbaden mit Festpreis.`,
+    h1: 'Entrümpelung im Main-Taunus-Kreis',
+    lead: `Östlich von Wiesbaden schließt der Main-Taunus-Kreis an. Hochheim liegt rund ${km('Hochheim am Main')} Kilometer von unserem Sitz entfernt, Hofheim rund ${km('Hofheim am Taunus')}.`,
+    places: ['Hochheim am Main', 'Flörsheim am Main', 'Weilbach', 'Wicker', 'Hofheim am Taunus', 'Marxheim', 'Diedenbergen', 'Wallau', 'Hattersheim', 'Kriftel', 'Eppstein', 'Kelkheim'],
+    placesLabel: 'Orte im Main-Taunus-Kreis',
+    sections: [
+      { h: 'Schnell erreichbar über die A 66', p: ['Über die Autobahn sind Hochheim, Hofheim und Hattersheim von Wiesbaden aus in kurzer Zeit erreicht. Das hält die Anfahrt überschaubar.'] },
+      { h: 'Wohnungen in Mehrfamilienhäusern, Reihenhäuser, Altorte', p: ['Im Main-Taunus-Kreis ist die Mischung groß: Etagenwohnungen in Hattersheim und Hofheim, Reihenhäuser aus den Siebzigern, alte Ortskerne in Hochheim und Eppstein. Entsprechend unterschiedlich sind Tragewege und Aufwand. Die Besichtigung schafft Klarheit.'] },
+    ],
+    faq: [
+      { q: 'Räumen Sie auch in Frankfurt?', a: `Ja. Frankfurt liegt rund ${km('Frankfurt am Main')} km von unserem Sitz entfernt und damit in unserem Einsatzgebiet von 50 km.` },
+      { q: 'Wie prüfe ich, ob mein Ort dazugehört?', a: 'Auf der Startseite gibt es einen Ortscheck. Dort geben Sie PLZ oder Ort ein und sehen sofort die Entfernung.' },
+    ],
+  },
+];
